@@ -13,9 +13,9 @@ services:
     working_dir: /var/www
     env_file:
       - .env
-    networks:
-      - email-builder_default
-    command: php artisan serve --host=0.0.0.0 --port=9007
+    # networks:
+    #   - email-builder_default
+    command: sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=9007"
 
   vite_dev:
     image: node:20
@@ -28,9 +28,27 @@ services:
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
     env_file:
       - .env
-    networks:
-      - email-builder_default
+    # networks:
+    #   - email-builder_default
 
-networks:
-  email-builder_default:
-    external: true
+  db:
+    platform: linux/amd64 #for platform error on Apple M1 chips
+    restart: unless-stopped
+    env_file: .env
+    image: postgres:16.0-alpine
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - db-data:/var/lib/postgresql/data/ #using a volume
+      #- ./data:/var/lib/postgresql/data/ # if you want to use a bind folder
+    ports:
+      - "4833:5432"
+
+volumes:
+  db-data:
+
+# networks:
+#   email-builder_default:
+#     external: true
