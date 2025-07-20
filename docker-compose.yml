@@ -9,13 +9,13 @@ services:
     volumes:
       - ./:/var/www
     ports:
-      - "9007:9007"   # Laravel PHP-FPM
+      - "9007:9007" # Laravel PHP-FPM
     working_dir: /var/www
     env_file:
       - .env
     # networks:
     #   - email-builder_default
-    command: sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=9007"
+    command: sh -c "composer install --no-interaction --prefer-dist --optimize-autoloader && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=9007"
 
   vite_dev:
     image: node:20
