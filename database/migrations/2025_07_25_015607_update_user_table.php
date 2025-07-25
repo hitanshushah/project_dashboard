@@ -27,8 +27,9 @@ return new class extends Migration
 
         // Insert test user
         DB::table('users')->insert([
-            'name' => 'test',
-            'email' => 'tes@abc.com',
+            'name' => 'demo user',
+            'email' => 'demo@example.com',
+            'username' => 'demouser',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
