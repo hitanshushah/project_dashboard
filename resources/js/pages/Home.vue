@@ -4,6 +4,8 @@ import { usePage } from '@inertiajs/vue3';
 import { VDataTable } from 'vuetify/components';
 
 const page = usePage();
+
+const currentUser = computed(() => page.props.auth?.user);
 const users = computed(() => page.props.users as Array<{ name: string; email: string }>);
 
 const headers = [
@@ -12,8 +14,14 @@ const headers = [
 ];
 </script>
 
+
 <template>
   <h1>Users</h1>
+
+  <div v-if="currentUser">
+    <p>Logged in as: <strong>{{ currentUser.name }}</strong> ({{ currentUser.username }})</p>
+  </div>
+
   <v-data-table
     :headers="headers"
     :items="users"

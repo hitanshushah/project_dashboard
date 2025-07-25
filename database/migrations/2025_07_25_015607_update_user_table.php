@@ -15,10 +15,14 @@ return new class extends Migration
 
         // Create the users table
         Schema::create('users', function (Blueprint $table) {
-            $table->id(); // auto-incrementing primary key
-            $table->string('name', 100);
-            $table->string('email', 100)->unique();
+            $table->id();
+            $table->text('name')->nullable();
+            $table->text('email');
+            $table->text('username');
             $table->timestamps();
+
+            $table->unique('email');
+            $table->unique('username');
         });
 
         // Insert test user
