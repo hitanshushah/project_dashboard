@@ -3,6 +3,9 @@ import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
+const appUrl = process.env.APP_URL || 'http://localhost:3000';
+const parsed = new URL(appUrl);
+
 export default defineConfig({
     plugins: [
         laravel({
@@ -22,7 +25,11 @@ export default defineConfig({
     ],
     server: {
         host: '0.0.0.0',
-        port: 5173,
-        cors: true,
+        allowedHosts: true,
+        hmr: {
+            protocol: 'wss',
+            host: parsed.hostname,
+            clientPort: 443
+        }
     },
 });
