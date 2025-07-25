@@ -44,6 +44,8 @@ services:
     depends_on:
       postgres:
         condition: service_started  # Wait for postgres to start
+    command: >
+      sh -c "php artisan config:clear && php artisan migrate --force && php-fpm"
 
   npm:
     image: node:22-bookworm-slim
@@ -61,11 +63,11 @@ services:
   postgres:
     image: postgres:16
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-4833}:5432"
     environment:
-      - POSTGRES_DB=${DB_DATABASE}
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=projectsdashboard
+      - POSTGRES_USER=projectsdashboard
+      - POSTGRES_PASSWORD=projectsdashboard
     volumes:
       - postgres-data-development:/var/lib/postgresql/data
     networks:
