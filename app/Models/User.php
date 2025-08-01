@@ -15,7 +15,6 @@ class User extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'name',
         'email',
         'username',
     ];
@@ -35,5 +34,10 @@ class User extends Model
     protected function casts(): array
     {
         return [];
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
     }
 }

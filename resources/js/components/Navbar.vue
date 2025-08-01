@@ -29,7 +29,7 @@
           class="ml-2"
         >
           <v-avatar size="40" class="bg-gradient-to-br from-purple-400 to-blue-500">
-            <span class="text-white font-semibold text-lg">JA</span>
+            <span class="text-white font-semibold text-lg">{{ userInitials }}</span>
           </v-avatar>
         </v-btn>
       </template>
@@ -39,11 +39,11 @@
         <v-card-text class="pb-2">
           <div class="flex items-center space-x-3">
             <v-avatar size="48" class="bg-gradient-to-br from-purple-400 to-blue-500">
-              <span class="text-white font-semibold text-xl">JA</span>
+              <span class="text-white font-semibold text-xl">{{ userInitials }}</span>
             </v-avatar>
             <div>
-              <div class="font-semibold text-gray-800">{{ user.name }}</div>
-              <div class="text-sm text-gray-600">{{ user.email }}</div>
+              <div class="font-semibold text-gray-800">{{ currentProfile?.name || currentUser?.username || 'User' }}</div>
+              <div class="text-sm text-gray-600">{{ currentUser?.email || 'user@example.com' }}</div>
             </div>
           </div>
         </v-card-text>
@@ -114,42 +114,52 @@
   </v-app-bar>
 </template>
 
-<script>
-export default {
-  name: 'Navbar',
-  data() {
-    return {
-      user: {
-        name: 'James Aldrino',
-        email: 'james.aldrino@company.com',
-        initials: 'JA'
-      }
-    }
-  },
-  methods: {
-    editProfile() {
-      console.log('Edit Profile clicked');
-      // Add your edit profile logic here
-    },
-    openSettings() {
-      console.log('Settings & Privacy clicked');
-      // Add your settings logic here
-    },
-    openSupport() {
-      console.log('Help & Support clicked');
-      // Add your support logic here
-    },
-    openAccessibility() {
-      console.log('Display & Accessibility clicked');
-      // Add your accessibility logic here
-    },
-    logout() {
-      console.log('Logout clicked');
-      // Add your logout logic here
-      // Example: this.$router.push('/login');
-    }
-  }
-}
+<script setup lang="ts">
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+
+const currentUser = computed(() => page.props.auth?.user);
+
+const currentProfile = computed(() => page.props.auth?.profile);
+
+const userInitials = computed(() => {
+  const name = currentProfile.value?.name || currentUser.value?.username;
+  if (!name) return 'U';
+  return name
+    .split(' ')
+    .map((name: string) => name.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+});
+
+const editProfile = () => {
+  console.log('Edit Profile clicked');
+  // Add your edit profile logic here
+};
+
+const openSettings = () => {
+  console.log('Settings & Privacy clicked');
+  // Add your settings logic here
+};
+
+const openSupport = () => {
+  console.log('Help & Support clicked');
+  // Add your support logic here
+};
+
+const openAccessibility = () => {
+  console.log('Display & Accessibility clicked');
+  // Add your accessibility logic here
+};
+
+const logout = () => {
+  console.log('Logout clicked');
+  // Add your logout logic here
+  // Example: router.visit('/logout');
+};
 </script>
 
 <style scoped>

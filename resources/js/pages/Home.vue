@@ -1,42 +1,57 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-import Navbar from '@/components/Navbar.vue';
+import { usePage, router } from '@inertiajs/vue3';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 const page = usePage();
 
-const currentUser = computed(() => page.props.auth?.user);
-const users = computed(() => page.props.users as Array<{ name: string; email: string }>);
+const flash = computed(() => page.props.flash as { success?: string });
 
-const headers = [
-  { title: 'Name', value: 'name' },
-  { title: 'Email', value: 'email' },
-];
+const createProject = () => {
+  router.visit('/projects/create');
+};
 </script>
 
 <template>
-  <!-- Add the navbar at the top -->
-  <v-app>
-    <Navbar />
-    
-    <!-- Main content with proper spacing from navbar -->
+  <AppLayout>
     <v-main>
       <v-container class="py-8">
-        <h1 class="text-3xl font-bold mb-6">Users</h1>
+        <v-alert
+          v-if="flash?.success"
+          type="success"
+          variant="tonal"
+          class="mb-6"
+          closable
+        >
+          {{ flash.success }}
+        </v-alert>
 
-        <div v-if="currentUser" class="mb-6">
-          <v-alert type="info" variant="tonal" class="mb-4">
-            Logged in as: <strong>{{ currentUser.name }}</strong> ({{ currentUser.username }})
-          </v-alert>
+        <div class="text-center py-16">
+          <v-icon 
+            icon="mdi-folder-plus" 
+            size="120" 
+            color="grey-lighten-1" 
+            class="mb-6"
+          ></v-icon>
+          
+          <h1 class="text-4xl font-bold text-gray-700 mb-4">
+            No projects yet
+          </h1>
+          
+          <p class="text-lg text-gray-500 mb-8 max-w-md mx-auto">
+            Start creating projects to organize your work and display it on dashboard.
+          </p>
+          
+          <v-btn
+            color="primary"
+            size="large"
+            prepend-icon="mdi-plus"
+            @click="createProject"
+          >
+            Create Your First Project
+          </v-btn>
         </div>
-
-        <v-data-table
-          :headers="headers"
-          :items="users"
-          class="elevation-1"
-          item-value="email"
-        />
       </v-container>
     </v-main>
-  </v-app>
+  </AppLayout>
 </template>
