@@ -10,9 +10,7 @@ Route::get('/', function () {
 })->name('home');
 
 // Project routes
-Route::get('/projects/create', function () {
-    return Inertia::render('CreateProject');
-})->name('projects.create');
+Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
 
 Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
 

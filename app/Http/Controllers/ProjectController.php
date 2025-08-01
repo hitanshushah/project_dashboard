@@ -6,9 +6,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use App\Models\Category;
+use App\Models\Status;
 
 class ProjectController extends Controller
 {
+    public function create()
+    {
+        $categories = Category::all(['name', 'key']);
+        $statuses = Status::where('is_active', true)->get(['name', 'key']);
+
+        return Inertia::render('CreateProject', [
+            'categories' => $categories,
+            'statuses' => $statuses,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -19,9 +32,7 @@ class ProjectController extends Controller
             'tags.*' => 'string|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|string|in:planning,in_progress,review,completed,on_hold',
-            'priority' => 'required|string|in:low,medium,high,urgent',
-            'budget' => 'nullable|string|max:255',
+            'status' => 'required|string|in:planning,inprogress,finished,onhold,cancelled,notstarted',
             'team_members' => 'nullable|array',
             'team_members.*' => 'string|max:255',
             'client' => 'nullable|string|max:255',
