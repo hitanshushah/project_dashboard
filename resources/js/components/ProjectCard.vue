@@ -4,29 +4,28 @@
       <h3 class="text-lg font-semibold text-gray-800">
         {{ project.name || 'Project Name' }}
       </h3>
-      <div v-if="project.category" class="text-sm text-blue-600 mt-1">
-        {{ getCategoryName(project.category) }}
+      <div v-if="project.category && previewSettings.showCategory" class="text-sm text-blue-600 mt-1">
+        {{ getCategoryNameLocal(project.category) }}
       </div>
     </div>
 
-    <div v-if="project.description" class="mb-4">
+    <div v-if="project.description && previewSettings.showDescription" class="mb-4">
       <p class="text-gray-600 text-sm whitespace-pre-wrap">{{ project.description }}</p>
     </div>
 
     <!-- Status Badge -->
-    <div class="mb-4">
+    <div v-if="project.status && previewSettings.showStatus" class="mb-4">
       <v-chip
-        v-if="project.status"
         :color="getStatusColor(project.status)"
         size="small"
         variant="tonal"
       >
-        {{ getStatusName(project.status) }}
+        {{ getStatusNameLocal(project.status) }}
       </v-chip>
     </div>
 
     <!-- Dates -->
-    <div v-if="project.start_date || project.end_date" class="mb-4">
+    <div v-if="(project.start_date || project.end_date) && previewSettings.showDates" class="mb-4">
       <div class="text-sm text-gray-500">
         <div v-if="project.start_date">
           <strong>Start:</strong> {{ formatDate(project.start_date) }}
@@ -38,7 +37,7 @@
     </div>
 
     <!-- Tags -->
-    <div v-if="project.tags && project.tags.length > 0" class="mb-4">
+    <div v-if="project.tags && project.tags.length > 0 && previewSettings.showTags" class="mb-4">
       <div class="text-sm text-gray-500 mb-2">Tags:</div>
       <div class="flex flex-wrap gap-1">
         <v-chip
@@ -54,7 +53,7 @@
     </div>
 
     <!-- Technologies -->
-    <div v-if="project.technologies && project.technologies.length > 0" class="mb-4">
+    <div v-if="project.technologies && project.technologies.length > 0 && previewSettings.showTechnologies" class="mb-4">
       <div class="text-sm text-gray-500 mb-2">Technologies:</div>
       <div class="flex flex-wrap gap-1">
         <v-chip
@@ -70,14 +69,19 @@
     </div>
 
     <!-- Links -->
-    <div v-if="project.links && project.links.length > 0" class="mb-4">
+    <div v-if="project.links && project.links.length > 0 && previewSettings.showLinks" class="mb-4">
       <div class="text-sm text-gray-500 mb-2">Links:</div>
       <div class="space-y-1">
         <div
           v-for="link in project.links"
           :key="link.title"
-          class="text-sm"
+          class="text-sm flex items-center"
         >
+          <v-icon 
+            :icon="getLinkIcon(link.title)" 
+            size="small" 
+            class="mr-2"
+          ></v-icon>
           <a :href="link.url" target="_blank" class="text-blue-600 hover:underline">
             {{ link.title }}
           </a>
@@ -85,14 +89,8 @@
       </div>
     </div>
 
-    <!-- Notes -->
-    <div v-if="project.notes" class="mb-4">
-      <div class="text-sm text-gray-500 mb-2">Notes:</div>
-      <p class="text-sm text-gray-600 whitespace-pre-wrap">{{ project.notes }}</p>
-    </div>
-
     <!-- Assets -->
-    <div v-if="project.assets && project.assets.length > 0" class="mb-4">
+    <div v-if="project.assets && project.assets.length > 0 && previewSettings.showAssets" class="mb-4">
       <div class="text-sm text-gray-500 mb-2">Assets ({{ project.assets.length }} files):</div>
       
       <!-- Image Carousel for Image Assets -->
@@ -152,16 +150,46 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Project } from '@/types';
+import { 
+  getLinkIcon, 
+  getLinkIconColor, 
+  getStatusColor, 
+  getStatusName, 
+  getCategoryName, 
+  formatDate, 
+  formatDateTime, 
+  getFileUrl 
+} from '@/lib/projectUtils';
 
 interface Props {
   project: Project;
   categories?: Array<{ name: string; key: string }>;
   statuses?: Array<{ name: string; key: string }>;
   showMetaInfo?: boolean;
+  previewSettings?: {
+    showDescription?: boolean;
+    showCategory?: boolean;
+    showStatus?: boolean;
+    showDates?: boolean;
+    showTags?: boolean;
+    showTechnologies?: boolean;
+    showLinks?: boolean;
+    showAssets?: boolean;
+  };
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showMetaInfo: false
+  showMetaInfo: false,
+  previewSettings: () => ({
+    showDescription: true,
+    showCategory: true,
+    showStatus: true,
+    showDates: true,
+    showTags: true,
+    showTechnologies: true,
+    showLinks: true,
+    showAssets: true,
+  })
 });
 
 // Computed properties for assets
@@ -181,51 +209,12 @@ const nonImageAssets = computed(() => {
   });
 });
 
-// Helper functions
-const getStatusColor = (status: string) => {
-  const colorMap: Record<string, string> = {
-    'planning': 'blue',
-    'inprogress': 'orange',
-    'finished': 'green',
-    'onhold': 'yellow',
-    'cancelled': 'red',
-    'notstarted': 'grey'
-  };
-  return colorMap[status] || 'grey';
+// Helper functions - using imported utilities
+const getStatusNameLocal = (statusKey: string) => {
+  return getStatusName(statusKey, props.statuses);
 };
 
-const getStatusName = (statusKey: string) => {
-  if (!props.statuses) return statusKey;
-  const status = props.statuses.find(s => s.key === statusKey);
-  return status?.name || statusKey;
-};
-
-const getCategoryName = (categoryKey: string) => {
-  if (!props.categories) return categoryKey;
-  const category = props.categories.find(c => c.key === categoryKey);
-  return category?.name || categoryKey;
-};
-
-const formatDate = (dateString: string) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString();
-};
-
-const formatDateTime = (dateString: string) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleString();
-};
-
-const getFileUrl = (file: any) => {
-  // For File objects (from form), create object URL
-  if (file instanceof File) {
-    return URL.createObjectURL(file);
-  }
-  // For saved files, use the path
-  if (file.path) {
-    return file.path;
-  }
-  // Fallback
-  return '';
+const getCategoryNameLocal = (categoryKey: string) => {
+  return getCategoryName(categoryKey, props.categories);
 };
 </script> 

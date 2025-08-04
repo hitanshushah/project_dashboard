@@ -3,6 +3,17 @@ import { ref, computed } from 'vue';
 import { usePage, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectCard from '@/components/ProjectCard.vue';
+import { 
+  getLinkIcon, 
+  getLinkIconColor, 
+  getFileIcon, 
+  getFileColor, 
+  getFileType, 
+  formatFileSize, 
+  isPreviewable, 
+  getFileUrl 
+} from '@/lib/projectUtils';
+import PreviewSettings from '@/components/PreviewSettings.vue';
 
 const page = usePage();
 
@@ -50,6 +61,21 @@ const newTechnology = ref('');
 const newTeamMember = ref('');
 const newAssets = ref<File[]>([]);
 const fileInputRef = ref<HTMLInputElement>();
+const githubUrl = ref('');
+const liveUrl = ref('');
+
+// Preview settings
+const showPreviewSettings = ref(false);
+const previewSettings = ref({
+  showDescription: true,
+  showCategory: true,
+  showStatus: true,
+  showDates: true,
+  showTags: true,
+  showTechnologies: true,
+  showLinks: true,
+  showAssets: true,
+});
 
 // Methods
 const addTag = () => {
@@ -91,6 +117,65 @@ const removeLink = (index: number) => {
   form.links.splice(index, 1);
 };
 
+const addGithubLink = () => {
+  if (!githubUrl.value.trim()) {
+    return;
+  }
+  
+  // Basic URL validation
+  let validUrl = githubUrl.value.trim();
+  if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
+    validUrl = 'https://' + validUrl;
+  }
+  
+  form.links.push({
+    title: 'Github',
+    url: validUrl
+  });
+  
+  // Clear the input field
+  githubUrl.value = '';
+};
+
+const addLiveUrlLink = () => {
+  if (!liveUrl.value.trim()) {
+    return;
+  }
+  
+  // Basic URL validation
+  let validUrl = liveUrl.value.trim();
+  if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
+    validUrl = 'https://' + validUrl;
+  }
+  
+  form.links.push({
+    title: 'Live Url',
+    url: validUrl
+  });
+  
+  // Clear the input field
+  liveUrl.value = '';
+};
+
+const addQuickLink = (title: string, url: string) => {
+  // Check if link with this title already exists
+  if (hasLinkWithTitle(title)) {
+    return;
+  }
+  
+  // Add the link with empty URL - user can edit it later
+  form.links.push({
+    title: title,
+    url: url
+  });
+};
+
+const hasLinkWithTitle = (title: string) => {
+  return form.links.some(link => link.title === title);
+};
+
+
+
 const addTechnology = () => {
   if (newTechnology.value.trim() && !form.technologies.includes(newTechnology.value.trim())) {
     form.technologies.push(newTechnology.value.trim());
@@ -106,7 +191,7 @@ const removeTechnology = (index: number) => {
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
-    form.assets = Array.from(target.files);
+    addAssets(Array.from(target.files));
   }
 };
 
@@ -125,6 +210,16 @@ const openFileDialog = () => {
 };
 
 const submit = () => {
+  if (!form.name.trim()) {
+    form.setError('name', 'Project name is required');
+    return;
+  }
+  
+  if (!form.category) {
+    form.setError('category', 'Category is required');
+    return;
+  }
+  
   form.post('/projects', {
     onSuccess: () => {
       router.visit('/');
@@ -180,53 +275,11 @@ const removeAsset = (index: number) => {
   form.assets.splice(index, 1);
 };
 
-const getFileIcon = (fileType: string) => {
-  if (fileType.startsWith('image/')) return 'mdi-image';
-  if (fileType.includes('pdf')) return 'mdi-file-pdf-box';
-  if (fileType.includes('word') || fileType.includes('doc')) return 'mdi-file-word-box';
-  if (fileType.includes('excel') || fileType.includes('sheet')) return 'mdi-file-excel-box';
-  if (fileType.includes('zip') || fileType.includes('rar')) return 'mdi-folder-zip';
-  if (fileType.includes('text')) return 'mdi-file-document';
-  return 'mdi-file';
-};
 
-const getFileColor = (fileType: string) => {
-  if (fileType.startsWith('image/')) return 'green';
-  if (fileType.includes('pdf')) return 'red';
-  if (fileType.includes('word') || fileType.includes('doc')) return 'blue';
-  if (fileType.includes('excel') || fileType.includes('sheet')) return 'green';
-  if (fileType.includes('zip') || fileType.includes('rar')) return 'orange';
-  return 'grey';
-};
-
-const getFileType = (fileType: string) => {
-  if (fileType.startsWith('image/')) return 'Image';
-  if (fileType.includes('pdf')) return 'PDF';
-  if (fileType.includes('word') || fileType.includes('doc')) return 'Word Document';
-  if (fileType.includes('excel') || fileType.includes('sheet')) return 'Excel Spreadsheet';
-  if (fileType.includes('zip') || fileType.includes('rar')) return 'Archive';
-  if (fileType.includes('text')) return 'Text File';
-  return 'File';
-};
-
-const formatFileSize = (bytes: number) => {
-  if (!bytes) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-};
-
-const isPreviewable = (fileType: string) => {
-  return fileType.startsWith('image/') || fileType.includes('pdf') || fileType.includes('text');
-};
 
 const previewFile = (file: File) => {
-  if (file.type.startsWith('image/')) {
-    const url = URL.createObjectURL(file);
-    window.open(url, '_blank');
-  } else if (file.type.includes('pdf')) {
-    const url = URL.createObjectURL(file);
+  if (isPreviewable(file.type)) {
+    const url = getFileUrl(file);
     window.open(url, '_blank');
   } else {
     // For text files, could implement a text preview modal
@@ -268,13 +321,13 @@ const previewFile = (file: File) => {
                       <v-col cols="12" md="8">
                         <v-text-field
                           v-model="form.name"
-                          label="Project Name"
+                          label="Project Name *"
                           placeholder="Enter an inspiring project name"
                           variant="outlined"
                           :error-messages="form.errors.name"
                           color="primary"
                           class="text-field-modern"
-                          density="comfortable"
+                          density="compact"
                           required
                         >
                           <template v-slot:prepend-inner>
@@ -289,13 +342,14 @@ const previewFile = (file: File) => {
                           :items="categories"
                           item-title="name"
                           item-value="key"
-                          label="Category"
+                          label="Category *"
                           placeholder="Select category"
                           variant="outlined"
                           :error-messages="form.errors.category"
                           color="primary"
-                          density="comfortable"
+                          density="compact"
                           class="select-modern"
+                          required
                         >
                           <template v-slot:prepend-inner>
                             <v-icon >mdi-folder-star</v-icon>
@@ -311,7 +365,7 @@ const previewFile = (file: File) => {
                       variant="outlined"
                       rows="5"
                       color="primary"
-                      density="comfortable"
+                      density="compact"
                       :error-messages="form.errors.description"
                       class="textarea-modern"
                     >
@@ -330,7 +384,11 @@ const previewFile = (file: File) => {
                     
                     <v-row>
                       <v-col cols="12" md="4">
-                        <v-menu>
+                        <v-menu
+                          :close-on-content-click="false"
+                          :close-on-click-outside="true"
+                          :persistent="false"
+                        >
                           <template v-slot:activator="{ props }">
                             <v-text-field
                               v-model="formattedStartDate"
@@ -339,7 +397,7 @@ const previewFile = (file: File) => {
                               :error-messages="form.errors.start_date"
                               prepend-inner-icon="mdi-calendar-start"
                               readonly
-                              density="comfortable"
+                              density="compact"
                               color="gray"
                               v-bind="props"
                               class="date-field-modern"
@@ -350,12 +408,17 @@ const previewFile = (file: File) => {
                             @update:model-value="updateStartDate"
                             show-adjacent-months
                             color="gray"
+                            @click:date="() => {}"
                           ></v-date-picker>
                         </v-menu>
                       </v-col>
                       
                       <v-col cols="12" md="4">
-                        <v-menu>
+                        <v-menu
+                          :close-on-content-click="false"
+                          :close-on-click-outside="true"
+                          :persistent="false"
+                        >
                           <template v-slot:activator="{ props }">
                             <v-text-field
                               v-model="formattedEndDate"
@@ -364,7 +427,7 @@ const previewFile = (file: File) => {
                               :error-messages="form.errors.end_date"
                               prepend-inner-icon="mdi-calendar-check"
                               readonly
-                              density="comfortable"
+                              density="compact"
                               color="primary"
                               v-bind="props"
                               class="date-field-modern"
@@ -375,6 +438,7 @@ const previewFile = (file: File) => {
                             @update:model-value="updateEndDate"
                             show-adjacent-months
                             color="gray"
+                            @click:date="() => {}"
                           ></v-date-picker>
                         </v-menu>
                       </v-col>
@@ -385,7 +449,7 @@ const previewFile = (file: File) => {
                           :items="statusOptions"
                           item-title="label"
                           item-value="value"
-                          density="comfortable"
+                          density="compact"
                           label="Current Status"
                           variant="outlined"
                           color="primary"
@@ -418,7 +482,7 @@ const previewFile = (file: File) => {
                     @keyup.enter="addTag"
                     append-inner-icon="mdi-plus"
                     @click:append-inner="addTag"
-                    density="comfortable"
+                    density="compact"
                     color="primary"
                     class="text-field-modern"
                   >
@@ -452,7 +516,7 @@ const previewFile = (file: File) => {
                     @keyup.enter="addTechnology"
                     append-inner-icon="mdi-plus"
                     @click:append-inner="addTechnology"
-                    density="comfortable"
+                    density="compact"
                     color="primary"
                     class="select-modern"
                   >
@@ -478,25 +542,93 @@ const previewFile = (file: File) => {
             </div>
 
             <!-- Links -->
-            <div class="mb-2">
+            <div class="mb-8">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full mr-4"></div>
                 <h2 class="text-2xl font-bold text-slate-800">Links</h2>
               </div>
               
               <div>
+                <!-- Github Link -->
+                <div v-if="!hasLinkWithTitle('Github')">
+                  <v-row>
+                    <v-col cols="12" md="10">
+                      <v-text-field
+                        v-model="githubUrl"
+                        label="Github"
+                        placeholder="https://github.com/..."
+                        variant="outlined"
+                        density="compact"
+                        color="primary"
+                        class="text-field-modern compact-field"
+                      >
+                        <template v-slot:prepend-inner>
+                          <v-icon icon="mdi-github"></v-icon>
+                        </template>
+                      </v-text-field>
+                    </v-col>
+                    
+                    <v-col cols="12" md="2" class="self-center">
+                      <v-btn
+                        variant="outlined"
+                        @click="addGithubLink"
+                        :disabled="!githubUrl.trim()"
+                        class="w-auto"
+                        density="compact"
+                      >
+                        <v-icon icon="mdi-plus" class="mr-1"></v-icon>
+                        Add
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </div>
+
+                <!-- Live Url Link -->
+                <div v-if="!hasLinkWithTitle('Live Url')">
+                  <v-row>
+                    <v-col cols="12" md="10">
+                      <v-text-field
+                        v-model="liveUrl"
+                        label="Live Url"
+                        placeholder="https://..."
+                        variant="outlined"
+                        density="compact"
+                        class="text-field-modern compact-field"
+                      >
+                        <template v-slot:prepend-inner>
+                          <v-icon icon="mdi-web"></v-icon>
+                        </template>
+                      </v-text-field>
+                    </v-col>
+                    
+                    <v-col cols="12" md="2" class="self-center">
+                      <v-btn
+                        variant="outlined"
+                        @click="addLiveUrlLink"
+                        :disabled="!liveUrl.trim()"
+                        class="w-auto"
+                        density="compact"
+                      >
+                        <v-icon icon="mdi-plus" class="mr-1"></v-icon>
+                        Add
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </div>
+              </div>
+              
+              <div>
                 <v-row>
                   <v-col cols="12" md="5">
-                    <v-text-field
-                      v-model="newLinkTitle"
-                      label="Link Title"
-                      placeholder="e.g., GitHub Repository"
-                      variant="outlined"
-                      @keyup.enter="addLink"
-                      density="comfortable"
-                      color="primary"
-                      class="text-field-modern"
-                    >
+                                          <v-text-field
+                        v-model="newLinkTitle"
+                        label="Link Title"
+                        placeholder="e.g., Documentation"
+                        variant="outlined"
+                        @keyup.enter="addLink"
+                        density="compact"
+                        class="text-field-modern compact-field"
+                      >
                       <template v-slot:prepend-inner>
                         <v-icon >mdi-link-variant</v-icon>
                       </template>
@@ -504,16 +636,15 @@ const previewFile = (file: File) => {
                   </v-col>
                   
                   <v-col cols="12" md="5">
-                    <v-text-field
-                      v-model="newLinkUrl"
-                      label="URL"
-                      placeholder="https://..."
-                      variant="outlined"
-                      @keyup.enter="addLink"
-                      density="comfortable"
-                      color="primary"
-                      class="text-field-modern"
-                    >
+                      <v-text-field
+                        v-model="newLinkUrl"
+                        label="URL"
+                        placeholder="https://..."
+                        variant="outlined"
+                        @keyup.enter="addLink"
+                        density="compact"
+                        class="text-field-modern compact-field"
+                      >
                       <template v-slot:prepend-inner>
                         <v-icon >mdi-web</v-icon>
                       </template>
@@ -522,12 +653,11 @@ const previewFile = (file: File) => {
                   
                   <v-col cols="12" md="2" class="self-center">
                     <v-btn
-                      color="gray"
                       variant="outlined"
                       @click="addLink"
                       :disabled="!newLinkTitle.trim() || !newLinkUrl.trim()"
                       class="w-auto"
-                      density="comfortable"
+                      density="compact"
                     >
                       <v-icon icon="mdi-plus" class="mr-1"></v-icon>
                       Add
@@ -536,7 +666,7 @@ const previewFile = (file: File) => {
                 </v-row>
               </div>
               
-              <div v-if="form.links.length > 0" class="mb-4">
+              <div v-if="form.links.length > 0" class="mb-4 mt-4">
                 <div class="flex flex-wrap gap-2">
                   <v-chip
                     v-for="(link, index) in form.links"
@@ -546,18 +676,24 @@ const previewFile = (file: File) => {
                     class="max-w-full text-sm !py-3 !px-4"
                   >
                     <div class="flex grow items-center gap-2 w-full">
-                      <!-- Left: title and URL -->
-                      <div class="flex-1 min-w-0 flex gap-1">
-                        <span class="truncate font-medium max-w-[120px]">
-                          {{ link.title }}:
-                        </span>
-                        <a
-                          :href="link.url"
-                          target="_blank"
-                          class="text-blue-600 hover:underline truncate max-w-[200px]"
-                        >
-                          {{ link.url }}
-                        </a>
+                      <!-- Left: icon, title and URL -->
+                      <div class="flex items-center flex-1 min-w-0 gap-2">
+                        <v-icon 
+                          :icon="getLinkIcon(link.title)" 
+                          size="small"
+                        ></v-icon>
+                        <div class="flex-1 min-w-0 flex gap-1">
+                          <span class="truncate font-medium max-w-[120px]">
+                            {{ link.title }}:
+                          </span>
+                          <a
+                            :href="link.url"
+                            target="_blank"
+                            class="text-blue-600 hover:underline truncate max-w-[200px]"
+                          >
+                            {{ link.url || 'Click to add URL' }}
+                          </a>
+                        </div>
                       </div>
 
                       <!-- Right: buttons -->
@@ -569,6 +705,7 @@ const previewFile = (file: File) => {
                           color="primary"
                           :href="link.url"
                           target="_blank"
+                          :disabled="!link.url"
                         />
                         <v-btn
                           icon="mdi-close"
@@ -713,8 +850,18 @@ const previewFile = (file: File) => {
           <v-col cols="12" lg="5">
             <v-card class="pa-6 h-fit sticky top-4">
               <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4">Live Preview</h2>
-                <div class="text-sm text-gray-500 mb-4">Preview your project as you type</div>
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-gray-700">Live Preview</h2>
+                  <v-btn
+                    icon="mdi-cog"
+                    variant="text"
+                    size="small"
+                    color="gray"
+                    @click="showPreviewSettings = true"
+                    class="ml-2"
+                  ></v-btn>
+                </div>
+                <div class="text-sm text-gray-500 mb-4">Click the settings icon to personalize your preview. Hidden fields stay saved and help in sorting and managing your projects.</div>
               </div>
 
               <!-- Project Preview Card -->
@@ -723,6 +870,7 @@ const previewFile = (file: File) => {
                 :categories="categories"
                 :statuses="statuses"
                 :show-meta-info="false"
+                :preview-settings="previewSettings"
               />
             </v-card>
           </v-col>
@@ -730,4 +878,25 @@ const previewFile = (file: File) => {
       </v-container>
     </v-main>
   </AppLayout>
-</template> 
+
+  <!-- Preview Settings Modal -->
+    <PreviewSettings
+    v-model="showPreviewSettings"
+    :settings="previewSettings"
+  />
+
+</template>
+
+<style scoped>
+.compact-field {
+  margin-bottom: 0 !important;
+}
+
+.compact-field :deep(.v-field__details) {
+  display: none !important;
+}
+
+.compact-field :deep(.v-input__details) {
+  display: none !important;
+}
+</style> 

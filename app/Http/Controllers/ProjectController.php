@@ -38,7 +38,6 @@ class ProjectController extends Controller
             'client' => 'nullable|string|max:255',
             'technologies' => 'nullable|array',
             'technologies.*' => 'string|max:255',
-            'notes' => 'nullable|string',
             'links' => 'nullable|array',
             'links.*.title' => 'required|string|max:255',
             'links.*.url' => 'required|url|max:500',

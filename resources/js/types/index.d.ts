@@ -78,7 +78,6 @@ export interface Project {
     tags?: string[];
     technologies?: string[];
     links?: ProjectLink[];
-    notes?: string;
     assets?: ProjectAsset[];
     created_at?: string;
     updated_at?: string;
