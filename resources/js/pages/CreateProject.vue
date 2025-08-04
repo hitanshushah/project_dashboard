@@ -374,7 +374,7 @@ const previewFile = (file: File) => {
                             v-model="form.end_date"
                             @update:model-value="updateEndDate"
                             show-adjacent-months
-                            color="primary"
+                            color="gray"
                           ></v-date-picker>
                         </v-menu>
                       </v-col>
@@ -543,9 +543,9 @@ const previewFile = (file: File) => {
                     :key="index"
                     variant="outlined"
                     density="compact"
-                    class="max-w-full text-sm p-4"
+                    class="max-w-full text-sm !py-3 !px-4"
                   >
-                    <div class="flex items-center gap-2 w-full">
+                    <div class="flex grow items-center gap-2 w-full">
                       <!-- Left: title and URL -->
                       <div class="flex-1 min-w-0 flex gap-1">
                         <span class="truncate font-medium max-w-[120px]">
@@ -561,7 +561,7 @@ const previewFile = (file: File) => {
                       </div>
 
                       <!-- Right: buttons -->
-                      <div class="flex items-center shrink-0">
+                      <div class="flex-none items-center shrink-0">
                         <v-btn
                           icon="mdi-open-in-new"
                           variant="text"
@@ -632,53 +632,55 @@ const previewFile = (file: File) => {
                 </div>
               </div>
               
-              <div v-if="form.assets.length > 0" class="flex flex-wrap gap-3 mb-8">
-                <div
+              <div v-if="form.assets.length > 0" class="flex flex-wrap gap-2 mb-8">
+                <v-chip
                   v-for="(file, index) in form.assets"
                   :key="index"
-                  class="w-full md:w-[48%] lg:w-[32%]"
+                  variant="outlined"
+                  density="compact"
+                  class="max-w-full !p-6"
                 >
-                  <v-card variant="outlined" class="p-3 h-full">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center flex-1 min-w-0">
-                        <v-icon
-                          :icon="getFileIcon(file.type || file.name)"
-                          :color="getFileColor(file.type || file.name)"
-                          class="mr-3"
-                          size="large"
-                        ></v-icon>
-                        <div class="flex-1 min-w-0">
-                          <div class="text-sm font-medium text-gray-800 truncate">
-                            {{ file.name }}
-                          </div>
-                          <div class="text-xs text-gray-500">
-                            {{ formatFileSize(file.size) }} • {{ getFileType(file.type || file.name) }}
-                          </div>
+                  <div class="flex items-center gap-3 w-full">
+                    <!-- Left: icon and file info -->
+                    <div class="flex items-center flex-1 min-w-0">
+                      <v-icon
+                        :icon="getFileIcon(file.type || file.name)"
+                        :color="getFileColor(file.type || file.name)"
+                        size="large"
+                        class="mr-2"
+                      />
+                      <div class="min-w-0">
+                        <div class="text-sm font-medium text-gray-800 truncate max-w-[180px]">
+                          {{ file.name }}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                          {{ formatFileSize(file.size) }} • {{ getFileType(file.type || file.name) }}
                         </div>
                       </div>
-
-                      <div class="flex items-center ml-2 shrink-0">
-                        <v-btn
-                          icon="mdi-eye"
-                          variant="text"
-                          size="small"
-                          color="primary"
-                          @click="previewFile(file)"
-                          class="mr-1"
-                          v-if="isPreviewable(file.type || file.name)"
-                        ></v-btn>
-                        <v-btn
-                          icon="mdi-delete"
-                          variant="text"
-                          size="small"
-                          color="error"
-                          @click="removeAsset(index)"
-                        ></v-btn>
-                      </div>
                     </div>
-                  </v-card>
-                </div>
+
+                    <!-- Right: buttons -->
+                    <div class="flex items-center gap-2">
+                      <v-btn
+                        icon="mdi-eye"
+                        variant="text"
+                        size="medium"
+                        color="primary"
+                        @click="previewFile(file)"
+                        v-if="isPreviewable(file.type || file.name)"
+                      />
+                      <v-btn
+                        icon="mdi-close"
+                        variant="text"
+                        size="medium"
+                        color="error"
+                        @click="removeAsset(index)"
+                      />
+                    </div>
+                  </div>
+                </v-chip>
               </div>
+
             </div>
 
             <!-- Form Actions -->
