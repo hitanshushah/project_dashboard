@@ -21,7 +21,7 @@ return new class extends Migration {
         // Profiles
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->unique();
+            $table->foreignId('user_id')->constrained('users')->unique();
             $table->string('name')->nullable();
             $table->text('bio')->nullable();
             $table->timestamps();
@@ -135,6 +135,25 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
         });
+
+        // Project Settings
+        Schema::create('project_settings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('project_id')->constrained('projects');
+            $table->foreignId('user_id')->constrained('users');
+
+            $table->boolean('show_description')->default(true);
+            $table->boolean('show_category')->default(true);
+            $table->boolean('show_status')->default(true);
+            $table->boolean('show_dates')->default(true);
+            $table->boolean('show_tags')->default(true);
+            $table->boolean('show_technologies')->default(true);
+            $table->boolean('show_links')->default(true);
+            $table->boolean('show_assets')->default(true);
+
+            $table->timestamps();
+        });
+
     }
 
     public function down(): void
@@ -148,5 +167,7 @@ return new class extends Migration {
         Schema::dropIfExists('categories');
         Schema::dropIfExists('profiles');
         Schema::dropIfExists('users');
+        Schema::dropIfExists('project_settings');
+
     }
 };

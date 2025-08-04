@@ -5,7 +5,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectCard from '@/components/ProjectCard.vue';
 import { 
   getLinkIcon, 
-  getLinkIconColor, 
   getFileIcon, 
   getFileColor, 
   getFileType, 
@@ -62,7 +61,7 @@ const newTeamMember = ref('');
 const newAssets = ref<File[]>([]);
 const fileInputRef = ref<HTMLInputElement>();
 const githubUrl = ref('');
-const liveUrl = ref('');
+const projectDemo = ref('');
 
 // Preview settings
 const showPreviewSettings = ref(false);
@@ -83,10 +82,6 @@ const addTag = () => {
     form.tags.push(newTag.value.trim());
     newTag.value = '';
   }
-};
-
-const removeTag = (index: number) => {
-  form.tags.splice(index, 1);
 };
 
 const addLink = () => {
@@ -137,37 +132,24 @@ const addGithubLink = () => {
   githubUrl.value = '';
 };
 
-const addLiveUrlLink = () => {
-  if (!liveUrl.value.trim()) {
+const addProjectDemoLink = () => {
+  if (!projectDemo.value.trim()) {
     return;
   }
   
   // Basic URL validation
-  let validUrl = liveUrl.value.trim();
+  let validUrl = projectDemo.value.trim();
   if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
     validUrl = 'https://' + validUrl;
   }
   
   form.links.push({
-    title: 'Live Url',
+    title: 'Project Demo',
     url: validUrl
   });
   
   // Clear the input field
-  liveUrl.value = '';
-};
-
-const addQuickLink = (title: string, url: string) => {
-  // Check if link with this title already exists
-  if (hasLinkWithTitle(title)) {
-    return;
-  }
-  
-  // Add the link with empty URL - user can edit it later
-  form.links.push({
-    title: title,
-    url: url
-  });
+  projectDemo.value = '';
 };
 
 const hasLinkWithTitle = (title: string) => {
@@ -182,11 +164,6 @@ const addTechnology = () => {
     newTechnology.value = '';
   }
 };
-
-const removeTechnology = (index: number) => {
-  form.technologies.splice(index, 1);
-};
-
 
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -274,8 +251,6 @@ const addAssets = (files: File | File[]) => {
 const removeAsset = (index: number) => {
   form.assets.splice(index, 1);
 };
-
-
 
 const previewFile = (file: File) => {
   if (isPreviewable(file.type)) {
@@ -474,69 +449,74 @@ const previewFile = (file: File) => {
               <v-row>
                 <!-- Tags -->
                 <v-col cols="12" md="6">
-                  <v-text-field
-                    v-model="newTag"
+                  <v-combobox
+                    v-model="form.tags"
+                    v-model:search="newTag"
+                    :items="[]"
                     label="Add Tag"
-                    placeholder="Enter a tag"
+                    placeholder="Enter or select a tag"
                     variant="outlined"
-                    @keyup.enter="addTag"
-                    append-inner-icon="mdi-plus"
                     @click:append-inner="addTag"
+                    :hide-no-data="false"
+                    multiple
+                    chips
+                    closable-chips
+                    hide-selected
+                    clearable
                     density="compact"
                     color="primary"
                     class="text-field-modern"
                   >
                     <template v-slot:prepend-inner>
-                      <v-icon >mdi-tag</v-icon>
+                      <v-icon>mdi-tag</v-icon>
                     </template>
-                  </v-text-field>
-                  
-                  <div v-if="form.tags.length > 0" class="flex flex-wrap gap-2 mb-4">
-                    <v-chip
-                      v-for="(tag, index) in form.tags"
-                      :key="index"
-                      closable
-                      @click:close="removeTag(index)"
-                      color="primary"
-                      variant="tonal"
-                    >
-                      {{ tag }}
-                    </v-chip>
-                  </div>
+
+                    <template v-slot:no-data>
+                      <v-list-item>
+                        <v-list-item-title>
+                          No results matching
+                          <strong>"{{ newTag || 'your input' }}"</strong>. Press <kbd>enter</kbd> to create a new one.
+                        </v-list-item-title>
+                      </v-list-item>
+                    </template>
+                  </v-combobox>
                 </v-col>
+
 
                 <!-- Technologies -->
                 <v-col cols="12" md="6">
-                  <v-autocomplete
-                    v-model="newTechnology"
+                  <v-combobox
+                    v-model="form.technologies"
+                    v-model:search="newTechnology"
                     :items="technologyOptions"
                     label="Add Technology"
                     placeholder="Select or type a technology"
                     variant="outlined"
-                    @keyup.enter="addTechnology"
-                    append-inner-icon="mdi-plus"
                     @click:append-inner="addTechnology"
+                    :hide-no-data="false"
+                    multiple
+                    chips
+                    closable-chips
+                    hide-selected
+                    clearable
                     density="compact"
                     color="primary"
                     class="select-modern"
                   >
                     <template v-slot:prepend-inner>
-                      <v-icon >mdi-cog</v-icon>
+                      <v-icon>mdi-cog</v-icon>
                     </template>
-                  </v-autocomplete>
-                  
-                  <div v-if="form.technologies.length > 0" class="flex flex-wrap gap-2 mb-4">
-                    <v-chip
-                      v-for="(tech, index) in form.technologies"
-                      :key="index"
-                      closable
-                      @click:close="removeTechnology(index)"
-                      color="secondary"
-                      variant="tonal"
-                    >
-                      {{ tech }}
-                    </v-chip>
-                  </div>
+
+                    <template v-slot:no-data>
+                      <v-list-item>
+                        <v-list-item-title>
+                          No results matching
+                          <strong>"{{ newTechnology || 'your input' }}"</strong>.
+                          Press <kbd>enter</kbd> to create a new one.
+                        </v-list-item-title>
+                      </v-list-item>
+                    </template>
+                  </v-combobox>
                 </v-col>
               </v-row>
             </div>
@@ -583,13 +563,13 @@ const previewFile = (file: File) => {
                   </v-row>
                 </div>
 
-                <!-- Live Url Link -->
-                <div v-if="!hasLinkWithTitle('Live Url')">
+                <!-- Project Demo Link -->
+                <div v-if="!hasLinkWithTitle('Project Demo')">
                   <v-row>
                     <v-col cols="12" md="10">
                       <v-text-field
-                        v-model="liveUrl"
-                        label="Live Url"
+                        v-model="projectDemo"
+                        label="Project Demo"
                         placeholder="https://..."
                         variant="outlined"
                         density="compact"
@@ -604,8 +584,8 @@ const previewFile = (file: File) => {
                     <v-col cols="12" md="2" class="self-center">
                       <v-btn
                         variant="outlined"
-                        @click="addLiveUrlLink"
-                        :disabled="!liveUrl.trim()"
+                        @click="addProjectDemoLink"
+                        :disabled="!projectDemo.trim()"
                         class="w-auto"
                         density="compact"
                       >
@@ -850,7 +830,7 @@ const previewFile = (file: File) => {
           <v-col cols="12" lg="5">
             <v-card class="pa-6 h-fit sticky top-4">
               <div class="mb-6">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center mb-4">
                   <h2 class="text-xl font-semibold text-gray-700">Live Preview</h2>
                   <v-btn
                     icon="mdi-cog"
@@ -858,7 +838,6 @@ const previewFile = (file: File) => {
                     size="small"
                     color="gray"
                     @click="showPreviewSettings = true"
-                    class="ml-2"
                   ></v-btn>
                 </div>
                 <div class="text-sm text-gray-500 mb-4">Click the settings icon to personalize your preview. Hidden fields stay saved and help in sorting and managing your projects.</div>
