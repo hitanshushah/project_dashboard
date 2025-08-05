@@ -251,12 +251,11 @@ const saveProject = async () => {
     }
   }
   
-  // Validate file sizes (10MB limit)
-  const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
+  // Validate file sizes (100MB limit)
   for (let i = 0; i < form.assets.length; i++) {
     const file = form.assets[i];
-    if (file.size > maxFileSize) {
-      form.setError('assets', `File "${file.name}" is too large. Maximum size is 10MB.`);
+    if (!validateFileSize(file)) {
+      form.setError('assets', `File "${file.name}" is too large. Maximum size is 100MB.`);
       return false;
     }
   }
@@ -326,10 +325,30 @@ const updateEndDate = (value: string) => {
   form.end_date = value;
 };
 
+// Helper function to validate file size
+const validateFileSize = (file: File): boolean => {
+  const maxFileSize = 100 * 1024 * 1024; // 100MB in bytes
+  if (file.size > maxFileSize) {
+    snackbarMessage.value = `File "${file.name}" is too large. Maximum size is 100MB.`;
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+    return false;
+  }
+  return true;
+};
+
 // Asset management functions
 const addAssets = (files: File | File[]) => {
   const fileArray = Array.isArray(files) ? files : [files];
+  
   if (fileArray && fileArray.length > 0) {
+    // Check file sizes before adding
+    for (const file of fileArray) {
+      if (!validateFileSize(file)) {
+        return; // Don't add any files if one is too large
+      }
+    }
+    
     form.assets.push(...fileArray);
     newAssets.value = [];
   }
@@ -354,8 +373,9 @@ const previewFile = (file: File) => {
 <template>
   <AppLayout>
     <v-main>
-      <v-container class="py-8 max-w-7xl">
-        <div class="mb-2">
+      <v-container class="py-8 max-w-7xl" @keydown.enter.prevent>
+        <div class="d-flex justify-space-between align-center mb-6">
+          <div>
           <v-btn
             icon="mdi-arrow-left"
             variant="outlined"
@@ -365,6 +385,28 @@ const previewFile = (file: File) => {
           ></v-btn>
           <h1 class="text-3xl font-bold text-gray-800">Create New Project</h1>
           <p class="text-gray-600 mt-2">Fill in the details below to create your new project</p>
+          </div>
+          <div class="flex gap-4 justify-end">
+              <v-btn
+                variant="outlined"
+                size="large"
+                @click="cancel"
+                density="compact"
+              >
+                Cancel
+              </v-btn>
+              
+              <v-btn
+                type="submit"
+                color="primary"
+                density="compact"
+                size="large"
+                :loading="form.processing"
+                :disabled="form.processing"
+              >
+                Create Project
+              </v-btn>
+            </div>
         </div>
 
         <v-row>

@@ -54,8 +54,8 @@ class ProjectController extends Controller
                 'updated_at' => $project->updated_at,
                 'category' => $project->category ? $project->category->key : null,
                 'status' => $project->status ? $project->status->key : null,
-                'tags' => $project->tags,
-                'technologies' => $project->technologies,
+                'tags' => $project->tags, // This uses the accessor method getTagsAttribute()
+                'technologies' => $project->technologies, // This uses the accessor method getTechnologiesAttribute()
                 'links' => $project->links->map(function($link) {
                     return [
                         'title' => $link->name,
@@ -87,7 +87,16 @@ class ProjectController extends Controller
                     'showTechnologies' => $project->settings->show_technologies,
                     'showLinks' => $project->settings->show_links,
                     'showAssets' => $project->settings->show_assets,
-                ] : null
+                ] : [
+                    'showDescription' => true,
+                    'showCategory' => true,
+                    'showStatus' => true,
+                    'showDates' => true,
+                    'showTags' => true,
+                    'showTechnologies' => true,
+                    'showLinks' => true,
+                    'showAssets' => true,
+                ]
             ];
         });
 
@@ -258,7 +267,7 @@ class ProjectController extends Controller
             'existingAssets.*.display_name' => 'nullable|string|max:255',
             'existingAssets.*.filename' => 'nullable|string|max:500',
             'assets' => 'nullable|array',
-            'assets.*' => 'file|max:10240',
+            'assets.*' => 'file|max:102400', // 100MB max per file
             'preview_settings' => 'nullable|array',
             'preview_settings.showDescription' => 'nullable|boolean',
             'preview_settings.showCategory' => 'nullable|boolean',
@@ -470,7 +479,7 @@ class ProjectController extends Controller
             'links.*.title' => 'required|string|max:255',
             'links.*.url' => 'required|url|max:500',
             'assets' => 'nullable|array',
-            'assets.*' => 'file|max:10240', // 10MB max per file
+            'assets.*' => 'file|max:102400', // 100MB max per file
             'preview_settings' => 'nullable|array',
             'preview_settings.showDescription' => 'nullable|boolean',
             'preview_settings.showCategory' => 'nullable|boolean',
@@ -685,7 +694,7 @@ class ProjectController extends Controller
             'links.*.title' => 'required|string|max:255',
             'links.*.url' => 'required|url|max:500',
             'assets' => 'nullable|array',
-            'assets.*' => 'file|max:10240',
+            'assets.*' => 'file|max:102400', // 100MB max per file
             'user_id' => 'required|integer|exists:users,id',
             'preview_settings' => 'nullable|array',
             'preview_settings.showDescription' => 'nullable|boolean',

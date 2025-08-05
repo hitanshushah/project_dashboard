@@ -140,8 +140,13 @@ class Project extends Model
 
     public function syncProjectTagsWithUser(array $tags, int $userId)
     {
+        // Get existing tag IDs of type 'tag' that are attached to this project
+        $existingTagIds = $this->tags()->where('type', 'tag')->pluck('tags.id')->toArray();
+        
         // Detach existing tags of type 'tag'
-        $this->tags()->where('type', 'tag')->detach();
+        if (!empty($existingTagIds)) {
+            $this->tags()->detach($existingTagIds);
+        }
         
         if (!empty($tags)) {
             // Create single tag row with all tags as JSON array
@@ -160,8 +165,13 @@ class Project extends Model
 
     public function syncProjectTechnologiesWithUser(array $technologies, int $userId)
     {
+        // Get existing tag IDs of type 'technology' that are attached to this project
+        $existingTagIds = $this->tags()->where('type', 'technology')->pluck('tags.id')->toArray();
+        
         // Detach existing tags of type 'technology'
-        $this->tags()->where('type', 'technology')->detach();
+        if (!empty($existingTagIds)) {
+            $this->tags()->detach($existingTagIds);
+        }
         
         if (!empty($technologies)) {
             // Create single technology row with all technologies as JSON array

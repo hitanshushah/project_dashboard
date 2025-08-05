@@ -104,7 +104,7 @@
             <v-carousel-item
               v-for="(file, index) in mediaAssets"
               :key="index"
-              :src="getFileUrl(file)"
+              :src="getFileUrlForPreview(file)"
               contain
             >
               <template v-slot:placeholder>
@@ -132,7 +132,7 @@
               <span class="truncate">{{ file.display_name || getFileNameFromUrl(file.filename || file.path || file.url || '') }}</span>
             </div>
             <v-btn
-              :href="getFileUrl(file)"
+              :href="getFileUrlForPreview(file)"
               target="_blank"
               size="small"
               variant="tonal"
@@ -206,6 +206,8 @@ const props = withDefaults(defineProps<Props>(), {
   })
 });
 
+
+
 // Computed property to handle null preview settings
 const effectivePreviewSettings = computed(() => {
   return props.previewSettings || {
@@ -231,6 +233,16 @@ const getFileNameFromUrl = (url: string): string => {
   } catch {
     return url;
   }
+};
+
+// Helper function to get file URL for preview (handles both existing and new files)
+const getFileUrlForPreview = (file: any): string => {
+  // If it's a new file (has file property), create object URL
+  if (file.file && file.file instanceof File) {
+    return URL.createObjectURL(file.file);
+  }
+  // Otherwise use the existing getFileUrl function
+  return getFileUrl(file);
 };
 
 // Computed properties for assets

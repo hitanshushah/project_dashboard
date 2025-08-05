@@ -116,6 +116,18 @@ const addProjectDemoLink = () => {
 };
 
 // File handling methods
+// Helper function to validate file size
+const validateFileSize = (file: File): boolean => {
+  const maxFileSize = 100 * 1024 * 1024; // 100MB in bytes
+  if (file.size > maxFileSize) {
+    snackbarMessage.value = `File "${file.name}" is too large. Maximum size is 100MB.`;
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+    return false;
+  }
+  return true;
+};
+
 const openFileDialog = () => {
   fileInputRef.value?.click();
 };
@@ -124,6 +136,14 @@ const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
     const files = Array.from(target.files);
+    
+    // Check file sizes before adding
+    for (const file of files) {
+      if (!validateFileSize(file)) {
+        return; // Don't add any files if one is too large
+      }
+    }
+    
     form.assets.push(...files);
   }
 };
@@ -132,6 +152,14 @@ const handleFileDrop = (event: DragEvent) => {
   event.preventDefault();
   if (event.dataTransfer?.files) {
     const files = Array.from(event.dataTransfer.files);
+    
+    // Check file sizes before adding
+    for (const file of files) {
+      if (!validateFileSize(file)) {
+        return; // Don't add any files if one is too large
+      }
+    }
+    
     form.assets.push(...files);
   }
 };
@@ -213,6 +241,14 @@ const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
     const files = Array.from(target.files);
+    
+    // Check file sizes before adding
+    for (const file of files) {
+      if (!validateFileSize(file)) {
+        return; // Don't add any files if one is too large
+      }
+    }
+    
     form.assets.push(...files);
   }
 };
@@ -229,12 +265,19 @@ const updateProject = async () => {
   // Clear previous errors
   form.clearErrors();
   
-
-  
   // Validate required fields
   if (!form.name.trim()) {
     form.setError('name', 'Project name is required');
     return false;
+  }
+
+  // Validate file sizes (100MB limit)
+  for (let i = 0; i < form.assets.length; i++) {
+    const file = form.assets[i];
+    if (!validateFileSize(file)) {
+      form.setError('assets', `File "${file.name}" is too large. Maximum size is 100MB.`);
+      return false;
+    }
   }
 
   try {
@@ -291,7 +334,10 @@ const allAssets = computed(() => {
     isExisting: true
   }));
   const newAssets = form.assets.map(file => ({
+    id: `new-${file.name}-${file.size}`,
     name: file.name,
+    filename: file.name, // For ProjectCard compatibility
+    display_name: file.name, // For ProjectCard compatibility
     size: file.size,
     type: file.type,
     isExisting: false,
@@ -313,17 +359,31 @@ const nonImageAssets = computed(() => {
     return fileType !== 'image' && !fileType.startsWith('image/');
   });
 });
+
+const cancel = () => {
+  router.visit('/');
+};
 </script>
 
 <template>
   <AppLayout>
     <v-main>
-      <v-container class="py-8">
+      <v-container class="py-8" @keydown.enter.prevent>
         <!-- Header -->
         <div class="d-flex justify-space-between align-center mb-6">
+          <div>
+          <v-btn
+            icon="mdi-arrow-left"
+            variant="outlined"
+            @click="cancel"
+            color="gray"
+            class="mb-4"
+          ></v-btn>
           <h1 class="text-3xl font-bold text-gray-800">
             Edit Project
           </h1>
+          <p class="text-gray-600 mt-2">Edit the details below to modify your project</p>
+          </div>
           <div class="d-flex gap-2">
             <v-btn
               variant="outlined"
@@ -908,6 +968,21 @@ const nonImageAssets = computed(() => {
                     </div>
                   </v-chip>
                 </div>
+              </div>
+              <div class="flex gap-4 justify-end">
+                <v-btn
+              variant="outlined"
+              @click="cancelEdit"
+            >
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="updateProject"
+              :loading="form.processing"
+            >
+              Update Project
+            </v-btn>
               </div>
           </v-col>
 

@@ -122,7 +122,7 @@ const cancelToggle = () => {
                   :project="project"
                   :categories="categories"
                   :statuses="statuses"
-                  :preview-settings="project.settings || {}"
+                  :preview-settings="project.settings"
                   :show-meta-info="true"
                 />
                 <div class="absolute top-2 right-2 d-flex gap-1">
@@ -159,7 +159,7 @@ const cancelToggle = () => {
                   :project="project"
                   :categories="categories"
                   :statuses="statuses"
-                  :preview-settings="project.settings || {}"
+                  :preview-settings="project.settings"
                   :show-meta-info="true"
                 />
                 <div class="absolute top-2 right-2 d-flex gap-1">
