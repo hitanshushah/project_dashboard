@@ -368,7 +368,7 @@ const cancel = () => {
 <template>
   <AppLayout>
     <v-main>
-      <v-container class="py-8" @keydown.enter.prevent>
+      <v-container class="py-8">
         <!-- Header -->
         <div class="d-flex justify-space-between align-center mb-6">
           <div>

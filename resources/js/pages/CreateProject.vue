@@ -373,7 +373,7 @@ const previewFile = (file: File) => {
 <template>
   <AppLayout>
     <v-main>
-      <v-container class="py-8 max-w-7xl" @keydown.enter.prevent>
+      <v-container class="py-8 max-w-7xl">
         <div class="d-flex justify-space-between align-center mb-6">
           <div>
           <v-btn
