@@ -65,6 +65,18 @@ export interface ProjectAsset {
     path?: string;
     size?: number;
     type?: string;
+    url?: string;
+}
+
+export interface ProjectSettings {
+    showDescription?: boolean;
+    showCategory?: boolean;
+    showStatus?: boolean;
+    showDates?: boolean;
+    showTags?: boolean;
+    showTechnologies?: boolean;
+    showLinks?: boolean;
+    showAssets?: boolean;
 }
 
 export interface Project {
@@ -79,6 +91,7 @@ export interface Project {
     technologies?: string[];
     links?: ProjectLink[];
     assets?: ProjectAsset[];
+    settings?: ProjectSettings;
     created_at?: string;
     updated_at?: string;
 }

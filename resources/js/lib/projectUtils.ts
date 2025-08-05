@@ -143,6 +143,10 @@ export const getFileUrl = (file: any): string => {
   if (file instanceof File) {
     return URL.createObjectURL(file);
   }
+  // For saved files, use the url property if available
+  if (file.url) {
+    return file.url;
+  }
   // For saved files, use the path
   if (file.path) {
     return file.path;

@@ -20,6 +20,79 @@ use App\Models\Tag;
 
 class ProjectController extends Controller
 {
+    public function index()
+    {
+        $user = request()->attributes->get('user');
+        if (!$user) {
+            return redirect()->route('home');
+        }
+
+        // Fetch user's projects with all relationships
+        $projects = Project::with([
+            'category',
+            'status', 
+            'links.linkType',
+            'assets.assetType',
+            'settings',
+            'tags'
+        ])
+        ->where('user_id', $user->id)
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function($project) {
+            return [
+                'id' => $project->id,
+                'key' => $project->key,
+                'name' => $project->name,
+                'description' => $project->description,
+                'start_date' => $project->start_date,
+                'end_date' => $project->end_date,
+                'is_public' => $project->is_public,
+                'created_at' => $project->created_at,
+                'updated_at' => $project->updated_at,
+                'category' => $project->category ? $project->category->key : null,
+                'status' => $project->status ? $project->status->key : null,
+                'tags' => $project->tags,
+                'technologies' => $project->technologies,
+                'links' => $project->links->map(function($link) {
+                    return [
+                        'title' => $link->name,
+                        'url' => $link->url,
+                        'type' => $link->linkType ? $link->linkType->key : null
+                    ];
+                }),
+                'assets' => $project->assets->map(function($asset) {
+                    return [
+                        'name' => $asset->display_name,
+                        'path' => $asset->filename,
+                        'type' => $asset->assetType ? $asset->assetType->key : null,
+                        'url' => asset('storage/' . $asset->filename)
+                    ];
+                }),
+                'settings' => $project->settings ? [
+                    'showDescription' => $project->settings->show_description,
+                    'showCategory' => $project->settings->show_category,
+                    'showStatus' => $project->settings->show_status,
+                    'showDates' => $project->settings->show_dates,
+                    'showTags' => $project->settings->show_tags,
+                    'showTechnologies' => $project->settings->show_technologies,
+                    'showLinks' => $project->settings->show_links,
+                    'showAssets' => $project->settings->show_assets,
+                ] : null
+            ];
+        });
+
+        // Fetch categories and statuses for the ProjectCard components
+        $categories = Category::all(['id', 'name', 'key']);
+        $statuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
+
+        return Inertia::render('Home', [
+            'projects' => $projects,
+            'categories' => $categories,
+            'statuses' => $statuses,
+        ]);
+    }
+
     public function create()
     {
         $categories = Category::all(['name', 'key']);

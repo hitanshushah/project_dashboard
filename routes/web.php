@@ -5,9 +5,7 @@ use Inertia\Inertia;
 use App\Models\User;
 use App\Http\Controllers\ProjectController;
 
-Route::get('/', function () {
-    return Inertia::render('Home');
-})->name('home');
+Route::get('/', [ProjectController::class, 'index'])->name('home');
 
 // Project routes
 Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');

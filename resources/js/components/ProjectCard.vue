@@ -4,17 +4,17 @@
       <h3 class="text-lg font-semibold text-gray-800">
         {{ project.name || 'Project Name' }}
       </h3>
-      <div v-if="project.category && previewSettings.showCategory" class="text-sm text-blue-600 mt-1">
+      <div v-if="project.category && (effectivePreviewSettings.showCategory !== false)" class="text-sm text-blue-600 mt-1">
         {{ getCategoryNameLocal(project.category) }}
       </div>
     </div>
 
-    <div v-if="project.description && previewSettings.showDescription" class="mb-4">
+    <div v-if="project.description && (effectivePreviewSettings.showDescription !== false)" class="mb-4">
       <p class="text-gray-600 text-sm whitespace-pre-wrap">{{ project.description }}</p>
     </div>
 
     <!-- Status Badge -->
-    <div v-if="project.status && previewSettings.showStatus" class="mb-4">
+    <div v-if="project.status && (effectivePreviewSettings.showStatus !== false)" class="mb-4">
       <v-chip
         :color="getStatusColor(project.status)"
         size="small"
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Dates -->
-    <div v-if="(project.start_date || project.end_date) && previewSettings.showDates" class="mb-4">
+    <div v-if="(project.start_date || project.end_date) && (effectivePreviewSettings.showDates !== false)" class="mb-4">
       <div class="text-sm text-gray-500">
         <div v-if="project.start_date">
           <strong>Start:</strong> {{ formatDate(project.start_date) }}
@@ -37,7 +37,7 @@
     </div>
 
     <!-- Tags -->
-    <div v-if="project.tags && project.tags.length > 0 && previewSettings.showTags" class="mb-4">
+    <div v-if="project.tags && project.tags.length > 0 && (effectivePreviewSettings.showTags !== false)" class="mb-4">
       <div class="text-sm text-gray-500 mb-2">Tags:</div>
       <div class="flex flex-wrap gap-1">
         <v-chip
@@ -53,7 +53,7 @@
     </div>
 
     <!-- Technologies -->
-    <div v-if="project.technologies && project.technologies.length > 0 && previewSettings.showTechnologies" class="mb-4">
+    <div v-if="project.technologies && project.technologies.length > 0 && (effectivePreviewSettings.showTechnologies !== false)" class="mb-4">
       <div class="text-sm text-gray-500 mb-2">Technologies:</div>
       <div class="flex flex-wrap gap-1">
         <v-chip
@@ -69,7 +69,7 @@
     </div>
 
     <!-- Links -->
-    <div v-if="project.links && project.links.length > 0 && previewSettings.showLinks" class="mb-4">
+    <div v-if="project.links && project.links.length > 0 && (effectivePreviewSettings.showLinks !== false)" class="mb-4">
       <div class="text-sm text-gray-500 mb-2">Links:</div>
       <div class="space-y-1">
         <div
@@ -90,7 +90,7 @@
     </div>
 
     <!-- Assets -->
-    <div v-if="project.assets && project.assets.length > 0 && previewSettings.showAssets" class="mb-4">
+    <div v-if="project.assets && project.assets.length > 0 && (effectivePreviewSettings.showAssets !== false)" class="mb-4">
       <div class="text-sm text-gray-500 mb-2">Assets ({{ project.assets.length }} files):</div>
       
       <!-- Image Carousel for Image Assets -->
@@ -175,7 +175,7 @@ interface Props {
     showTechnologies?: boolean;
     showLinks?: boolean;
     showAssets?: boolean;
-  };
+  } | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -192,12 +192,27 @@ const props = withDefaults(defineProps<Props>(), {
   })
 });
 
+// Computed property to handle null preview settings
+const effectivePreviewSettings = computed(() => {
+  return props.previewSettings || {
+    showDescription: true,
+    showCategory: true,
+    showStatus: true,
+    showDates: true,
+    showTags: true,
+    showTechnologies: true,
+    showLinks: true,
+    showAssets: true,
+  };
+});
+
 // Computed properties for assets
 const imageAssets = computed(() => {
   if (!props.project.assets) return [];
   return props.project.assets.filter(file => {
     const fileType = file.type || file.name || '';
-    return fileType.startsWith('image/');
+    // Check for both MIME type and asset type key
+    return fileType === 'image' || fileType.startsWith('image/');
   });
 });
 
@@ -205,7 +220,8 @@ const nonImageAssets = computed(() => {
   if (!props.project.assets) return [];
   return props.project.assets.filter(file => {
     const fileType = file.type || file.name || '';
-    return !fileType.startsWith('image/');
+    // Check for both MIME type and asset type key
+    return fileType !== 'image' && !fileType.startsWith('image/');
   });
 });
 
