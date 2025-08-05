@@ -37,7 +37,7 @@ return [
 
             'minio' => [
             'endpoint' => env('MINIO_ENDPOINT', 'http://host.docker.internal:4810'),
-            'public_url' => env('MINIO_PUBLIC_URL', 'http://localhost:4811'),
+            'public_url' => env('MINIO_PUBLIC_URL', 'http://localhost:4810'),
             'bucket' => env('MINIO_BUCKET', 'projectsdashboard'),
             'region' => env('MINIO_REGION', 'us-east-1'),
             'access_key' => env('MINIO_ACCESS_KEY', 'admin'),

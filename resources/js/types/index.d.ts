@@ -61,11 +61,18 @@ export interface ProjectLink {
 }
 
 export interface ProjectAsset {
+    id?: number;
     name?: string;
     path?: string;
     size?: number;
     type?: string;
     url?: string;
+    filename?: string; // MinIO URL
+    display_name?: string; // Original filename
+    asset_type?: {
+        key: string;
+        name: string;
+    };
 }
 
 export interface ProjectSettings {

@@ -89,49 +89,61 @@
       </div>
     </div>
 
-    <!-- Assets -->
-    <div v-if="project.assets && project.assets.length > 0 && (effectivePreviewSettings.showAssets !== false)" class="mb-4">
-      <div class="text-sm text-gray-500 mb-2">Assets ({{ project.assets.length }} files):</div>
-      
-      <!-- Image Carousel for Image Assets -->
-      <div v-if="imageAssets.length > 0" class="mb-4">
-        <v-carousel
-          :show-arrows="imageAssets.length > 1"
-          :show-dots="imageAssets.length > 1"
-          height="200"
-          class="rounded-lg overflow-hidden"
-        >
-          <v-carousel-item
-            v-for="(file, index) in imageAssets"
-            :key="index"
-            :src="getFileUrl(file)"
-            contain
+          <!-- Assets -->
+      <div v-if="project.assets && project.assets.length > 0 && (effectivePreviewSettings.showAssets !== false)" class="mb-4">
+        <div class="text-sm text-gray-500 mb-2">Assets ({{ project.assets.length }} files):</div>
+        
+        <!-- Image/Video Carousel for Media Assets -->
+        <div v-if="mediaAssets.length > 0" class="mb-4">
+          <v-carousel
+            :show-arrows="mediaAssets.length > 1"
+            :show-dots="mediaAssets.length > 1"
+            height="200"
+            class="rounded-lg overflow-hidden"
           >
-            <template v-slot:placeholder>
-              <div class="d-flex fill-height justify-center align-center">
-                <v-progress-circular
-                  indeterminate
-                  color="grey-lighten-4"
-                ></v-progress-circular>
-              </div>
-            </template>
-          </v-carousel-item>
-        </v-carousel>
-      </div>
-      
-      <!-- Other Files List -->
-      <div v-if="nonImageAssets.length > 0" class="space-y-1">
-        <div class="text-sm text-gray-500 mb-2">Other Files:</div>
-        <div
-          v-for="file in nonImageAssets"
-          :key="file.name || file.path"
-          class="text-sm text-gray-600 flex items-center"
-        >
-          <v-icon icon="mdi-file" size="small" class="mr-1"></v-icon>
-          {{ file.name || file.path }}
+            <v-carousel-item
+              v-for="(file, index) in mediaAssets"
+              :key="index"
+              :src="getFileUrl(file)"
+              contain
+            >
+              <template v-slot:placeholder>
+                <div class="d-flex fill-height justify-center align-center">
+                  <v-progress-circular
+                    indeterminate
+                    color="grey-lighten-4"
+                  ></v-progress-circular>
+                </div>
+              </template>
+            </v-carousel-item>
+          </v-carousel>
+        </div>
+        
+        <!-- Downloadable Files List -->
+        <div v-if="downloadableAssets.length > 0" class="space-y-2">
+          <div class="text-sm text-gray-500 mb-2">Files:</div>
+          <div
+            v-for="file in downloadableAssets"
+            :key="file.id || file.filename || file.name || file.path || file.url"
+            class="text-sm text-gray-600 flex items-center justify-between p-2 bg-gray-50 rounded"
+          >
+            <div class="flex items-center">
+              <v-icon :icon="getFileIcon(file.filename || file.display_name || file.name || file.path || file.url || '')" size="small" class="mr-2" :color="getFileColor(file.filename || file.display_name || file.name || file.path || file.url || '')"></v-icon>
+              <span class="truncate">{{ file.display_name || getFileNameFromUrl(file.filename || file.path || file.url || '') }}</span>
+            </div>
+            <v-btn
+              :href="getFileUrl(file)"
+              target="_blank"
+              size="small"
+              variant="tonal"
+              color="primary"
+              prepend-icon="mdi-download"
+            >
+              Download
+            </v-btn>
+          </div>
         </div>
       </div>
-    </div>
 
     <!-- Created/Updated Info -->
     <div v-if="showMetaInfo && (project.created_at || project.updated_at)" class="mt-4 pt-4 border-t border-gray-200">
@@ -158,7 +170,9 @@ import {
   getCategoryName, 
   formatDate, 
   formatDateTime, 
-  getFileUrl 
+  getFileUrl,
+  getFileIcon,
+  getFileColor
 } from '@/lib/projectUtils';
 
 interface Props {
@@ -206,22 +220,41 @@ const effectivePreviewSettings = computed(() => {
   };
 });
 
+// Helper function to extract filename from URL
+const getFileNameFromUrl = (url: string): string => {
+  if (!url) return '';
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    const filename = pathname.split('/').pop();
+    return filename || url;
+  } catch {
+    return url;
+  }
+};
+
 // Computed properties for assets
-const imageAssets = computed(() => {
+const mediaAssets = computed(() => {
   if (!props.project.assets) return [];
   return props.project.assets.filter(file => {
-    const fileType = file.type || file.name || '';
-    // Check for both MIME type and asset type key
-    return fileType === 'image' || fileType.startsWith('image/');
+    // Check if it's an image or video based on asset type or filename
+    const assetType = file.asset_type?.key || '';
+    const filename = file.filename || file.display_name || file.name || file.path || file.url || '';
+    const isImage = assetType === 'images' || filename.match(/\.(jpg|jpeg|png|gif|svg|webp|bmp|tiff)$/i);
+    const isVideo = assetType === 'videos' || filename.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv|m4v)$/i);
+    return isImage || isVideo;
   });
 });
 
-const nonImageAssets = computed(() => {
+const downloadableAssets = computed(() => {
   if (!props.project.assets) return [];
   return props.project.assets.filter(file => {
-    const fileType = file.type || file.name || '';
-    // Check for both MIME type and asset type key
-    return fileType !== 'image' && !fileType.startsWith('image/');
+    // Check if it's a document or other file (not image/video)
+    const assetType = file.asset_type?.key || '';
+    const filename = file.filename || file.display_name || file.name || file.path || file.url || '';
+    const isImage = assetType === 'images' || filename.match(/\.(jpg|jpeg|png|gif|svg|webp|bmp|tiff)$/i);
+    const isVideo = assetType === 'videos' || filename.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv|m4v)$/i);
+    return !isImage && !isVideo;
   });
 });
 

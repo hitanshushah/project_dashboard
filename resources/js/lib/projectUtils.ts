@@ -143,13 +143,17 @@ export const getFileUrl = (file: any): string => {
   if (file instanceof File) {
     return URL.createObjectURL(file);
   }
-  // For saved files, use the url property if available
+  // For saved files, use the url property if available (MinIO URLs)
   if (file.url) {
     return file.url;
   }
   // For saved files, use the path
   if (file.path) {
     return file.path;
+  }
+  // For MinIO files stored in filename field
+  if (file.filename) {
+    return file.filename;
   }
   // Fallback
   return '';

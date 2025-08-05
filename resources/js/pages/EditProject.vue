@@ -19,7 +19,7 @@ const page = usePage();
 const currentUser = computed(() => page.props.auth?.user);
 
 // Get data from backend
-const project = computed(() => page.props.project || {});
+const project = computed(() => page.props.project || {} as any);
 const categories = computed(() => page.props.categories || []);
 const statuses = computed(() => page.props.statuses || []);
 const userTechnologies = computed(() => (page.props.userTechnologies as string[]) || []);
@@ -92,7 +92,7 @@ const updateEndDate = () => {
 
 // Link helper methods
 const hasLinkWithTitle = (title: string) => {
-  return form.links.some(link => link.title.toLowerCase().includes(title.toLowerCase()));
+  return form.links.some((link: any) => link.title.toLowerCase().includes(title.toLowerCase()));
 };
 
 const addGithubLink = () => {
@@ -229,6 +229,8 @@ const updateProject = async () => {
   // Clear previous errors
   form.clearErrors();
   
+
+  
   // Validate required fields
   if (!form.name.trim()) {
     form.setError('name', 'Project name is required');
@@ -236,18 +238,41 @@ const updateProject = async () => {
   }
 
   try {
-    await form.put(`/projects/${project.value.id}`, {
-      onSuccess: () => {
-        snackbarMessage.value = 'Project updated successfully!';
-        snackbarColor.value = 'success';
-        snackbar.value = true;
-      },
-      onError: (errors) => {
-        snackbarMessage.value = 'Failed to update project. Please check the form.';
-        snackbarColor.value = 'error';
-        snackbar.value = true;
-      }
-    });
+    // Check if there are any file uploads
+    const hasFiles = form.assets && form.assets.length > 0;
+    
+    if (hasFiles) {
+      // Use post method with _method: PUT for file uploads
+      await form.post(`/projects/${project.value.id}`, {
+        data: {
+          _method: 'PUT'
+        },
+        onSuccess: () => {
+          snackbarMessage.value = 'Project updated successfully!';
+          snackbarColor.value = 'success';
+          snackbar.value = true;
+        },
+        onError: (errors: any) => {
+          snackbarMessage.value = 'Failed to update project. Please check the form.';
+          snackbarColor.value = 'error';
+          snackbar.value = true;
+        }
+      } as any);
+    } else {
+      // Use put method for forms without file uploads
+      await form.put(`/projects/${project.value.id}`, {
+        onSuccess: () => {
+          snackbarMessage.value = 'Project updated successfully!';
+          snackbarColor.value = 'success';
+          snackbar.value = true;
+        },
+        onError: (errors: any) => {
+          snackbarMessage.value = 'Failed to update project. Please check the form.';
+          snackbarColor.value = 'error';
+          snackbar.value = true;
+        }
+      });
+    }
   } catch (error) {
     snackbarMessage.value = 'An error occurred while updating the project.';
     snackbarColor.value = 'error';
@@ -261,7 +286,7 @@ const cancelEdit = () => {
 
 // Computed properties for assets
 const allAssets = computed(() => {
-  const existingAssets = form.existingAssets.map(asset => ({
+  const existingAssets = form.existingAssets.map((asset: any) => ({
     ...asset,
     isExisting: true
   }));
@@ -318,8 +343,7 @@ const nonImageAssets = computed(() => {
 
         <v-row>
           <!-- Form Section -->
-          <v-col cols="12" lg="8">
-            <v-card variant="outlined" class="pa-6">
+          <v-col cols="12" lg="7">
               <!-- Project Information Section -->
               <div class="mb-8">
                 <div class="flex items-center mb-8">
@@ -327,6 +351,8 @@ const nonImageAssets = computed(() => {
                   <h2 class="text-2xl font-bold text-slate-800">Project Information</h2>
                 </div>
                 
+                <v-row>
+                  <v-col cols="12" md="8">
                 <v-text-field
                   v-model="form.name"
                   label="Project Name *"
@@ -339,9 +365,10 @@ const nonImageAssets = computed(() => {
                   required
                 >
                   <template v-slot:prepend-inner>
-                    <v-icon>mdi-folder</v-icon>
+                    <v-icon>mdi-rocket-launch</v-icon>
                   </template>
                 </v-text-field>
+                </v-col>
                       
                 <v-col cols="12" md="4">
                   <v-select
@@ -363,6 +390,7 @@ const nonImageAssets = computed(() => {
                     </template>
                   </v-select>
                 </v-col>
+                </v-row>
 
                 <v-textarea
                   v-model="form.description"
@@ -881,13 +909,11 @@ const nonImageAssets = computed(() => {
                   </v-chip>
                 </div>
               </div>
-            </v-card>
           </v-col>
 
           <!-- Preview Section -->
-          <v-col cols="12" lg="4">
-            <v-card variant="outlined" class="pa-4">
-              <div class="d-flex justify-space-between align-center mb-4">
+          <v-col cols="12" lg="5">
+              <div class="d-flex align-center mb-4">
                 <h3 class="text-lg font-semibold">Preview</h3>
                 <v-btn
                   icon="mdi-cog"
@@ -914,7 +940,6 @@ const nonImageAssets = computed(() => {
                 :statuses="statuses"
                 :preview-settings="previewSettings"
               />
-            </v-card>
           </v-col>
         </v-row>
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Models\Category;
 use App\Models\Status;
@@ -64,10 +65,17 @@ class ProjectController extends Controller
                 }),
                 'assets' => $project->assets->map(function($asset) {
                     return [
+                        'id' => $asset->id,
                         'name' => $asset->display_name,
                         'path' => $asset->filename,
                         'type' => $asset->assetType ? $asset->assetType->key : null,
-                        'url' => $asset->filename // Use MinIO URL directly
+                        'url' => $asset->filename, // Use MinIO URL directly
+                        'filename' => $asset->filename, // MinIO URL
+                        'display_name' => $asset->display_name, // Original filename
+                        'asset_type' => $asset->assetType ? [
+                            'key' => $asset->assetType->key,
+                            'name' => $asset->assetType->name
+                        ] : null
                     ];
                 }),
                 'settings' => $project->settings ? [
@@ -182,9 +190,16 @@ class ProjectController extends Controller
             }),
             'assets' => $project->assets->map(function($asset) {
                 return [
+                    'id' => $asset->id,
                     'name' => $asset->display_name,
                     'path' => $asset->filename,
-                    'url' => $asset->filename // Use MinIO URL directly
+                    'url' => $asset->filename, // Use MinIO URL directly
+                    'filename' => $asset->filename, // MinIO URL
+                    'display_name' => $asset->display_name, // Original filename
+                    'asset_type' => $asset->assetType ? [
+                        'key' => $asset->assetType->key,
+                        'name' => $asset->assetType->name
+                    ] : null
                 ];
             }),
             'preview_settings' => $project->settings ? [
@@ -211,8 +226,15 @@ class ProjectController extends Controller
 
     public function update(Request $request, Project $project)
     {
+
+        
         $user = request()->attributes->get('user');
         if (!$user || $project->user_id !== $user->id) {
+            Log::error('EditProject: Unauthorized access attempt', [
+                'project_id' => $project->id,
+                'user_id' => $user ? $user->id : null,
+                'project_user_id' => $project->user_id
+            ]);
             return back()->withErrors(['error' => 'Unauthorized'])->withInput();
         }
 
@@ -231,6 +253,10 @@ class ProjectController extends Controller
             'links' => 'nullable|array',
             'links.*.title' => 'required|string|max:255',
             'links.*.url' => 'required|url|max:500',
+            'existingAssets' => 'nullable|array',
+            'existingAssets.*.id' => 'nullable|integer|exists:assets,id',
+            'existingAssets.*.display_name' => 'nullable|string|max:255',
+            'existingAssets.*.filename' => 'nullable|string|max:500',
             'assets' => 'nullable|array',
             'assets.*' => 'file|max:10240',
             'preview_settings' => 'nullable|array',
@@ -320,10 +346,55 @@ class ProjectController extends Controller
                 $project->syncProjectTechnologiesWithUser($request->technologies, $user->id);
             }
 
-            // Handle new assets
-            if ($request->hasFile('assets')) {
-                $minioService = new MinIOService();
+            // Handle assets (update, add new, delete)
+            $minioService = new MinIOService();
+            
+            // Get current assets
+            $currentAssets = $project->assets()->with('assetType')->get();
+            $currentAssetIds = $currentAssets->pluck('id')->toArray();
+            
+            // Get assets from request (existing + new)
+            $requestAssets = $request->input('existingAssets', []);
+            $requestAssetIds = collect($requestAssets)->pluck('id')->filter()->toArray();
+            
+            // Find assets to delete (in current but not in request)
+            $assetsToDelete = $currentAssets->whereNotIn('id', $requestAssetIds);
+            
+            // Delete assets from MinIO and database
+            foreach ($assetsToDelete as $asset) {
+                Log::info('Deleting asset from project', [
+                    'project_id' => $project->id,
+                    'asset_id' => $asset->id,
+                    'filename' => $asset->filename
+                ]);
                 
+                // Extract filename from MinIO URL for deletion
+                if ($asset->filename && $asset->assetType) {
+                    $urlParts = parse_url($asset->filename);
+                    $pathParts = explode('/', trim($urlParts['path'], '/'));
+                    
+                    // URL structure: /projectsdashboard/username/assettype/filename
+                    if (count($pathParts) >= 4) {
+                        $username = $pathParts[1];
+                        $assetType = $pathParts[2];
+                        $filename = $pathParts[3];
+                        
+                        // Delete from MinIO
+                        $minioService->deleteFile($username, $assetType, $filename);
+                        Log::info('Asset deleted from MinIO', [
+                            'username' => $username,
+                            'asset_type' => $assetType,
+                            'filename' => $filename
+                        ]);
+                    }
+                }
+                
+                // Delete from database
+                $asset->delete();
+            }
+            
+            // Handle new file uploads
+            if ($request->hasFile('assets')) {
                 foreach ($request->file('assets') as $file) {
                     if ($file->isValid()) {
                         $assetTypeKey = $this->determineAssetType($file);
@@ -347,6 +418,8 @@ class ProjectController extends Controller
                             } else {
                                 throw new \Exception('Failed to upload file to MinIO: ' . ($uploadResult['error'] ?? 'Unknown error'));
                             }
+                        } else {
+                            throw new \Exception('Invalid asset type: ' . $assetTypeKey);
                         }
                     }
                 }
