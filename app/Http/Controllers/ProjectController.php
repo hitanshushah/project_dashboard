@@ -128,6 +128,249 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function edit(Project $project)
+    {
+        $user = request()->attributes->get('user');
+        if (!$user || $project->user_id !== $user->id) {
+            return redirect()->route('home');
+        }
+
+        // Fetch categories and statuses for the form
+        $categories = Category::all(['id', 'name', 'key']);
+        $statuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
+        $linkTypes = LinkType::all(['id', 'name', 'key']);
+        $assetTypes = AssetType::all(['id', 'name', 'key']);
+
+        // Fetch user's existing technologies for the dropdown
+        $userTechnologies = Tag::where('type', 'technology')
+            ->where('user_id', $user->id)
+            ->get()
+            ->pluck('name')
+            ->filter()
+            ->flatMap(function($name) {
+                if (is_string($name)) {
+                    $decoded = json_decode($name, true);
+                    return is_array($decoded) ? $decoded : [];
+                }
+                return [];
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Load project with relationships
+        $project->load(['category', 'status', 'links.linkType', 'assets.assetType', 'settings', 'tags']);
+
+        // Prepare project data for the form
+        $projectData = [
+            'id' => $project->id,
+            'name' => $project->name,
+            'description' => $project->description,
+            'category' => $project->category ? $project->category->key : null,
+            'status' => $project->status ? $project->status->key : null,
+            'start_date' => $project->start_date,
+            'end_date' => $project->end_date,
+            'is_public' => $project->is_public,
+            'tags' => $project->tags,
+            'technologies' => $project->technologies,
+            'links' => $project->links->map(function($link) {
+                return [
+                    'title' => $link->name,
+                    'url' => $link->url,
+                ];
+            }),
+            'assets' => $project->assets->map(function($asset) {
+                return [
+                    'name' => $asset->display_name,
+                    'path' => $asset->filename,
+                    'url' => asset('storage/' . $asset->filename)
+                ];
+            }),
+            'preview_settings' => $project->settings ? [
+                'showDescription' => $project->settings->show_description,
+                'showCategory' => $project->settings->show_category,
+                'showStatus' => $project->settings->show_status,
+                'showDates' => $project->settings->show_dates,
+                'showTags' => $project->settings->show_tags,
+                'showTechnologies' => $project->settings->show_technologies,
+                'showLinks' => $project->settings->show_links,
+                'showAssets' => $project->settings->show_assets,
+            ] : null
+        ];
+
+        return Inertia::render('EditProject', [
+            'project' => $projectData,
+            'categories' => $categories,
+            'statuses' => $statuses,
+            'linkTypes' => $linkTypes,
+            'assetTypes' => $assetTypes,
+            'userTechnologies' => $userTechnologies,
+        ]);
+    }
+
+    public function update(Request $request, Project $project)
+    {
+        $user = request()->attributes->get('user');
+        if (!$user || $project->user_id !== $user->id) {
+            return back()->withErrors(['error' => 'Unauthorized'])->withInput();
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category' => 'nullable|string|exists:categories,key',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'nullable|string|exists:status,key',
+            'is_public' => 'boolean',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:255',
+            'technologies' => 'nullable|array',
+            'technologies.*' => 'string|max:255',
+            'links' => 'nullable|array',
+            'links.*.title' => 'required|string|max:255',
+            'links.*.url' => 'required|url|max:500',
+            'assets' => 'nullable|array',
+            'assets.*' => 'file|max:10240',
+            'preview_settings' => 'nullable|array',
+            'preview_settings.showDescription' => 'nullable|boolean',
+            'preview_settings.showCategory' => 'nullable|boolean',
+            'preview_settings.showStatus' => 'nullable|boolean',
+            'preview_settings.showDates' => 'nullable|boolean',
+            'preview_settings.showTags' => 'nullable|boolean',
+            'preview_settings.showTechnologies' => 'nullable|boolean',
+            'preview_settings.showLinks' => 'nullable|boolean',
+            'preview_settings.showAssets' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Get category and status IDs
+            $category = null;
+            if ($request->category) {
+                $category = Category::where('key', $request->category)->first();
+            }
+            
+            $status = null;
+            if ($request->status) {
+                $status = Status::where('key', $request->status)->first();
+                if (!$status) {
+                    throw new \Exception('Invalid status selected');
+                }
+            }
+
+            // Update project
+            $project->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'status_id' => $status ? $status->id : null,
+                'category_id' => $category ? $category->id : null,
+                'is_public' => $request->input('is_public', false),
+            ]);
+
+            // Update project settings
+            $previewSettings = $request->input('preview_settings', []);
+            if ($project->settings) {
+                $project->settings->update([
+                    'show_description' => $previewSettings['showDescription'] ?? true,
+                    'show_category' => $previewSettings['showCategory'] ?? true,
+                    'show_status' => $previewSettings['showStatus'] ?? true,
+                    'show_dates' => $previewSettings['showDates'] ?? true,
+                    'show_tags' => $previewSettings['showTags'] ?? true,
+                    'show_technologies' => $previewSettings['showTechnologies'] ?? true,
+                    'show_links' => $previewSettings['showLinks'] ?? true,
+                    'show_assets' => $previewSettings['showAssets'] ?? true,
+                ]);
+            }
+
+            // Handle links
+            $project->links()->delete();
+            if ($request->has('links') && is_array($request->links)) {
+                foreach ($request->links as $linkData) {
+                    $linkTypeKey = $this->determineLinkType($linkData['title']);
+                    $linkType = LinkType::where('key', $linkTypeKey)->first();
+                    
+                    if ($linkType) {
+                        Link::create([
+                            'key' => $linkType->key,
+                            'name' => $linkData['title'],
+                            'url' => $linkData['url'],
+                            'link_type_id' => $linkType->id,
+                            'linkable_id' => $project->id,
+                            'linkable_type' => Project::class,
+                        ]);
+                    }
+                }
+            }
+
+            // Handle tags and technologies
+            if ($request->has('tags') && is_array($request->tags)) {
+                $project->syncProjectTagsWithUser($request->tags, $user->id);
+            }
+
+            if ($request->has('technologies') && is_array($request->technologies)) {
+                $project->syncProjectTechnologiesWithUser($request->technologies, $user->id);
+            }
+
+            // Handle new assets
+            if ($request->hasFile('assets')) {
+                foreach ($request->file('assets') as $file) {
+                    if ($file->isValid()) {
+                        $assetTypeKey = $this->determineAssetType($file);
+                        $assetType = AssetType::where('key', $assetTypeKey)->first();
+                        
+                        if ($assetType) {
+                            $filename = time() . '_' . $file->getClientOriginalName();
+                            $path = $file->storeAs('project-assets/' . $project->id, $filename, 'public');
+                            
+                            Asset::create([
+                                'display_name' => $file->getClientOriginalName(),
+                                'filename' => $path,
+                                'asset_type_id' => $assetType->id,
+                                'is_active' => true,
+                                'assetable_id' => $project->id,
+                                'assetable_type' => Project::class,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('home')->with('success', 'Project updated successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to update project: ' . $e->getMessage()])->withInput();
+        }
+    }
+
+    public function toggleVisibility(Request $request, Project $project)
+    {
+        $user = request()->attributes->get('user');
+        if (!$user || $project->user_id !== $user->id) {
+            return back()->withErrors(['error' => 'Unauthorized']);
+        }
+
+        try {
+            $project->update([
+                'is_public' => !$project->is_public
+            ]);
+
+            return back()->with('success', 'Project visibility updated successfully');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to update project visibility: ' . $e->getMessage()]);
+        }
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

@@ -87,6 +87,7 @@ export interface Project {
     status?: string;
     start_date?: string;
     end_date?: string;
+    is_public?: boolean;
     tags?: string[];
     technologies?: string[];
     links?: ProjectLink[];

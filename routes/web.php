@@ -9,8 +9,11 @@ Route::get('/', [ProjectController::class, 'index'])->name('home');
 
 // Project routes
 Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+Route::patch('/projects/{project}/toggle-visibility', [ProjectController::class, 'toggleVisibility'])->name('projects.toggle-visibility');
 Route::post('/saveProject', [ProjectController::class, 'saveProject'])->name('projects.saveProject');
 Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
 
 // API routes for project data
 Route::get('/api/categories', function () {
