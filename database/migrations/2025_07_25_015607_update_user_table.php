@@ -33,7 +33,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('key');
-            $table->boolean('is_active')->default(true);
+            $table->boolean('is_active');
         });
 
         DB::table('categories')->insert([
@@ -52,7 +52,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('key');
-            $table->boolean('is_active')->default(true);
+            $table->boolean('is_active');
         });
 
         DB::table('status')->insert([
@@ -75,7 +75,7 @@ return new class extends Migration {
             $table->foreignId('status_id')->constrained('status');
             $table->foreignId('category_id')->nullable()->constrained('categories');
             $table->foreignId('user_id')->constrained('users');
-            $table->boolean('is_public')->default(true);
+            $table->boolean('is_public');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -129,7 +129,7 @@ return new class extends Migration {
             $table->string('display_name');
             $table->string('filename')->nullable();
             $table->foreignId('asset_type_id')->constrained('asset_types');
-            $table->boolean('is_active')->default(true);
+            $table->boolean('is_active');
             $table->unsignedBigInteger('assetable_id');
             $table->string('assetable_type');
             $table->timestamps();
@@ -142,14 +142,14 @@ return new class extends Migration {
             $table->foreignId('project_id')->constrained('projects');
             $table->foreignId('user_id')->constrained('users');
 
-            $table->boolean('show_description')->default(true);
-            $table->boolean('show_category')->default(true);
-            $table->boolean('show_status')->default(true);
-            $table->boolean('show_dates')->default(true);
-            $table->boolean('show_tags')->default(true);
-            $table->boolean('show_technologies')->default(true);
-            $table->boolean('show_links')->default(true);
-            $table->boolean('show_assets')->default(true);
+            $table->boolean('show_description');
+            $table->boolean('show_category');
+            $table->boolean('show_status');
+            $table->boolean('show_dates');
+            $table->boolean('show_tags');
+            $table->boolean('show_technologies');
+            $table->boolean('show_links');
+            $table->boolean('show_assets');
 
             $table->timestamps();
         });

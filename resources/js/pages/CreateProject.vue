@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { usePage, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectCard from '@/components/ProjectCard.vue';
@@ -21,6 +21,11 @@ const currentUser = computed(() => page.props.auth?.user);
 // Get data from backend
 const categories = computed(() => page.props.categories || []);
 const statuses = computed(() => page.props.statuses || []);
+const userTechnologies = computed(() => (page.props.userTechnologies as string[]) || []);
+
+const snackbar = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref('success')
 
 // Form data
 const form = useForm({
@@ -34,7 +39,26 @@ const form = useForm({
   end_date: '',
   status: '',
   technologies: [] as string[],
+  user_id: currentUser.value?.id || null,
+  preview_settings: {
+    showDescription: true,
+    showCategory: true,
+    showStatus: true,
+    showDates: true,
+    showTags: true,
+    showTechnologies: true,
+    showLinks: true,
+    showAssets: true,
+  },
 });
+
+// Update user_id when currentUser changes
+const updateUserId = () => {
+  form.user_id = currentUser.value?.id || null;
+};
+
+// Watch for changes in currentUser
+watch(currentUser, updateUserId, { immediate: true });
 
 // Available options
 const statusOptions = computed(() => 
@@ -46,11 +70,16 @@ const statusOptions = computed(() =>
 
 
 
-const technologyOptions = [
-  'React', 'Vue.js', 'Angular', 'Laravel', 'Node.js', 'Python', 'PHP',
-  'JavaScript', 'TypeScript', 'HTML/CSS', 'MySQL', 'PostgreSQL', 'MongoDB',
-  'Docker', 'AWS', 'Azure', 'Git', 'Figma', 'Adobe Creative Suite'
-];
+// Normalize technology name for comparison (lowercase and remove spaces)
+const normalizeTechnologyName = (name: string): string => {
+  return name.toLowerCase().replace(/\s+/g, '');
+};
+
+// Check if technology already exists (case-insensitive and space-insensitive)
+const isTechnologyDuplicate = (newTech: string, existingTechs: string[]): boolean => {
+  const normalizedNewTech = normalizeTechnologyName(newTech);
+  return existingTechs.some(tech => normalizeTechnologyName(tech) === normalizedNewTech);
+};
 
 // Local state
 const newTag = ref('');
@@ -65,16 +94,7 @@ const projectDemo = ref('');
 
 // Preview settings
 const showPreviewSettings = ref(false);
-const previewSettings = ref({
-  showDescription: true,
-  showCategory: true,
-  showStatus: true,
-  showDates: true,
-  showTags: true,
-  showTechnologies: true,
-  showLinks: true,
-  showAssets: true,
-});
+const previewSettings = computed(() => form.preview_settings);
 
 // Methods
 const addTag = () => {
@@ -159,10 +179,16 @@ const hasLinkWithTitle = (title: string) => {
 
 
 const addTechnology = () => {
-  if (newTechnology.value.trim() && !form.technologies.includes(newTechnology.value.trim())) {
-    form.technologies.push(newTechnology.value.trim());
-    newTechnology.value = '';
+  const techName = newTechnology.value.trim();
+  if (!techName) return;
+  
+  // Check for duplicates in current form technologies only
+  if (isTechnologyDuplicate(techName, form.technologies)) {
+    return; // Already exists in current form
   }
+  
+  form.technologies.push(techName);
+  newTechnology.value = '';
 };
 
 const handleFileUpload = (event: Event) => {
@@ -186,22 +212,83 @@ const openFileDialog = () => {
   }
 };
 
-const submit = () => {
+const saveProject = async () => {
+  // Clear previous errors
+  form.clearErrors();
+  
+  // Validate required fields
   if (!form.name.trim()) {
     form.setError('name', 'Project name is required');
-    return;
+    return false;
   }
   
   if (!form.category) {
     form.setError('category', 'Category is required');
-    return;
+    return false;
   }
   
-  form.post('/projects', {
-    onSuccess: () => {
-      router.visit('/');
+  // Validate dates
+  if (form.start_date && form.end_date) {
+    const startDate = new Date(form.start_date);
+    const endDate = new Date(form.end_date);
+    
+    if (endDate < startDate) {
+      form.setError('end_date', 'End date must be after start date');
+      return false;
     }
-  });
+  }
+  
+  // Validate links
+  for (let i = 0; i < form.links.length; i++) {
+    const link = form.links[i];
+    if (!link.title.trim()) {
+      form.setError('links', `Link ${i + 1}: Title is required`);
+      return false;
+    }
+    if (!link.url.trim()) {
+      form.setError('links', `Link ${i + 1}: URL is required`);
+      return false;
+    }
+  }
+  
+  // Validate file sizes (10MB limit)
+  const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
+  for (let i = 0; i < form.assets.length; i++) {
+    const file = form.assets[i];
+    if (file.size > maxFileSize) {
+      form.setError('assets', `File "${file.name}" is too large. Maximum size is 10MB.`);
+      return false;
+    }
+  }
+  
+  try {
+    await form.post('/saveProject', {
+      onSuccess: () => {
+        snackbarMessage.value = 'Project created successfully!'
+        snackbarColor.value = 'success'
+        snackbar.value = true
+
+        setTimeout(() => router.visit('/'), 1500)
+      },
+      onError: (errors) => {
+        snackbarMessage.value = 'Project creation failed. Please check the form.'
+        snackbarColor.value = 'error'
+        snackbar.value = true
+      }
+    })
+    return true
+  } catch (error) {
+    snackbarMessage.value = 'An unexpected error occurred. Please try again.'
+    snackbarColor.value = 'error'
+    snackbar.value = true
+    form.setError('name', 'An unexpected error occurred.')
+    return false
+  }
+
+};
+
+const submit = () => {
+  saveProject();
 };
 
 const cancel = () => {
@@ -488,7 +575,7 @@ const previewFile = (file: File) => {
                   <v-combobox
                     v-model="form.technologies"
                     v-model:search="newTechnology"
-                    :items="technologyOptions"
+                    :items="userTechnologies"
                     label="Add Technology"
                     placeholder="Select or type a technology"
                     variant="outlined"
@@ -849,19 +936,29 @@ const previewFile = (file: File) => {
                 :categories="categories"
                 :statuses="statuses"
                 :show-meta-info="false"
-                :preview-settings="previewSettings"
+                :preview-settings="form.preview_settings"
               />
             </v-card>
           </v-col>
         </v-row>
       </v-container>
+      <v-snackbar
+        v-model="snackbar"
+        :timeout="5000"
+        :color="snackbarColor"
+        location="bottom"
+        multi-line
+      >
+        {{ snackbarMessage }}
+      </v-snackbar>
+
     </v-main>
   </AppLayout>
 
   <!-- Preview Settings Modal -->
     <PreviewSettings
     v-model="showPreviewSettings"
-    :settings="previewSettings"
+    :settings="form.preview_settings"
   />
 
 </template>
