@@ -17,6 +17,7 @@ use App\Models\AssetType;
 use App\Models\ProjectSetting;
 use App\Models\User;
 use App\Models\Tag;
+use App\Services\MinIOService;
 
 class ProjectController extends Controller
 {
@@ -66,7 +67,7 @@ class ProjectController extends Controller
                         'name' => $asset->display_name,
                         'path' => $asset->filename,
                         'type' => $asset->assetType ? $asset->assetType->key : null,
-                        'url' => asset('storage/' . $asset->filename)
+                        'url' => $asset->filename // Use MinIO URL directly
                     ];
                 }),
                 'settings' => $project->settings ? [
@@ -183,7 +184,7 @@ class ProjectController extends Controller
                 return [
                     'name' => $asset->display_name,
                     'path' => $asset->filename,
-                    'url' => asset('storage/' . $asset->filename)
+                    'url' => $asset->filename // Use MinIO URL directly
                 ];
             }),
             'preview_settings' => $project->settings ? [
@@ -321,6 +322,8 @@ class ProjectController extends Controller
 
             // Handle new assets
             if ($request->hasFile('assets')) {
+                $minioService = new MinIOService();
+                
                 foreach ($request->file('assets') as $file) {
                     if ($file->isValid()) {
                         $assetTypeKey = $this->determineAssetType($file);
@@ -328,16 +331,22 @@ class ProjectController extends Controller
                         
                         if ($assetType) {
                             $filename = time() . '_' . $file->getClientOriginalName();
-                            $path = $file->storeAs('project-assets/' . $project->id, $filename, 'public');
                             
-                            Asset::create([
-                                'display_name' => $file->getClientOriginalName(),
-                                'filename' => $path,
-                                'asset_type_id' => $assetType->id,
-                                'is_active' => true,
-                                'assetable_id' => $project->id,
-                                'assetable_type' => Project::class,
-                            ]);
+                            // Upload to MinIO
+                            $uploadResult = $minioService->uploadFile($file, $user->username, $assetTypeKey, $filename);
+                            
+                            if ($uploadResult['success']) {
+                                Asset::create([
+                                    'display_name' => $file->getClientOriginalName(),
+                                    'filename' => $uploadResult['url'], // Store MinIO URL instead of local path
+                                    'asset_type_id' => $assetType->id,
+                                    'is_active' => true,
+                                    'assetable_id' => $project->id,
+                                    'assetable_type' => Project::class,
+                                ]);
+                            } else {
+                                throw new \Exception('Failed to upload file to MinIO: ' . ($uploadResult['error'] ?? 'Unknown error'));
+                            }
                         }
                     }
                 }
@@ -478,6 +487,8 @@ class ProjectController extends Controller
 
             // Handle assets
             if ($request->hasFile('assets')) {
+                $minioService = new MinIOService();
+                
                 foreach ($request->file('assets') as $file) {
                     if ($file->isValid()) {
                         // Determine asset type based on file extension
@@ -486,16 +497,22 @@ class ProjectController extends Controller
                         
                         if ($assetType) {
                             $filename = time() . '_' . $file->getClientOriginalName();
-                            $path = $file->storeAs('project-assets/' . $project->id, $filename, 'public');
                             
-                            Asset::create([
-                                'display_name' => $file->getClientOriginalName(),
-                                'filename' => $path,
-                                'asset_type_id' => $assetType->id,
-                                'is_active' => true,
-                                'assetable_id' => $project->id,
-                                'assetable_type' => Project::class,
-                            ]);
+                            // Upload to MinIO
+                            $uploadResult = $minioService->uploadFile($file, $user->username, $assetTypeKey, $filename);
+                            
+                            if ($uploadResult['success']) {
+                                Asset::create([
+                                    'display_name' => $file->getClientOriginalName(),
+                                    'filename' => $uploadResult['url'], // Store MinIO URL instead of local path
+                                    'asset_type_id' => $assetType->id,
+                                    'is_active' => true,
+                                    'assetable_id' => $project->id,
+                                    'assetable_type' => Project::class,
+                                ]);
+                            } else {
+                                throw new \Exception('Failed to upload file to MinIO: ' . ($uploadResult['error'] ?? 'Unknown error'));
+                            }
                         }
                     }
                 }
@@ -532,32 +549,27 @@ class ProjectController extends Controller
         $mimeType = strtolower($file->getMimeType());
         
         // Image files
-        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp']) || 
+        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'tiff']) || 
             str_starts_with($mimeType, 'image/')) {
-            return 'image';
+            return 'images';
         }
         
         // Video files
-        if (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm']) || 
+        if (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'm4v']) || 
             str_starts_with($mimeType, 'video/')) {
-            return 'video';
+            return 'videos';
         }
         
-        // Resume files
-        if (in_array($extension, ['pdf', 'doc', 'docx']) && 
-            (str_contains(strtolower($file->getClientOriginalName()), 'resume') || 
-             str_contains(strtolower($file->getClientOriginalName()), 'cv'))) {
-            return 'resume';
+        // Document files (PDFs, Word docs, Excel, etc.)
+        if (in_array($extension, ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'md', 'rtf']) || 
+            str_starts_with($mimeType, 'application/pdf') ||
+            str_starts_with($mimeType, 'application/msword') ||
+            str_starts_with($mimeType, 'application/vnd.openxmlformats-officedocument')) {
+            return 'documents';
         }
         
-        // Readme files
-        if (in_array($extension, ['md', 'txt']) && 
-            str_contains(strtolower($file->getClientOriginalName()), 'readme')) {
-            return 'readme';
-        }
-        
-        // Default to image for now
-        return 'image';
+        // Default to others for everything else
+        return 'others';
     }
 
     private function createProjectSettings($project, $user, $previewSettings = [])
@@ -693,6 +705,8 @@ class ProjectController extends Controller
 
             // Handle assets
             if ($request->hasFile('assets')) {
+                $minioService = new MinIOService();
+                
                 foreach ($request->file('assets') as $file) {
                     if ($file->isValid()) {
                         // Determine asset type based on file extension
@@ -701,16 +715,22 @@ class ProjectController extends Controller
                         
                         if ($assetType) {
                             $filename = time() . '_' . $file->getClientOriginalName();
-                            $path = $file->storeAs('project-assets/' . $project->id, $filename, 'public');
                             
-                            Asset::create([
-                                'display_name' => $file->getClientOriginalName(),
-                                'filename' => $path,
-                                'asset_type_id' => $assetType->id,
-                                'is_active' => true,
-                                'assetable_id' => $project->id,
-                                'assetable_type' => Project::class,
-                            ]);
+                            // Upload to MinIO
+                            $uploadResult = $minioService->uploadFile($file, $user->username, $assetTypeKey, $filename);
+                            
+                            if ($uploadResult['success']) {
+                                Asset::create([
+                                    'display_name' => $file->getClientOriginalName(),
+                                    'filename' => $uploadResult['url'], // Store MinIO URL instead of local path
+                                    'asset_type_id' => $assetType->id,
+                                    'is_active' => true,
+                                    'assetable_id' => $project->id,
+                                    'assetable_type' => Project::class,
+                                ]);
+                            } else {
+                                throw new \Exception('Failed to upload file to MinIO: ' . ($uploadResult['error'] ?? 'Unknown error'));
+                            }
                         }
                     }
                 }

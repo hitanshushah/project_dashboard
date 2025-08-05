@@ -106,8 +106,8 @@ return new class extends Migration {
         DB::table('asset_types')->insert([
             ['key' => 'image', 'name' => 'Image'],
             ['key' => 'video', 'name' => 'Video'],
-            ['key' => 'resume', 'name' => 'Resume'],
-            ['key' => 'readme', 'name' => 'Read Me'],
+            ['key' => 'document', 'name' => 'Documents'],
+            ['key' => 'others', 'name' => 'Other'],
         ]);
 
         // Links (Morphs)

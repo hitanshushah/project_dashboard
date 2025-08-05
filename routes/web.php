@@ -58,3 +58,18 @@ Route::get('/api/user-technologies', function () {
     return response()->json($technologies);
 });
 
+// MinIO test route for debugging
+Route::get('/api/test-minio', function () {
+    try {
+        $minioService = new \App\Services\MinIOService();
+        $result = $minioService->testConnection();
+        return response()->json($result);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+    }
+});
+
