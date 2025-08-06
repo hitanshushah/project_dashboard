@@ -388,6 +388,30 @@ const nonImageAssets = computed(() => {
 const cancel = () => {
   router.visit('/');
 };
+
+const handleGithubKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    event.stopPropagation();
+    addGithubLink();
+  }
+};
+
+const handleDemoKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    event.stopPropagation();
+    addProjectDemoLink();
+  }
+};
+
+const handleLinkKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    event.stopPropagation();
+    addLink();
+  }
+};
 </script>
 
 <template>
@@ -684,6 +708,7 @@ const cancel = () => {
                           density="compact"
                           color="primary"
                           class="text-field-modern compact-field"
+                          @keydown="handleGithubKeydown"
                         >
                           <template v-slot:prepend-inner>
                             <v-icon icon="mdi-github"></v-icon>
@@ -717,6 +742,7 @@ const cancel = () => {
                           variant="outlined"
                           density="compact"
                           class="text-field-modern compact-field"
+                          @keydown="handleDemoKeydown"
                         >
                           <template v-slot:prepend-inner>
                             <v-icon icon="mdi-web"></v-icon>
@@ -725,16 +751,16 @@ const cancel = () => {
                       </v-col>
                       
                       <v-col cols="12" md="2" class="self-center">
-                        <v-btn
-                          variant="outlined"
-                          @click="addProjectDemoLink"
-                          :disabled="!projectDemo.trim()"
-                          class="w-auto"
-                          density="compact"
-                        >
-                          <v-icon icon="mdi-plus" class="mr-1"></v-icon>
-                          Add
-                        </v-btn>
+                                              <v-btn
+                        variant="outlined"
+                        @click="addProjectDemoLink"
+                        :disabled="!projectDemo.trim()"
+                        class="w-auto"
+                        density="compact"
+                      >
+                        <v-icon icon="mdi-plus" class="mr-1"></v-icon>
+                        Add
+                      </v-btn>
                       </v-col>
                     </v-row>
                   </div>
@@ -748,7 +774,7 @@ const cancel = () => {
                         label="Link Title"
                         placeholder="e.g., Documentation"
                         variant="outlined"
-                        @keyup.enter="addLink"
+                        @keydown="handleLinkKeydown"
                         density="compact"
                         class="text-field-modern compact-field"
                       >
@@ -764,7 +790,7 @@ const cancel = () => {
                         label="URL"
                         placeholder="https://..."
                         variant="outlined"
-                        @keyup.enter="addLink"
+                        @keydown="handleLinkKeydown"
                         density="compact"
                         class="text-field-modern compact-field"
                       >
