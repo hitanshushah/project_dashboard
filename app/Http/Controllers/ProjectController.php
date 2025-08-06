@@ -22,26 +22,76 @@ use App\Services\MinIOService;
 
 class ProjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = request()->attributes->get('user');
         if (!$user) {
             return redirect()->route('home');
         }
 
-        // Fetch user's projects with all relationships
-        $projects = Project::with([
+        // Get search, filter, and sort parameters
+        $search = $request->get('search', '');
+        $categories = $request->get('categories', []);
+        $statuses = $request->get('statuses', []);
+        $technologies = $request->get('technologies', []);
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+
+        // Build the query with filters
+        $query = Project::with([
             'category',
             'status', 
             'links.linkType',
             'assets.assetType',
             'settings',
             'tags'
-        ])
-        ->where('user_id', $user->id)
-        ->orderBy('created_at', 'desc')
-        ->get()
-        ->map(function($project) {
+        ])->where('user_id', $user->id);
+
+        // Apply search filter (search in name, description, and all project data regardless of settings)
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%')
+                  ->orWhere('key', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Apply category filter
+        if (!empty($categories) && is_array($categories)) {
+            $query->whereHas('category', function($q) use ($categories) {
+                $q->whereIn('key', $categories);
+            });
+        }
+
+        // Apply status filter
+        if (!empty($statuses) && is_array($statuses)) {
+            $query->whereHas('status', function($q) use ($statuses) {
+                $q->whereIn('key', $statuses);
+            });
+        }
+
+        // Apply technology filter
+        if (!empty($technologies) && is_array($technologies)) {
+            $query->whereHas('tags', function($q) use ($technologies) {
+                $q->where('type', 'technology');
+                foreach ($technologies as $tech) {
+                    $q->where('name', 'like', '%"' . $tech . '"%');
+                }
+            });
+        }
+
+        // Apply sorting
+        $validSortFields = ['created_at', 'updated_at', 'name'];
+        $validSortDirections = ['asc', 'desc'];
+        
+        if (in_array($sortBy, $validSortFields) && in_array($sortDirection, $validSortDirections)) {
+            $query->orderBy($sortBy, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // Execute query and transform data
+        $projects = $query->get()->map(function($project) {
             return [
                 'id' => $project->id,
                 'key' => $project->key,
@@ -101,13 +151,40 @@ class ProjectController extends Controller
         });
 
         // Fetch categories and statuses for the ProjectCard components
-        $categories = Category::all(['id', 'name', 'key']);
-        $statuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
+        $allCategories = Category::all(['id', 'name', 'key']);
+        $allStatuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
+
+        // Get all available technologies for filter dropdown
+        $allTechnologies = Tag::where('type', 'technology')
+            ->where('user_id', $user->id)
+            ->get()
+            ->pluck('name')
+            ->filter()
+            ->flatMap(function($name) {
+                // Extract technologies from JSON array structure
+                if (is_string($name)) {
+                    $decoded = json_decode($name, true);
+                    return is_array($decoded) ? $decoded : [];
+                }
+                return [];
+            })
+            ->unique()
+            ->values()
+            ->toArray();
 
         return Inertia::render('Home', [
             'projects' => $projects,
-            'categories' => $categories,
-            'statuses' => $statuses,
+            'categories' => $allCategories,
+            'statuses' => $allStatuses,
+            'technologies' => $allTechnologies,
+            'filters' => [
+                'search' => $search,
+                'categories' => $categories,
+                'statuses' => $statuses,
+                'technologies' => $technologies,
+                'sort_by' => $sortBy,
+                'sort_direction' => $sortDirection,
+            ]
         ]);
     }
 

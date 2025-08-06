@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { usePage, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectCard from '@/components/ProjectCard.vue';
+import SearchFilters from '@/components/SearchFilters.vue';
 import type { Project } from '@/types';
 
 const page = usePage();
@@ -11,6 +12,35 @@ const flash = computed(() => page.props.flash as { success?: string });
 const projects = computed(() => page.props.projects as Project[] || []);
 const categories = computed(() => page.props.categories as Array<{ name: string; key: string }> || []);
 const statuses = computed(() => page.props.statuses as Array<{ name: string; key: string }> || []);
+const technologies = computed(() => page.props.technologies as string[] || []);
+const currentFilters = computed(() => page.props.filters as {
+  search: string;
+  categories: string[];
+  statuses: string[];
+  technologies: string[];
+  sort_by: string;
+  sort_direction: string;
+} || {
+  search: '',
+  categories: [],
+  statuses: [],
+  technologies: [],
+  sort_by: 'created_at',
+  sort_direction: 'desc'
+});
+
+// Reference to SearchFilters component
+const searchFiltersRef = ref<InstanceType<typeof SearchFilters>>();
+
+// Computed property for checking if filters are active (based on current filters prop)
+const hasActiveFilters = computed(() => {
+  return currentFilters.value.search ||
+         currentFilters.value.categories.length > 0 ||
+         currentFilters.value.statuses.length > 0 ||
+         currentFilters.value.technologies.length > 0 ||
+         currentFilters.value.sort_by !== 'created_at' ||
+         currentFilters.value.sort_direction !== 'desc';
+});
 
 // Toggle state for showing public/hidden projects
 const selectedView = ref('hidden'); // 'hidden' or 'public'
@@ -64,6 +94,13 @@ const cancelToggle = () => {
   projectToToggle.value = null;
 };
 
+// Clear filters function for accessing from SearchFilters component
+const clearFilters = () => {
+  if (searchFiltersRef.value) {
+    searchFiltersRef.value.clearFilters();
+  }
+};
+
 
 </script>
 
@@ -94,6 +131,17 @@ const cancelToggle = () => {
             Create Project
           </v-btn>
         </div>
+
+        <!-- Search and Filter Controls -->
+        <SearchFilters
+          ref="searchFiltersRef"
+          :categories="categories"
+          :statuses="statuses"
+          :technologies="technologies"
+          :current-filters="currentFilters"
+          :results-count="projects.length"
+          class="mb-6"
+        />
 
         <!-- Project Type Toggle -->
         <div v-if="projects.length > 0" class="mb-6">
@@ -191,45 +239,83 @@ const cancelToggle = () => {
           <!-- No Projects Message -->
           <div v-if="(selectedView === 'hidden' && privateProjects.length === 0) || (selectedView === 'public' && publicProjects.length === 0)" class="text-center py-16">
             <v-icon 
-              icon="mdi-folder-open" 
+              :icon="hasActiveFilters ? 'mdi-filter-off' : 'mdi-folder-open'" 
               size="120" 
               color="grey-lighten-1" 
               class="mb-6"
             ></v-icon>
             <h2 class="text-2xl font-bold text-gray-700 mb-4">
-              No {{ selectedView === 'hidden' ? 'hidden' : 'public' }} projects
+              <span v-if="hasActiveFilters">
+                No projects match your filters
+              </span>
+              <span v-else>
+                No {{ selectedView === 'hidden' ? 'hidden' : 'public' }} projects
+              </span>
             </h2>
             <p class="text-lg text-gray-500 mb-8 max-w-md mx-auto">
-              {{ selectedView === 'hidden' ? 'All your projects are currently public.' : 'All your projects are currently hidden.' }}
+              <span v-if="hasActiveFilters">
+                Try adjusting your search criteria or clear some filters to see more results.
+              </span>
+              <span v-else>
+                {{ selectedView === 'hidden' ? 'All your projects are currently public.' : 'All your projects are currently hidden.' }}
+              </span>
             </p>
+            <v-btn
+              v-if="hasActiveFilters"
+              color="primary"
+              variant="outlined"
+              @click="clearFilters"
+            >
+              Clear Filters
+            </v-btn>
           </div>
         </div>
 
         <!-- No Projects State -->
         <div v-else class="text-center py-16">
           <v-icon 
-            icon="mdi-folder-plus" 
+            :icon="hasActiveFilters ? 'mdi-filter-off' : 'mdi-folder-plus'" 
             size="120" 
             color="grey-lighten-1" 
             class="mb-6"
           ></v-icon>
           
           <h2 class="text-4xl font-bold text-gray-700 mb-4">
-            No projects yet
+            <span v-if="hasActiveFilters">
+              No projects found
+            </span>
+            <span v-else>
+              No projects yet
+            </span>
           </h2>
           
           <p class="text-lg text-gray-500 mb-8 max-w-md mx-auto">
-            Start creating projects to organize your work and display it on dashboard.
+            <span v-if="hasActiveFilters">
+              No projects match your current search and filter criteria. Try adjusting your filters or create a new project.
+            </span>
+            <span v-else>
+              Start creating projects to organize your work and display it on dashboard.
+            </span>
           </p>
           
-          <v-btn
-            color="primary"
-            size="large"
-            prepend-icon="mdi-plus"
-            @click="createProject"
-          >
-            Create Your First Project
-          </v-btn>
+          <div class="d-flex gap-3 justify-center">
+            <v-btn
+              v-if="hasActiveFilters"
+              color="secondary"
+              variant="outlined"
+              @click="clearFilters"
+            >
+              Clear Filters
+            </v-btn>
+            <v-btn
+              color="primary"
+              size="large"
+              prepend-icon="mdi-plus"
+              @click="createProject"
+            >
+              {{ hasActiveFilters ? 'Create Project' : 'Create Your First Project' }}
+            </v-btn>
+          </div>
         </div>
 
         <!-- Confirmation Modal -->

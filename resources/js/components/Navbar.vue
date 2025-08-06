@@ -96,6 +96,17 @@
             </template>
           </v-list-item>
 
+          <v-list-item
+            prepend-icon="mdi-web"
+            title="See Website"
+            @click="seeWebsite"
+            class="hover:bg-gray-50 transition-colors"
+          >
+            <template v-slot:append>
+              <v-icon icon="mdi-chevron-right" size="small" class="text-gray-400"></v-icon>
+            </template>
+          </v-list-item>
+
           <v-divider class="my-1"></v-divider>
 
           <v-list-item
@@ -116,7 +127,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, router } from '@inertiajs/vue3';
 
 const page = usePage();
 
@@ -153,6 +164,11 @@ const openSupport = () => {
 const openAccessibility = () => {
   console.log('Display & Accessibility clicked');
   // Add your accessibility logic here
+};
+
+const seeWebsite = () => {
+  console.log('See Website clicked');
+  router.visit('/public-projects');
 };
 
 const logout = () => {
