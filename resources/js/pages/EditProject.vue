@@ -97,9 +97,15 @@ const hasLinkWithTitle = (title: string) => {
 
 const addGithubLink = () => {
   if (githubUrl.value.trim()) {
+    // Basic URL validation
+    let validUrl = githubUrl.value.trim();
+    if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
+      validUrl = 'https://' + validUrl;
+    }
+    
     form.links.push({
       title: 'Github',
-      url: githubUrl.value.trim()
+      url: validUrl
     });
     githubUrl.value = '';
   }
@@ -107,9 +113,15 @@ const addGithubLink = () => {
 
 const addProjectDemoLink = () => {
   if (projectDemo.value.trim()) {
+    // Basic URL validation
+    let validUrl = projectDemo.value.trim();
+    if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
+      validUrl = 'https://' + validUrl;
+    }
+    
     form.links.push({
       title: 'Project Demo',
-      url: projectDemo.value.trim()
+      url: validUrl
     });
     projectDemo.value = '';
   }
@@ -223,14 +235,27 @@ const removeTechnology = (index: number) => {
 };
 
 const addLink = () => {
-  if (newLinkTitle.value.trim() && newLinkUrl.value.trim()) {
-    form.links.push({
-      title: newLinkTitle.value.trim(),
-      url: newLinkUrl.value.trim()
-    });
-    newLinkTitle.value = '';
-    newLinkUrl.value = '';
+  const title = newLinkTitle.value.trim();
+  const url = newLinkUrl.value.trim();
+  
+  if (!title || !url) {
+    return;
   }
+  
+  // Basic URL validation
+  let validUrl = url;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    validUrl = 'https://' + url;
+  }
+  
+  form.links.push({
+    title: title,
+    url: validUrl
+  });
+  
+  // Clear the input fields
+  newLinkTitle.value = '';
+  newLinkUrl.value = '';
 };
 
 const removeLink = (index: number) => {

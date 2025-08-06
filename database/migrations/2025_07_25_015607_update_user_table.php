@@ -72,7 +72,7 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->foreignId('status_id')->constrained('status');
+            $table->foreignId('status_id')->nullable()->constrained('status');
             $table->foreignId('category_id')->nullable()->constrained('categories');
             $table->foreignId('user_id')->constrained('users');
             $table->boolean('is_public');
