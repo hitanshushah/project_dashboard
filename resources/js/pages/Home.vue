@@ -62,6 +62,11 @@ const editProject = (projectId: number) => {
   router.visit(`/projects/${projectId}/edit`);
 };
 
+const openPublicPreview = () => {
+  // Open the public projects page in a new tab
+  window.open('/public-projects', '_blank');
+};
+
 const toggleProjectVisibility = (project: Project) => {
   projectToToggle.value = project;
   toggleAction.value = project.is_public ? 'hidden' : 'public';
@@ -118,18 +123,36 @@ const clearFilters = () => {
           {{ flash.success }}
         </v-alert>
 
-        <!-- Header with Create Project Button -->
+        <!-- Header with Action Buttons -->
         <div class="d-flex justify-space-between align-center mb-6">
           <h1 class="text-3xl font-bold text-gray-800">
             My Projects
           </h1>
-          <v-btn
-            color="primary"
-            prepend-icon="mdi-plus"
-            @click="createProject"
-          >
-            Create Project
-          </v-btn>
+          <div class="d-flex gap-3">
+            <v-btn
+              v-if="publicProjects.length > 0"
+              color="secondary"
+              prepend-icon="mdi-eye"
+              variant="outlined"
+              @click="openPublicPreview"
+              :title="`Preview your ${publicProjects.length} public project${publicProjects.length !== 1 ? 's' : ''}`"
+            >
+              Preview Public
+              <v-badge
+                :content="publicProjects.length"
+                color="primary"
+                inline
+                class="ml-2"
+              ></v-badge>
+            </v-btn>
+            <v-btn
+              color="primary"
+              prepend-icon="mdi-plus"
+              @click="createProject"
+            >
+              Create Project
+            </v-btn>
+          </div>
         </div>
 
         <!-- Search and Filter Controls -->

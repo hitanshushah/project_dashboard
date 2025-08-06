@@ -16,6 +16,9 @@ Route::post('/projects', [ProjectController::class, 'store'])->name('projects.st
 Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
 Route::post('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update.post');
 
+// Public projects preview route
+Route::get('/public-projects', [ProjectController::class, 'publicProjects'])->name('projects.public');
+
 // API routes for project data
 Route::get('/api/categories', function () {
     return response()->json(\App\Models\Category::all(['id', 'name', 'key']));

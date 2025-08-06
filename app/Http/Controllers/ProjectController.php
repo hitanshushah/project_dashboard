@@ -904,4 +904,174 @@ class ProjectController extends Controller
             return back()->withErrors(['error' => 'Failed to create project: ' . $e->getMessage()])->withInput();
         }
     }
+
+    public function publicProjects(Request $request)
+    {
+        $user = request()->attributes->get('user');
+        if (!$user) {
+            return redirect()->route('home');
+        }
+
+        // Get search, filter, and sort parameters
+        $search = $request->get('search', '');
+        $categories = $request->get('categories', []);
+        $statuses = $request->get('statuses', []);
+        $technologies = $request->get('technologies', []);
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+
+        // Build the query for public projects only
+        $query = Project::with([
+            'category',
+            'status', 
+            'links.linkType',
+            'assets.assetType',
+            'settings',
+            'tags'
+        ])->where('user_id', $user->id)
+          ->where('is_public', true); // Only fetch public projects
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%')
+                  ->orWhere('key', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Apply category filter
+        if (!empty($categories) && is_array($categories)) {
+            $query->whereHas('category', function($q) use ($categories) {
+                $q->whereIn('key', $categories);
+            });
+        }
+
+        // Apply status filter
+        if (!empty($statuses) && is_array($statuses)) {
+            $query->whereHas('status', function($q) use ($statuses) {
+                $q->whereIn('key', $statuses);
+            });
+        }
+
+        // Apply technology filter
+        if (!empty($technologies) && is_array($technologies)) {
+            $query->whereHas('tags', function($q) use ($technologies) {
+                $q->where('type', 'technology');
+                foreach ($technologies as $tech) {
+                    $q->where('name', 'like', '%"' . $tech . '"%');
+                }
+            });
+        }
+
+        // Apply sorting
+        $validSortFields = ['created_at', 'updated_at', 'name'];
+        $validSortDirections = ['asc', 'desc'];
+        
+        if (in_array($sortBy, $validSortFields) && in_array($sortDirection, $validSortDirections)) {
+            $query->orderBy($sortBy, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // Execute query and transform data
+        $projects = $query->get()->map(function($project) {
+            return [
+                'id' => $project->id,
+                'key' => $project->key,
+                'name' => $project->name,
+                'description' => $project->description,
+                'start_date' => $project->start_date,
+                'end_date' => $project->end_date,
+                'is_public' => $project->is_public,
+                'created_at' => $project->created_at,
+                'updated_at' => $project->updated_at,
+                'category' => $project->category ? $project->category->key : null,
+                'status' => $project->status ? $project->status->key : null,
+                'tags' => $project->tags,
+                'technologies' => $project->technologies,
+                'links' => $project->links->map(function($link) {
+                    return [
+                        'title' => $link->name,
+                        'url' => $link->url,
+                        'type' => $link->linkType ? $link->linkType->key : null
+                    ];
+                }),
+                'assets' => $project->assets->map(function($asset) {
+                    return [
+                        'id' => $asset->id,
+                        'name' => $asset->display_name,
+                        'path' => $asset->filename,
+                        'type' => $asset->assetType ? $asset->assetType->key : null,
+                        'url' => $asset->filename,
+                        'filename' => $asset->filename,
+                        'display_name' => $asset->display_name,
+                        'asset_type' => $asset->assetType ? [
+                            'key' => $asset->assetType->key,
+                            'name' => $asset->assetType->name
+                        ] : null
+                    ];
+                }),
+                'settings' => $project->settings ? [
+                    'showDescription' => $project->settings->show_description,
+                    'showCategory' => $project->settings->show_category,
+                    'showStatus' => $project->settings->show_status,
+                    'showDates' => $project->settings->show_dates,
+                    'showTags' => $project->settings->show_tags,
+                    'showTechnologies' => $project->settings->show_technologies,
+                    'showLinks' => $project->settings->show_links,
+                    'showAssets' => $project->settings->show_assets,
+                ] : [
+                    'showDescription' => true,
+                    'showCategory' => true,
+                    'showStatus' => true,
+                    'showDates' => true,
+                    'showTags' => true,
+                    'showTechnologies' => true,
+                    'showLinks' => true,
+                    'showAssets' => true,
+                ]
+            ];
+        });
+
+        // Fetch categories and statuses for filtering
+        $allCategories = Category::all(['id', 'name', 'key']);
+        $allStatuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
+
+        // Get all available technologies for filter dropdown
+        $allTechnologies = Tag::where('type', 'technology')
+            ->where('user_id', $user->id)
+            ->get()
+            ->pluck('name')
+            ->filter()
+            ->flatMap(function($name) {
+                if (is_string($name)) {
+                    $decoded = json_decode($name, true);
+                    return is_array($decoded) ? $decoded : [];
+                }
+                return [];
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Get user profile for website-like display
+        $userProfile = $user->profile ?? null;
+
+        return Inertia::render('PublicProjects', [
+            'projects' => $projects,
+            'categories' => $allCategories,
+            'statuses' => $allStatuses,
+            'technologies' => $allTechnologies,
+            'userProfile' => $userProfile,
+            'filters' => [
+                'search' => $search,
+                'categories' => $categories,
+                'statuses' => $statuses,
+                'technologies' => $technologies,
+                'sort_by' => $sortBy,
+                'sort_direction' => $sortDirection,
+            ]
+        ]);
+    }
 } 
