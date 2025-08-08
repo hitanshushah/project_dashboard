@@ -1,4 +1,4 @@
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 type Appearance = 'light' | 'dark' | 'system';
 
@@ -7,13 +7,21 @@ export function updateTheme(value: Appearance) {
         return;
     }
 
+    let isDark = false;
+
     if (value === 'system') {
         const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
-        const systemTheme = mediaQueryList.matches ? 'dark' : 'light';
-
-        document.documentElement.classList.toggle('dark', systemTheme === 'dark');
+        isDark = mediaQueryList.matches;
     } else {
-        document.documentElement.classList.toggle('dark', value === 'dark');
+        isDark = value === 'dark';
+    }
+
+    // Update document class for Tailwind CSS
+    document.documentElement.classList.toggle('dark', isDark);
+    
+    // Update Vuetify theme
+    if (window.__VUETIFY__) {
+        window.__VUETIFY__.theme.global.name.value = isDark ? 'dark' : 'light';
     }
 }
 
@@ -45,7 +53,6 @@ const getStoredAppearance = () => {
 
 const handleSystemThemeChange = () => {
     const currentAppearance = getStoredAppearance();
-
     updateTheme(currentAppearance || 'system');
 };
 
@@ -54,15 +61,16 @@ export function initializeTheme() {
         return;
     }
 
-    // Initialize theme from saved preference or default to system...
+    // Initialize theme from saved preference or default to system
     const savedAppearance = getStoredAppearance();
     updateTheme(savedAppearance || 'system');
 
-    // Set up system theme change listener...
+    // Set up system theme change listener
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
 const appearance = ref<Appearance>('system');
+const isDark = ref(false);
 
 export function useAppearance() {
     onMounted(() => {
@@ -71,22 +79,42 @@ export function useAppearance() {
         if (savedAppearance) {
             appearance.value = savedAppearance;
         }
+
+        // Initialize isDark based on current theme
+        updateIsDark();
     });
+
+    function updateIsDark() {
+        if (appearance.value === 'system') {
+            const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+            isDark.value = mediaQueryList.matches;
+        } else {
+            isDark.value = appearance.value === 'dark';
+        }
+    }
 
     function updateAppearance(value: Appearance) {
         appearance.value = value;
 
-        // Store in localStorage for client-side persistence...
+        // Store in localStorage for client-side persistence
         localStorage.setItem('appearance', value);
 
-        // Store in cookie for SSR...
+        // Store in cookie for SSR
         setCookie('appearance', value);
 
         updateTheme(value);
+        updateIsDark();
     }
+
+    // Watch for system theme changes
+    watch(appearance, () => {
+        updateIsDark();
+    });
 
     return {
         appearance,
+        isDark,
         updateAppearance,
+        updateIsDark,
     };
 }

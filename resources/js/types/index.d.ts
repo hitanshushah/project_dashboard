@@ -58,6 +58,7 @@ export interface Status {
 export interface ProjectLink {
     title: string;
     url: string;
+    type?: string;
 }
 
 export interface ProjectAsset {

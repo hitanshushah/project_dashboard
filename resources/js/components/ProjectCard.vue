@@ -1,166 +1,209 @@
 <template>
-  <v-card variant="outlined" class="pa-4">
-    <div class="mb-4">
-      <h3 class="text-lg font-semibold text-gray-800">
-        {{ project.name || 'Project Name' }}
-      </h3>
-      <div v-if="project.category && (effectivePreviewSettings.showCategory !== false)" class="text-sm text-blue-600 mt-1">
-        {{ getCategoryNameLocal(project.category) }}
-      </div>
-    </div>
-
-    <div v-if="project.description && (effectivePreviewSettings.showDescription !== false)" class="mb-4">
-      <p class="text-gray-600 text-sm whitespace-pre-wrap">{{ project.description }}</p>
-    </div>
-
-    <!-- Status Badge -->
-    <div v-if="project.status && (effectivePreviewSettings.showStatus !== false)" class="mb-4">
-      <v-chip
-        :color="getStatusColor(project.status)"
-        size="small"
-        variant="tonal"
-      >
-        {{ getStatusNameLocal(project.status) }}
-      </v-chip>
-    </div>
-
-    <!-- Dates -->
-    <div v-if="(project.start_date || project.end_date) && (effectivePreviewSettings.showDates !== false)" class="mb-4">
-      <div class="text-sm text-gray-500">
-        <div v-if="project.start_date">
-          <strong>Start:</strong> {{ formatDate(project.start_date) }}
+  <v-card 
+    :class="[
+      'rounded-xl !p-6 h-full flex flex-col',
+      isDarkMode ? 'bg-black' : 'bg-white'
+    ]"
+  >
+    <!-- Content Wrapper (flex-grow) -->
+    <div class="flex-1 flex flex-col">
+      <!-- Header Section -->
+      <div class="p-6 pb-4">
+        <!-- Title -->
+        <h3 :class="[
+          'text-2xl font-bold mb-2',
+          isDarkMode ? 'text-white' : 'text-gray-900'
+        ]">
+          {{ project.name }}
+        </h3>
+        
+        <!-- Status Tags -->
+        <div class="flex items-center gap-2 mb-3">
+          <v-chip
+            size="small"
+            v-if="project.category"
+            :class="[
+              'text-xs font-bold',
+              isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'
+            ]"
+          >
+            {{ getCategoryNameLocal(project.category)}}
+          </v-chip>
+          <v-chip
+            size="small"
+            v-if="project.status"
+            class="!border-2 !border-green-900 !bg-[#183421] !text-green-500 text-xs"
+          >
+            {{ getStatusNameLocal(project.status)}}
+          </v-chip>
         </div>
-        <div v-if="project.end_date">
-          <strong>End:</strong> {{ formatDate(project.end_date) }}
-        </div>
+        
+        <!-- Description -->
+        <p v-if="project.description"
+        :class="[
+          'text-sm',
+          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+        ]">
+          {{ project.description}}
+        </p>
       </div>
+
+    <!-- Image/Preview Section -->
+    <div class="px-6 pb-4">
+      <v-sheet class="overflow-hidden rounded-lg" max-width="700">
+        <v-carousel
+          v-if="mediaAssets.length > 0"
+          v-model="currentIndex"
+          direction="vertical"
+          height="300"
+          show-arrows
+          progress="purple"
+          vertical-arrows="left"
+          vertical-delimiters="right"
+          hide-delimiter-background
+          class="bg-gradient-to-r from-purple-400 to-purple-800 rounded-lg"
+        >
+          <v-carousel-item
+            v-for="(file, index) in mediaAssets"
+            :key="index"
+            :src="getFileUrlForPreview(file)"
+            contain
+          />
+        </v-carousel>
+
+        <div v-else class="h-80 rounded-lg overflow-hidden bg-gradient-to-r from-purple-400 to-purple-800 flex items-center justify-center">
+          <div class="text-center text-white">
+            <v-icon size="64" color="white" class="mb-4">mdi-cellphone</v-icon>
+            <p class="text-lg font-medium">Project Preview</p>
+          </div>
+        </div>
+      </v-sheet>
     </div>
 
-    <!-- Tags -->
-    <div v-if="project.tags && project.tags.length > 0 && (effectivePreviewSettings.showTags !== false)" class="mb-4">
-      <div class="text-sm text-gray-500 mb-2">Tags:</div>
-      <div class="flex flex-wrap gap-1">
+    <!-- Category Tags -->
+    <div v-if="project.tags" class="px-6 pb-4">
+      <div class="flex flex-wrap gap-2">
         <v-chip
-          v-for="tag in project.tags"
+          v-for="tag in (project.tags)"
           :key="tag"
-          size="x-small"
-          color="primary"
-          variant="tonal"
+          size="small"
+          :class="[
+            'text-xs !font-bold',
+            isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'
+          ]"
         >
           {{ tag }}
         </v-chip>
       </div>
     </div>
 
-    <!-- Technologies -->
-    <div v-if="project.technologies && project.technologies.length > 0 && (effectivePreviewSettings.showTechnologies !== false)" class="mb-4">
-      <div class="text-sm text-gray-500 mb-2">Technologies:</div>
-      <div class="flex flex-wrap gap-1">
+    <!-- Technologies Section -->
+    <div v-if="project.technologies" class="px-6 pb-4">
+      <h4 v-if="project.technologies.length > 0" :class="[
+        'font-bold mb-3',
+        isDarkMode ? 'text-white' : 'text-gray-900'
+      ]">
+        Technologies
+      </h4>
+      <div class="flex flex-wrap gap-2">
         <v-chip
-          v-for="tech in project.technologies"
+          v-for="tech in (project.technologies)"
           :key="tech"
-          size="x-small"
-          color="secondary"
-          variant="tonal"
+          size="small"
+          :class="[
+            'text-lg !font-bold',
+            isDarkMode ? '!border-2 !border-purple-900 !bg-[#23153A] !text-purple-400' : 'bg-blue-500 text-white'
+          ]"
         >
           {{ tech }}
         </v-chip>
       </div>
     </div>
 
-    <!-- Links -->
-    <div v-if="project.links && project.links.length > 0 && (effectivePreviewSettings.showLinks !== false)" class="mb-4">
-      <div class="text-sm text-gray-500 mb-2">Links:</div>
-      <div class="space-y-1">
-        <div
-          v-for="link in project.links"
-          :key="link.title"
-          class="text-sm flex items-center"
+    <!-- Date Range -->
+    <div v-if="project.start_date || project.end_date" class="px-6 pb-6">
+      <div class="flex items-center gap-2 text-sm">
+        <v-icon 
+          size="16" 
+          :color="isDarkMode ? 'gray-300' : 'gray-500'"
         >
-          <v-icon 
-            :icon="getLinkIcon(link.title)" 
-            size="small" 
-            class="mr-2"
-          ></v-icon>
-          <a :href="link.url" target="_blank" class="text-blue-600 hover:underline">
-            {{ link.title }}
-          </a>
-        </div>
+          mdi-calendar
+        </v-icon>
+        <span :class="[
+          'transition-colors',
+          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+        ]">
+          {{ formatDate(project.start_date || '')}} 
+          {{ project.end_date ? `- ${formatDate(project.end_date)}` : '' }}
+        </span>
       </div>
     </div>
+    </div>
 
-          <!-- Assets -->
-      <div v-if="project.assets && project.assets.length > 0 && (effectivePreviewSettings.showAssets !== false)" class="mb-4">
-        <div class="text-sm text-gray-500 mb-2">Assets ({{ project.assets.length }} files):</div>
+    <!-- Action Buttons -->
+    <div  v-if="githubLink || demoLink || additionalLinks.length" class="px-6 py-6 pb-0 border-t border-gray-400">
+      <div class="flex gap-3 flex-wrap">
+        <!-- Code Button -->
+        <v-btn
+          v-if="githubLink"
+          variant="elevated"
+          size="large"
+          :class="[
+            'flex-1 border rounded-lg !text-sm',
+            isDarkMode 
+              ? '!bg-black text-white !border-gray-600' 
+              : 'bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:bg-blue-50'
+          ]"
+          :href="githubLink.url"
+          target="_blank"
+          prepend-icon="mdi-github"
+        >
+          {{ githubLink.title }}
+        </v-btn>
         
-        <!-- Image/Video Carousel for Media Assets -->
-        <div v-if="mediaAssets.length > 0" class="mb-4">
-          <v-carousel
-            :show-arrows="mediaAssets.length > 1"
-            :show-dots="mediaAssets.length > 1"
-            height="200"
-            class="rounded-lg overflow-hidden"
-          >
-            <v-carousel-item
-              v-for="(file, index) in mediaAssets"
-              :key="index"
-              :src="getFileUrlForPreview(file)"
-              contain
-            >
-              <template v-slot:placeholder>
-                <div class="d-flex fill-height justify-center align-center">
-                  <v-progress-circular
-                    indeterminate
-                    color="grey-lighten-4"
-                  ></v-progress-circular>
-                </div>
-              </template>
-            </v-carousel-item>
-          </v-carousel>
-        </div>
-        
-        <!-- Downloadable Files List -->
-        <div v-if="downloadableAssets.length > 0" class="space-y-2">
-          <div class="text-sm text-gray-500 mb-2">Files:</div>
-          <div
-            v-for="file in downloadableAssets"
-            :key="file.id || file.filename || file.name || file.path || file.url"
-            class="text-sm text-gray-600 flex items-center justify-between p-2 bg-gray-50 rounded"
-          >
-            <div class="flex items-center">
-              <v-icon :icon="getFileIcon(file.filename || file.display_name || file.name || file.path || file.url || '')" size="small" class="mr-2" :color="getFileColor(file.filename || file.display_name || file.name || file.path || file.url || '')"></v-icon>
-              <span class="truncate">{{ file.display_name || getFileNameFromUrl(file.filename || file.path || file.url || '') }}</span>
-            </div>
-            <v-btn
-              :href="getFileUrlForPreview(file)"
-              target="_blank"
-              size="small"
-              variant="tonal"
-              color="primary"
-              prepend-icon="mdi-download"
-            >
-              Download
-            </v-btn>
-          </div>
-        </div>
-      </div>
+        <!-- Demo Button -->
+        <v-btn
+          v-if="demoLink"
+          variant="elevated"
+          size="large"
+          :class="[
+            'flex-1 rounded-lg !text-sm',
+            isDarkMode 
+              ? '!bg-purple-900 text-white' 
+              : 'bg-blue-600 text-white'
+          ]"
+          :href="demoLink.url"
+          target="_blank"
+          prepend-icon="mdi-open-in-new"
+        >
+          {{ demoLink.title }}
+        </v-btn>
 
-    <!-- Created/Updated Info -->
-    <div v-if="showMetaInfo && (project.created_at || project.updated_at)" class="mt-4 pt-4 border-t border-gray-200">
-      <div class="text-xs text-gray-400">
-        <div v-if="project.created_at">
-          Created: {{ formatDateTime(project.created_at) }}
-        </div>
-        <div v-if="project.updated_at && project.updated_at !== project.created_at">
-          Updated: {{ formatDateTime(project.updated_at) }}
-        </div>
+        <!-- Additional Links -->
+        <v-btn
+          v-for="link in additionalLinks"
+          :key="link.url"
+          variant="elevated"
+          size="large"
+          :class="[
+            'flex-1 rounded-lg',
+            isDarkMode 
+              ? '!bg-purple-900 text-white' 
+              : 'bg-blue-600 text-white'
+          ]"
+          :href="link.url"
+          target="_blank"
+          prepend-icon="mdi-open-in-new"
+        >
+          {{ link.title }}
+        </v-btn>
       </div>
     </div>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { Project } from '@/types';
 import { 
   getLinkIcon, 
@@ -174,6 +217,7 @@ import {
   getFileIcon,
   getFileColor
 } from '@/lib/projectUtils';
+import { useAppearance } from '@/composables/useAppearance';
 
 interface Props {
   project: Project;
@@ -206,7 +250,9 @@ const props = withDefaults(defineProps<Props>(), {
   })
 });
 
-
+const { isDark } = useAppearance();
+const isDarkMode = computed(() => isDark.value);
+const currentIndex = ref(0);
 
 // Computed property to handle null preview settings
 const effectivePreviewSettings = computed(() => {
@@ -258,16 +304,22 @@ const mediaAssets = computed(() => {
   });
 });
 
-const downloadableAssets = computed(() => {
-  if (!props.project.assets) return [];
-  return props.project.assets.filter(file => {
-    // Check if it's a document or other file (not image/video)
-    const assetType = file.asset_type?.key || '';
-    const filename = file.filename || file.display_name || file.name || file.path || file.url || '';
-    const isImage = assetType === 'images' || filename.match(/\.(jpg|jpeg|png|gif|svg|webp|bmp|tiff)$/i);
-    const isVideo = assetType === 'videos' || filename.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv|m4v)$/i);
-    return !isImage && !isVideo;
-  });
+// Helper functions for links
+const githubLink = computed(() => {
+  if (!props.project.links) return null;
+  return props.project.links.find(link => link.type === 'github');
+});
+
+const demoLink = computed(() => {
+  if (!props.project.links) return null;
+  return props.project.links.find(link => link.type === 'liveurl');
+});
+
+const additionalLinks = computed(() => {
+  if (!props.project.links) return [];
+  return props.project.links.filter(link => 
+    link.type !== 'github' && link.type !== 'liveurl'
+  );
 });
 
 // Helper functions - using imported utilities
@@ -278,4 +330,4 @@ const getStatusNameLocal = (statusKey: string) => {
 const getCategoryNameLocal = (categoryKey: string) => {
   return getCategoryName(categoryKey, props.categories);
 };
-</script> 
+</script>

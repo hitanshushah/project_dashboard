@@ -12,6 +12,13 @@ import * as directives from 'vuetify/directives'
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 
+// Extend Window interface for Vuetify instance
+declare global {
+    interface Window {
+        __VUETIFY__: any;
+    }
+}
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -21,7 +28,40 @@ createInertiaApp({
         const vuetify = createVuetify({
             components,
             directives,
-          })
+            theme: {
+                defaultTheme: 'light',
+                themes: {
+                    light: {
+                        colors: {
+                            primary: '#3B82F6',
+                            secondary: '#8B5CF6',
+                            accent: '#06B6D4',
+                            error: '#EF4444',
+                            warning: '#F59E0B',
+                            info: '#3B82F6',
+                            success: '#10B981',
+                        },
+                    },
+                    dark: {
+                        colors: {
+                            primary: '#8B5CF6',
+                            secondary: '#3B82F6',
+                            accent: '#06B6D4',
+                            error: '#EF4444',
+                            warning: '#F59E0B',
+                            info: '#3B82F6',
+                            success: '#10B981',
+                        },
+                    },
+                },
+            },
+        })
+        
+        // Make Vuetify instance available globally for theme switching
+        if (typeof window !== 'undefined') {
+            window.__VUETIFY__ = vuetify;
+        }
+        
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)

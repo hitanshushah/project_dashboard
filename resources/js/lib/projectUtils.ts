@@ -64,11 +64,15 @@ export const getCategoryName = (categoryKey: string, categories?: Array<{ name: 
 };
 
 /**
- * Format a date string to locale date format
+ * Format a date string to month and year format (e.g., "Jan 2025")
  */
 export const formatDate = (dateString: string): string => {
   if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString();
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric'
+  });
 };
 
 /**

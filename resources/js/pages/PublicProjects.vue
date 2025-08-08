@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import PublicProjectCard from '@/components/PublicProjectCard.vue';
+import ProjectCard from '@/components/ProjectCard.vue';
 import SearchFilters from '@/components/SearchFilters.vue';
 import type { Project } from '@/types';
 
@@ -122,7 +122,7 @@ const currentYear = new Date().getFullYear();
               :key="project.id" 
               class="project-item transform transition-all duration-300 hover:scale-105"
             >
-              <PublicProjectCard
+              <ProjectCard
                 :project="project"
                 :categories="categories"
                 :statuses="statuses"

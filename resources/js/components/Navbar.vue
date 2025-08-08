@@ -1,7 +1,17 @@
 <template>
-  <v-app-bar app color="grey-darken-4" dark height="64" class="px-4">
+  <v-app-bar 
+    app 
+    :color="isDark ? 'grey-darken-4' : 'white'" 
+    :dark="isDark"
+    height="64" 
+    class="px-4 transition-colors duration-300"
+    elevation="1"
+  >
     <!-- Logo on left -->
-    <v-app-bar-title class="text-white font-bold text-xl">
+    <v-app-bar-title :class="[
+      'font-bold text-xl transition-colors duration-300',
+      isDark ? 'text-white' : 'text-gray-900'
+    ]">
       <div class="flex items-center">
         <div class="w-8 h-8 bg-blue-500 rounded mr-2 flex items-center justify-center">
           <span class="text-white font-bold text-sm">L</span>
@@ -10,15 +20,10 @@
       </div>
     </v-app-bar-title>
 
-    <!-- Navigation items (optional) -->
     <v-spacer></v-spacer>
-    
-    <div class="hidden md:flex items-center space-x-6 mr-6">
-      <a href="#" class="text-white hover:text-gray-300 transition-colors">Home</a>
-      <a href="#" class="text-white hover:text-gray-300 transition-colors">Features</a>
-      <a href="#" class="text-white hover:text-gray-300 transition-colors">About</a>
-      <a href="#" class="text-white hover:text-gray-300 transition-colors">Contact</a>
-    </div>
+
+    <!-- Theme Toggle -->
+    <ThemeToggle class="mr-4" />
 
     <!-- Avatar dropdown on right -->
     <v-menu offset-y>
@@ -128,8 +133,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
+import ThemeToggle from './ThemeToggle.vue';
+import { useAppearance } from '@/composables/useAppearance';
 
 const page = usePage();
+const { isDark } = useAppearance();
 
 const currentUser = computed(() => page.props.auth?.user);
 
