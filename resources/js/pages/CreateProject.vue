@@ -407,15 +407,14 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             color="gray"
             class="mb-4"
           ></v-btn>
-          <h1 class="text-3xl font-bold text-gray-800">Create New Project</h1>
-          <p class="text-gray-600 mt-2">Fill in the details below to create your new project</p>
+          <h1 class="text-3xl font-bold text-gray-300">Create New Project</h1>
+          <p class="text-gray-500 mt-2">Fill in the details below to create your new project</p>
           </div>
           <div class="flex gap-4 justify-end">
               <v-btn
                 variant="outlined"
                 size="large"
                 @click="cancel"
-                density="compact"
               >
                 Cancel
               </v-btn>
@@ -423,7 +422,6 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               <v-btn
                 type="submit"
                 color="primary"
-                density="compact"
                 size="large"
                 :loading="form.processing"
                 :disabled="form.processing"
@@ -442,7 +440,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                   <div class="mb-2">
                     <div class="flex items-center mb-8">
                       <div class="w-1 h-8 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full mr-4"></div>
-                      <h2 class="text-2xl font-bold text-slate-800">Project Information</h2>
+                      <h2 class="text-2xl font-bold text-gray-300">Project Information</h2>
                     </div>
                     
                     <v-row>
@@ -453,7 +451,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           placeholder="Enter an inspiring project name"
                           variant="outlined"
                           :error-messages="form.errors.name"
-                          color="primary"
+                          color="gray-300"
                           class="text-field-modern"
                           density="compact"
                           required
@@ -474,7 +472,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           placeholder="Select category"
                           variant="outlined"
                           :error-messages="form.errors.category"
-                          color="primary"
+                          color="gray-300"
                           density="compact"
                           class="select-modern"
                           required
@@ -492,7 +490,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                       placeholder="Describe your project vision, goals, and what makes it special..."
                       variant="outlined"
                       rows="5"
-                      color="primary"
+                      color="gray-300"
                       density="compact"
                       :error-messages="form.errors.description"
                       class="textarea-modern"
@@ -507,7 +505,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                   <div class="mb-2">
                     <div class="flex items-center mb-8">
                       <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
-                      <h2 class="text-2xl font-bold text-slate-800">Project Timeline</h2>
+                      <h2 class="text-2xl font-bold text-gray-300">Project Timeline</h2>
                     </div>
                     
                     <v-row>
@@ -556,7 +554,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                               prepend-inner-icon="mdi-calendar-check"
                               readonly
                               density="compact"
-                              color="primary"
+                              color="gray-300"
                               v-bind="props"
                               class="date-field-modern"
                             ></v-text-field>
@@ -580,7 +578,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           density="compact"
                           label="Current Status"
                           variant="outlined"
-                          color="primary"
+                          color="gray-300"
                           :error-messages="form.errors.status"
                           class="select-modern"
                         >
@@ -596,7 +594,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             <div class="mb-2">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-4"></div>
-                <h2 class="text-2xl font-bold text-slate-800">Tags & Technologies</h2>
+                <h2 class="text-2xl font-bold text-gray-300">Tags & Technologies</h2>
               </div>
               
               <v-row>
@@ -617,7 +615,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     hide-selected
                     clearable
                     density="compact"
-                    color="primary"
+                    color="gray-300"
                     class="text-field-modern"
                   >
                     <template v-slot:prepend-inner>
@@ -653,7 +651,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     hide-selected
                     clearable
                     density="compact"
-                    color="primary"
+                    color="gray-300"
                     class="select-modern"
                   >
                     <template v-slot:prepend-inner>
@@ -678,7 +676,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             <div class="mb-8">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full mr-4"></div>
-                <h2 class="text-2xl font-bold text-slate-800">Links</h2>
+                <h2 class="text-2xl font-bold text-gray-300">Links</h2>
               </div>
               
               <div>
@@ -692,7 +690,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         placeholder="https://github.com/..."
                         variant="outlined"
                         density="compact"
-                        color="primary"
+                        color="gray-300"
                         @keydown="handleGithubKeydown"
                         class="text-field-modern compact-field"
                       >
@@ -837,7 +835,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           icon="mdi-open-in-new"
                           variant="text"
                           size="x-small"
-                          color="primary"
+                          color="gray-300"
                           :href="link.url"
                           target="_blank"
                           :disabled="!link.url"
@@ -861,22 +859,23 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             <div class="mb-8">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-gray-500 to-orange-500 rounded-full mr-4"></div>
-                <h2 class="text-2xl font-bold text-slate-800">Assets</h2>
+                <h2 class="text-2xl font-bold text-gray-300">Assets</h2>
               </div>
               
               <div class="mb-4">
                 <div 
-                  class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors duration-200 bg-gray-50 hover:bg-gray-50 cursor-pointer"
+                  class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors duration-200 
+                  hover:bg-gray-800 cursor-pointer"
                   @click="openFileDialog"
                   @dragover.prevent
                   @drop.prevent="handleFileDrop"
                 >
                   <div class="flex flex-col items-center justify-center !p-4">
-                    <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center">
                       <v-icon size="32">mdi-cloud-upload</v-icon>
                     </div>
                     <div>
-                      <h3 class="text-lg font-semibold text-gray-700 mb-2">Upload Project Assets</h3>
+                      <h3 class="text-lg font-semibold text-gray-300 mb-2">Upload Project Assets</h3>
                       <p class="text-gray-500 mb-4">Drag and drop files here, or click to browse</p>
                       <v-btn
                         variant="outlined"
@@ -922,7 +921,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         class="mr-2"
                       />
                       <div class="min-w-0">
-                        <div class="text-sm font-medium text-gray-800 truncate max-w-[180px]">
+                        <div class="text-sm font-medium text-gray-300 truncate max-w-[180px]">
                           {{ file.name }}
                         </div>
                         <div class="text-xs text-gray-500">
@@ -937,7 +936,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         icon="mdi-eye"
                         variant="text"
                         size="medium"
-                        color="primary"
+                        color="gray-300"
                         @click="previewFile(file)"
                         v-if="isPreviewable(file.type || file.name)"
                       />
@@ -961,7 +960,6 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 variant="outlined"
                 size="large"
                 @click="cancel"
-                density="compact"
               >
                 Cancel
               </v-btn>
@@ -969,7 +967,6 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               <v-btn
                 type="submit"
                 color="primary"
-                density="compact"
                 size="large"
                 :loading="form.processing"
                 :disabled="form.processing"
@@ -982,11 +979,11 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
           </v-col>
 
           <!-- Right Section - Live Preview -->
-          <v-col cols="12" lg="5">
+          <v-col cols="12" lg="5" class="!mt-[-15px]">
             <v-card class="pa-6 h-fit sticky top-4">
               <div class="mb-6">
                 <div class="flex items-center mb-4">
-                  <h2 class="text-xl font-semibold text-gray-700">Live Preview</h2>
+                  <h2 class="text-xl font-semibold text-gray-300">Live Preview</h2>
                   <v-btn
                     icon="mdi-cog"
                     variant="text"

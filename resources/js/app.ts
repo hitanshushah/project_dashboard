@@ -44,8 +44,8 @@ createInertiaApp({
                     },
                     dark: {
                         colors: {
-                            primary: '#8B5CF6',
-                            secondary: '#3B82F6',
+                            primary: '#17265C',
+                            secondary: '#193BB5',
                             accent: '#06B6D4',
                             error: '#EF4444',
                             warning: '#F59E0B',

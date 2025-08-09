@@ -125,13 +125,13 @@ const clearFilters = () => {
 
         <!-- Header with Action Buttons -->
         <div class="d-flex justify-space-between align-center mb-6">
-          <h1 class="text-3xl font-bold text-gray-800">
+          <h1 class="text-3xl font-bold text-white">
             My Projects
           </h1>
           <div class="d-flex gap-3">
             <v-btn
               v-if="publicProjects.length > 0"
-              color="secondary"
+              color="blue"
               prepend-icon="mdi-eye"
               variant="outlined"
               @click="openPublicPreview"
@@ -140,7 +140,7 @@ const clearFilters = () => {
               Preview Public
               <v-badge
                 :content="publicProjects.length"
-                color="primary"
+                color="#1d76ba"
                 inline
                 class="ml-2"
               ></v-badge>
@@ -212,7 +212,7 @@ const clearFilters = () => {
                   <v-btn
                     icon="mdi-pencil"
                     size="small"
-                    color="primary"
+                    color="blue"
                     variant="tonal"
                     @click="editProject(project.id!)"
                     title="Edit Project"
@@ -249,7 +249,7 @@ const clearFilters = () => {
                   <v-btn
                     icon="mdi-pencil"
                     size="small"
-                    color="primary"
+                    color="blue"
                     variant="tonal"
                     @click="editProject(project.id!)"
                     title="Edit Project"
@@ -342,8 +342,8 @@ const clearFilters = () => {
         </div>
 
         <!-- Confirmation Modal -->
-        <v-dialog v-model="showConfirmationModal" max-width="400">
-          <v-card>
+        <v-dialog v-model="showConfirmationModal" class="!max-w-xl">
+          <v-card class="!p-2">
             <v-card-title class="text-h6">
               <v-icon 
                 :icon="toggleAction === 'public' ? 'mdi-eye' : 'mdi-eye-off'" 
@@ -358,7 +358,7 @@ const clearFilters = () => {
                 <strong>"{{ projectToToggle?.name }}"</strong> 
                 {{ toggleAction === 'public' ? 'public' : 'hidden' }}?
               </p>
-              <p class="text-sm text-gray-600">
+              <p class="text-sm text-gray-400">
                 {{ toggleAction === 'public' 
                   ? 'This project will be visible to everyone.' 
                   : 'This project will only be visible to you.' 
@@ -374,6 +374,7 @@ const clearFilters = () => {
                 Cancel
               </v-btn>
               <v-btn
+                variant="tonal"
                 :color="toggleAction === 'public' ? 'success' : 'warning'"
                 @click="confirmToggle"
               >

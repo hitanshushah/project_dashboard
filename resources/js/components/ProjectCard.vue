@@ -2,7 +2,7 @@
   <v-card 
     :class="[
       'rounded-xl !p-6 h-full flex flex-col',
-      isDarkMode ? 'bg-black' : 'bg-white'
+      isDarkMode ? 'bg-black' : 'bg-white',
     ]"
   >
     <!-- Content Wrapper (flex-grow) -->
@@ -23,8 +23,8 @@
             size="small"
             v-if="project.category"
             :class="[
-              'text-xs font-bold',
-              isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'
+              'text-xs !font-bold',
+              isDarkMode ? '!border-1 !border-orange-400 !bg-[#3A2315] !text-orange-400' : 'bg-gray-100 text-gray-700'
             ]"
           >
             {{ getCategoryNameLocal(project.category)}}
@@ -57,11 +57,11 @@
           direction="vertical"
           height="300"
           show-arrows
-          progress="purple"
+          progress="blue"
           vertical-arrows="left"
           vertical-delimiters="right"
           hide-delimiter-background
-          class="bg-gradient-to-r from-purple-400 to-purple-800 rounded-lg"
+          class="bg-gradient-to-r from-blue-800 to-blue-950 rounded-lg"
         >
           <v-carousel-item
             v-for="(file, index) in mediaAssets"
@@ -71,7 +71,7 @@
           />
         </v-carousel>
 
-        <div v-else class="h-80 rounded-lg overflow-hidden bg-gradient-to-r from-purple-400 to-purple-800 flex items-center justify-center">
+        <div v-else class="h-80 rounded-lg overflow-hidden bg-gradient-to-r from-blue-800 to-blue-950 flex items-center justify-center">
           <div class="text-center text-white">
             <v-icon size="64" color="white" class="mb-4">mdi-cellphone</v-icon>
             <p class="text-lg font-medium">Project Preview</p>
@@ -112,7 +112,7 @@
           size="small"
           :class="[
             'text-lg !font-bold',
-            isDarkMode ? '!border-2 !border-purple-900 !bg-[#23153A] !text-purple-400' : 'bg-blue-500 text-white'
+            isDarkMode ? '!border-2 !border-blue-900 !bg-[#23153A] !text-blue-400' : 'bg-blue-500 text-white'
           ]"
         >
           {{ tech }}
@@ -169,7 +169,7 @@
           :class="[
             'flex-1 rounded-lg !text-sm',
             isDarkMode 
-              ? '!bg-purple-900 text-white' 
+              ? '!bg-blue-950 text-white' 
               : 'bg-blue-600 text-white'
           ]"
           :href="demoLink.url"
@@ -188,7 +188,7 @@
           :class="[
             'flex-1 rounded-lg',
             isDarkMode 
-              ? '!bg-purple-900 text-white' 
+              ? '!bg-blue-950 text-white' 
               : 'bg-blue-600 text-white'
           ]"
           :href="link.url"

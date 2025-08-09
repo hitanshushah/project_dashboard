@@ -7,7 +7,7 @@
       >
         <div 
           class="absolute left-0.5 w-5 h-5 rounded-full transition-all duration-300 ease-in-out flex items-center justify-center z-10"
-          :class="isDark ? 'left-[calc(100%-1.375rem)] bg-gray-500' : 'bg-orange-500'"
+          :class="isDark ? 'left-[calc(100%-1.375rem)] bg-blue-950' : 'bg-orange-500'"
         >
           <img 
             v-if="!isDark" 

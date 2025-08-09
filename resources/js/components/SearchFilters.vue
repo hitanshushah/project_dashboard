@@ -36,9 +36,9 @@ const emit = defineEmits<{
 
 // Local state
 const searchQuery = ref(props.currentFilters.search || '');
-const selectedCategories = ref([...props.currentFilters.categories] || []);
-const selectedStatuses = ref([...props.currentFilters.statuses] || []);
-const selectedTechnologies = ref([...props.currentFilters.technologies] || []);
+const selectedCategories = ref([...props.currentFilters.categories]);
+const selectedStatuses = ref([...props.currentFilters.statuses]);
+const selectedTechnologies = ref([...props.currentFilters.technologies]);
 const sortBy = ref(props.currentFilters.sort_by || 'created_at');
 const sortDirection = ref(props.currentFilters.sort_direction || 'desc');
 
@@ -153,36 +153,40 @@ defineExpose({
 });
 </script>
 
+
 <template>
   <div class="search-filters">
+
     <!-- Search Bar -->
-    <div class="d-flex gap-3 mb-4">
-      <v-text-field
-        v-model="searchQuery"
-        prepend-inner-icon="mdi-magnify"
-        placeholder="Search projects by name, description, or key..."
-        variant="outlined"
-        density="compact"
-        hide-details
-        clearable
-        class="flex-grow-1"
-      ></v-text-field>
-      
+    <v-text-field
+      v-model="searchQuery"
+      prepend-inner-icon="mdi-magnify"
+      placeholder="Search projects..."
+      variant="outlined"
+      density="compact"
+      clearable
+      class="mb-2 w-96"
+    />
+
+    <!-- Filters + Sort Row -->
+    <div class="d-flex align-center gap-3 mb-2">
       <v-btn
-        :color="showFilters ? 'primary' : 'default'"
-        :variant="showFilters ? 'flat' : 'outlined'"
-        prepend-icon="mdi-filter"
+        color="blue"
+        :variant="showFilters ? 'tonal' : 'outlined'"
+        class="px-3"
         @click="showFilters = !showFilters"
+        title="Toggle filters"
       >
-        Filters
+        <v-icon left>mdi-filter-variant</v-icon> Filters
         <v-badge
           v-if="hasActiveFilters"
-          color="error"
-          content="!"
-          inline
-        ></v-badge>
+          color="success"
+          dot
+          class="ml-2 mb-5"
+        />
       </v-btn>
 
+      <div>
       <v-select
         v-model="selectedSortOption"
         :items="sortOptions.map(opt => opt.text)"
@@ -190,185 +194,80 @@ defineExpose({
         variant="outlined"
         density="compact"
         hide-details
-        style="min-width: 200px;"
-        placeholder="Sort by..."
-      ></v-select>
+        placeholder="Sort by"
+      />
+      </div>
     </div>
 
-    <!-- Expanded Filters -->
+    <!-- Compact Filters Panel -->
     <v-expand-transition>
-      <v-card v-if="showFilters" class="pa-4 mb-4" variant="outlined">
-        <div class="d-flex justify-space-between align-center mb-3">
-          <h3 class="text-h6">Filters</h3>
+      <v-row
+        v-if="showFilters"
+        class="mb-4"
+      >
+        <v-col cols="12" sm="4" md="3" lg="2">
+          <v-select
+            v-model="selectedCategories"
+            :items="categories"
+            item-title="name"
+            item-value="key"
+            label="Categories"
+            multiple
+            chips
+            closable-chips
+            density="compact"
+            hide-details
+            clearable
+            :menu-props="{ maxHeight: '220px' }"
+          />
+        </v-col>
+
+        <v-col cols="12" sm="4" md="3" lg="2">
+          <v-select
+            v-model="selectedStatuses"
+            :items="statuses"
+            item-title="name"
+            item-value="key"
+            label="Status"
+            multiple
+            chips
+            closable-chips
+            density="compact"
+            hide-details
+            clearable
+            :menu-props="{ maxHeight: '220px' }"
+          />
+        </v-col>
+
+        <v-col cols="12" sm="4" md="3" lg="2">
+          <v-select
+            v-model="selectedTechnologies"
+            :items="technologies"
+            label="Technologies"
+            multiple
+            chips
+            closable-chips
+            density="compact"
+            hide-details
+            clearable
+            :menu-props="{ maxHeight: '220px' }"
+          />
+        </v-col>
+
+        <v-col cols="12" sm="12" md="3" lg="3" class="d-flex align-center">
           <v-btn
             v-if="hasActiveFilters"
-            variant="text"
             color="error"
-            size="small"
+            variant="text"
+            density="compact"
             @click="clearFilters"
           >
             Clear All
           </v-btn>
-        </div>
-        
-        <v-row>
-          <!-- Category Filter -->
-          <v-col cols="12" md="4">
-            <v-select
-              v-model="selectedCategories"
-              :items="categories"
-              item-title="name"
-              item-value="key"
-              label="Categories"
-              multiple
-              chips
-              variant="outlined"
-              density="compact"
-              hide-details
-            >
-              <template v-slot:selection="{ item, index }">
-                <v-chip
-                  v-if="index < 2"
-                  size="small"
-                  closable
-                  @click:close="selectedCategories.splice(selectedCategories.indexOf(item.value), 1)"
-                >
-                  {{ item.title }}
-                </v-chip>
-                <span v-if="index === 2" class="text-grey text-caption align-self-center">
-                  (+{{ selectedCategories.length - 2 }} others)
-                </span>
-              </template>
-            </v-select>
-          </v-col>
-
-          <!-- Status Filter -->
-          <v-col cols="12" md="4">
-            <v-select
-              v-model="selectedStatuses"
-              :items="statuses"
-              item-title="name"
-              item-value="key"
-              label="Status"
-              multiple
-              chips
-              variant="outlined"
-              density="compact"
-              hide-details
-            >
-              <template v-slot:selection="{ item, index }">
-                <v-chip
-                  v-if="index < 2"
-                  size="small"
-                  closable
-                  @click:close="selectedStatuses.splice(selectedStatuses.indexOf(item.value), 1)"
-                >
-                  {{ item.title }}
-                </v-chip>
-                <span v-if="index === 2" class="text-grey text-caption align-self-center">
-                  (+{{ selectedStatuses.length - 2 }} others)
-                </span>
-              </template>
-            </v-select>
-          </v-col>
-
-          <!-- Technology Filter -->
-          <v-col cols="12" md="4">
-            <v-select
-              v-model="selectedTechnologies"
-              :items="technologies"
-              label="Technologies"
-              multiple
-              chips
-              variant="outlined"
-              density="compact"
-              hide-details
-            >
-              <template v-slot:selection="{ item, index }">
-                <v-chip
-                  v-if="index < 2"
-                  size="small"
-                  closable
-                  @click:close="selectedTechnologies.splice(selectedTechnologies.indexOf(item.value), 1)"
-                >
-                  {{ item.value }}
-                </v-chip>
-                <span v-if="index === 2" class="text-grey text-caption align-self-center">
-                  (+{{ selectedTechnologies.length - 2 }} others)
-                </span>
-              </template>
-            </v-select>
-          </v-col>
-        </v-row>
-      </v-card>
+        </v-col>
+      </v-row>
     </v-expand-transition>
 
-    <!-- Active Filters Summary -->
-    <div v-if="hasActiveFilters && !showFilters" class="mb-4">
-      <div class="d-flex flex-wrap gap-2 align-center">
-        <span class="text-body-2 text-grey-darken-1">Active filters:</span>
-        
-        <v-chip
-          v-if="searchQuery"
-          size="small"
-          closable
-          @click:close="searchQuery = ''"
-        >
-          Search: "{{ searchQuery }}"
-        </v-chip>
-        
-        <v-chip
-          v-for="category in selectedCategories"
-          :key="`cat-${category}`"
-          size="small"
-          closable
-          @click:close="selectedCategories.splice(selectedCategories.indexOf(category), 1)"
-        >
-          {{ categories.find(c => c.key === category)?.name }}
-        </v-chip>
-        
-        <v-chip
-          v-for="status in selectedStatuses"
-          :key="`stat-${status}`"
-          size="small"
-          closable
-          @click:close="selectedStatuses.splice(selectedStatuses.indexOf(status), 1)"
-        >
-          {{ statuses.find(s => s.key === status)?.name }}
-        </v-chip>
-        
-        <v-chip
-          v-for="tech in selectedTechnologies"
-          :key="`tech-${tech}`"
-          size="small"
-          closable
-          @click:close="selectedTechnologies.splice(selectedTechnologies.indexOf(tech), 1)"
-        >
-          {{ tech }}
-        </v-chip>
-        
-        <v-chip
-          v-if="sortBy !== 'created_at' || sortDirection !== 'desc'"
-          size="small"
-          closable
-          @click:close="sortBy = 'created_at'; sortDirection = 'desc'; applyFilters()"
-        >
-          Sort: {{ selectedSortOption }}
-        </v-chip>
-      </div>
-    </div>
-
-    <!-- Results Summary -->
-    <div v-if="resultsCount !== undefined" class="d-flex justify-space-between align-center mb-4">
-      <div class="text-body-1 text-grey-darken-1">
-        <span v-if="hasActiveFilters">
-          Found {{ resultsCount }} project{{ resultsCount !== 1 ? 's' : '' }}
-        </span>
-        <span v-else>
-          {{ resultsCount }} project{{ resultsCount !== 1 ? 's' : '' }} total
-        </span>
-      </div>
-    </div>
   </div>
 </template>
 

@@ -47,8 +47,8 @@
               <span class="text-white font-semibold text-xl">{{ userInitials }}</span>
             </v-avatar>
             <div>
-              <div class="font-semibold text-gray-800">{{ currentProfile?.name || currentUser?.username || 'User' }}</div>
-              <div class="text-sm text-gray-600">{{ currentUser?.email || 'user@example.com' }}</div>
+              <div class="font-semibold text-white">{{ currentProfile?.name || currentUser?.username || 'User' }}</div>
+              <div class="text-sm text-gray-400">{{ currentUser?.email || 'user@example.com' }}</div>
             </div>
           </div>
         </v-card-text>
@@ -61,40 +61,6 @@
             prepend-icon="mdi-account-edit"
             title="Edit Profile"
             @click="editProfile"
-            class="hover:bg-gray-50 transition-colors"
-          >
-            <template v-slot:append>
-              <v-icon icon="mdi-chevron-right" size="small" class="text-gray-400"></v-icon>
-            </template>
-          </v-list-item>
-
-          <v-list-item
-            prepend-icon="mdi-cog"
-            title="Settings & Privacy"
-            @click="openSettings"
-            class="hover:bg-gray-50 transition-colors"
-          >
-            <template v-slot:append>
-              <v-icon icon="mdi-chevron-right" size="small" class="text-gray-400"></v-icon>
-            </template>
-          </v-list-item>
-
-          <v-list-item
-            prepend-icon="mdi-help-circle"
-            title="Help & Support"
-            @click="openSupport"
-            class="hover:bg-gray-50 transition-colors"
-          >
-            <template v-slot:append>
-              <v-icon icon="mdi-chevron-right" size="small" class="text-gray-400"></v-icon>
-            </template>
-          </v-list-item>
-
-          <v-list-item
-            prepend-icon="mdi-monitor"
-            title="Display & Accessibility"
-            @click="openAccessibility"
-            class="hover:bg-gray-50 transition-colors"
           >
             <template v-slot:append>
               <v-icon icon="mdi-chevron-right" size="small" class="text-gray-400"></v-icon>
@@ -105,7 +71,6 @@
             prepend-icon="mdi-web"
             title="See Website"
             @click="seeWebsite"
-            class="hover:bg-gray-50 transition-colors"
           >
             <template v-slot:append>
               <v-icon icon="mdi-chevron-right" size="small" class="text-gray-400"></v-icon>
@@ -159,21 +124,6 @@ const editProfile = () => {
   // Add your edit profile logic here
 };
 
-const openSettings = () => {
-  console.log('Settings & Privacy clicked');
-  // Add your settings logic here
-};
-
-const openSupport = () => {
-  console.log('Help & Support clicked');
-  // Add your support logic here
-};
-
-const openAccessibility = () => {
-  console.log('Display & Accessibility clicked');
-  // Add your accessibility logic here
-};
-
 const seeWebsite = () => {
   console.log('See Website clicked');
   router.visit('/public-projects');
@@ -185,14 +135,3 @@ const logout = () => {
   // Example: router.visit('/logout');
 };
 </script>
-
-<style scoped>
-/* Additional custom styles if needed */
-.v-list-item:hover {
-  background-color: #f9fafb;
-}
-
-.v-list-item.text-red-600:hover {
-  background-color: #fef2f2;
-}
-</style>

@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="modelValue" max-width="600">
-    <v-card>
+    <v-card :class="[isDarkMode ? 'bg-black' : 'bg-white']">
       <v-card-title class="text-lg font-semibold">
         <v-icon icon="mdi-cog" class="mr-2"></v-icon>
         Customize Project Preview
@@ -11,9 +11,9 @@
           Choose which elements to display in the project preview. You can keep some details disabled for metadata and project filtering purposes.
         </p>
 
-        <div class="space-y-4">
+        <div class="!space-y-0">
           <template v-for="(label, key) in toggleOptions" :key="key">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between h-[60px]">
               <div>
                 <div class="font-medium">{{ label }}</div>
                 <div class="text-sm text-gray-500">Show {{ label.toLowerCase() }} in preview</div>
@@ -35,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { useAppearance } from '@/composables/useAppearance';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -48,6 +49,9 @@ const modelValue = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 });
+
+const { isDark } = useAppearance();
+const isDarkMode = computed(() => isDark.value);
 
 const settings = props.settings;
 
