@@ -513,7 +513,7 @@ class ProjectController extends Controller
 
             DB::commit();
 
-            return redirect()->route('home')->with('success', 'Project updated successfully!');
+            return redirect()->back()->with('success', 'Project updated successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
