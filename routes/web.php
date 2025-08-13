@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\User;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', [ProjectController::class, 'index'])->name('home');
 
@@ -18,6 +19,10 @@ Route::post('/projects/{project}', [ProjectController::class, 'update'])->name('
 
 // Public projects preview route
 Route::get('/public-projects', [ProjectController::class, 'publicProjects'])->name('projects.public');
+
+// Profile routes
+Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
 // API routes for project data
 Route::get('/api/categories', function () {

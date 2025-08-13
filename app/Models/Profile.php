@@ -14,11 +14,26 @@ class Profile extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'designation',
         'bio',
+        'street',
+        'city',
+        'province',
+        'country',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function links()
+    {
+        return $this->morphMany(Link::class, 'linkable');
+    }
+
+    public function assets()
+    {
+        return $this->morphMany(Asset::class, 'assetable');
     }
 }

@@ -898,7 +898,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             class="mr-2"
                           />
                           <div class="min-w-0">
-                            <div class="text-sm font-medium text-gray-800 truncate max-w-[180px]">
+                            <div class="text-sm font-medium text-gray-300 truncate max-w-[180px]">
                               {{ asset.name }}
                             </div>
                             <div class="text-xs text-gray-500">

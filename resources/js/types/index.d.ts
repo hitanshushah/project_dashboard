@@ -40,8 +40,14 @@ export interface User {
 
 export interface Profile {
     id: number;
-    name: string;
+    name: string | null;
+    designation: string | null;
     bio: string | null;
+    street: string | null;
+    city: string | null;
+    province: string | null;
+    country: string | null;
+    links?: ProjectLink[];
 }
 
 export interface Category {

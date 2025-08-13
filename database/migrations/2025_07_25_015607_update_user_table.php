@@ -23,7 +23,12 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->unique();
             $table->string('name')->nullable();
+            $table->text('designation')->nullable();
             $table->text('bio')->nullable();
+            $table->text('street')->nullable();
+            $table->text('city')->nullable();
+            $table->text('province')->nullable();
+            $table->text('country')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

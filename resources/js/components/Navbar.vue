@@ -120,8 +120,7 @@ const userInitials = computed(() => {
 });
 
 const editProfile = () => {
-  console.log('Edit Profile clicked');
-  // Add your edit profile logic here
+  router.visit('/profile/edit');
 };
 
 const seeWebsite = () => {
