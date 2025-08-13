@@ -109,9 +109,9 @@ return new class extends Migration {
         });
 
         DB::table('asset_types')->insert([
-            ['key' => 'image', 'name' => 'Image'],
-            ['key' => 'video', 'name' => 'Video'],
-            ['key' => 'document', 'name' => 'Documents'],
+            ['key' => 'images', 'name' => 'Image'],
+            ['key' => 'videos', 'name' => 'Video'],
+            ['key' => 'documents', 'name' => 'Resume'],
             ['key' => 'others', 'name' => 'Other'],
         ]);
 
