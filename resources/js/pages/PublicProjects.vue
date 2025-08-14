@@ -187,7 +187,7 @@ const getLinkIcon = (linkType: string): string => {
                 <v-icon 
                   :icon="getDocumentIcon(document.display_name || '')" 
                   class="mr-2"
-                  :color="gray-300"
+                  color="gray-300"
                 ></v-icon>
                 {{ document.display_name || 'Document' }}
                 <v-icon icon="mdi-download" size="small" class="ml-2"></v-icon>
