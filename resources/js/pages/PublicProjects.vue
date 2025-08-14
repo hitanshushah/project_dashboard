@@ -90,21 +90,6 @@ const getDocumentIcon = (filename: string): string => {
   }
 };
 
-const getDocumentColor = (filename: string): string => {
-  const lowerFilename = filename.toLowerCase();
-  if (lowerFilename.includes('resume') || lowerFilename.includes('cv')) {
-    return 'blue';
-  } else if (lowerFilename.includes('cover') || lowerFilename.includes('letter')) {
-    return 'green';
-  } else if (lowerFilename.includes('certificate') || lowerFilename.includes('cert')) {
-    return 'orange';
-  } else if (lowerFilename.includes('portfolio')) {
-    return 'purple';
-  } else {
-    return 'gray';
-  }
-};
-
 const getDocumentLabel = (filename: string): string => {
   const lowerFilename = filename.toLowerCase();
   if (lowerFilename.includes('resume') || lowerFilename.includes('cv')) {
@@ -202,7 +187,7 @@ const getLinkIcon = (linkType: string): string => {
                 <v-icon 
                   :icon="getDocumentIcon(document.display_name || '')" 
                   class="mr-2"
-                  :color="getDocumentColor(document.display_name || '')"
+                  :color="gray-300"
                 ></v-icon>
                 {{ document.display_name || 'Document' }}
                 <v-icon icon="mdi-download" size="small" class="ml-2"></v-icon>
