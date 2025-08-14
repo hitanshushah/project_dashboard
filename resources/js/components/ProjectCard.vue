@@ -138,6 +138,50 @@
         </span>
       </div>
     </div>
+
+    <!-- Documents Section -->
+    <div v-if="documentAssets.length > 0 && effectivePreviewSettings.showAssets" class="px-6 pb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <v-icon 
+          size="16" 
+          :color="isDarkMode ? 'gray-300' : 'gray-500'"
+        >
+          mdi-file-document-multiple
+        </v-icon>
+        <h4 :class="[
+          'font-bold',
+          isDarkMode ? 'text-white' : 'text-gray-900'
+        ]">
+          Documents
+        </h4>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <v-chip
+          v-for="document in documentAssets"
+          :key="document.id || document.name"
+          size="small"
+          variant="outlined"
+          :class="[
+            'cursor-pointer hover:bg-gray-100 transition-colors',
+            isDarkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-800' : 'border-gray-300 text-gray-700'
+          ]"
+          @click="openDocument(document)"
+        >
+          <v-icon 
+            :icon="getFileIcon(document.type || document.name || '')" 
+            :color="getFileColor(document.type || document.name || '')"
+            size="small"
+            class="mr-1"
+          />
+          <span class="text-xs">{{ document.display_name || document.name || 'Document' }}</span>
+          <v-icon 
+            icon="mdi-download" 
+            size="x-small" 
+            class="ml-1 text-gray-500"
+          />
+        </v-chip>
+      </div>
+    </div>
     </div>
 
     <!-- Action Buttons -->
@@ -304,6 +348,19 @@ const mediaAssets = computed(() => {
   });
 });
 
+// Computed properties for documents (non-media files)
+const documentAssets = computed(() => {
+  if (!props.project.assets) return [];
+  return props.project.assets.filter(file => {
+    // Check if it's a document based on asset type or filename
+    const assetType = file.asset_type?.key || '';
+    const filename = file.filename || file.display_name || file.name || file.path || file.url || '';
+    const isImage = assetType === 'images' || filename.match(/\.(jpg|jpeg|png|gif|svg|webp|bmp|tiff)$/i);
+    const isVideo = assetType === 'videos' || filename.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv|m4v)$/i);
+    return !isImage && !isVideo; // Return non-media files as documents
+  });
+});
+
 // Helper functions for links
 const githubLink = computed(() => {
   if (!props.project.links) return null;
@@ -329,5 +386,10 @@ const getStatusNameLocal = (statusKey: string) => {
 
 const getCategoryNameLocal = (categoryKey: string) => {
   return getCategoryName(categoryKey, props.categories);
+};
+
+const openDocument = (document: any) => {
+  const url = getFileUrl(document);
+  window.open(url, '_blank');
 };
 </script>

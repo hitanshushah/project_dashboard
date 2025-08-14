@@ -23,6 +23,8 @@ Route::get('/public-projects', [ProjectController::class, 'publicProjects'])->na
 // Profile routes
 Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+Route::delete('/profile/photo', [ProfileController::class, 'removePhoto'])->name('profile.remove-photo');
+Route::delete('/profile/assets/{asset}', [ProfileController::class, 'removeAsset'])->name('profile.remove-asset');
 
 // API routes for project data
 Route::get('/api/categories', function () {

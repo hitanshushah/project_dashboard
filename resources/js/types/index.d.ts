@@ -47,7 +47,9 @@ export interface Profile {
     city: string | null;
     province: string | null;
     country: string | null;
+    profile_photo_url?: string | null;
     links?: ProjectLink[];
+    documents?: ProjectAsset[];
 }
 
 export interface Category {

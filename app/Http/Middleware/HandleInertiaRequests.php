@@ -45,7 +45,7 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->attributes->get('user')?->only(['id', 'username', 'email']),
-                'profile' => $request->attributes->get('user')?->profile?->only(['id', 'name', 'bio']),
+                'profile' => $this->getProfileData($request->attributes->get('user')),
             ],
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
@@ -53,5 +53,71 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    /**
+     * Get profile data including profile photo, links, and documents
+     */
+    private function getProfileData($user)
+    {
+        if (!$user || !$user->profile) {
+            return null;
+        }
+
+        $profile = $user->profile;
+        
+        // Get profile photo URL
+        $profilePhoto = $profile->assets()
+            ->where('display_name', 'Profile Photo')
+            ->whereHas('assetType', function($query) {
+                $query->where('key', 'images');
+            })
+            ->first();
+
+        // Get profile links
+        $links = $profile->links()->with('linkType')->get()->map(function ($link) {
+            return [
+                'title' => $link->name,
+                'url' => $link->url,
+                'type' => $link->linkType->key ?? 'portfolio',
+            ];
+        })->toArray();
+
+        // Get profile documents (excluding profile photo)
+        $documents = $profile->assets()
+            ->where('display_name', '!=', 'Profile Photo')
+            ->whereHas('assetType', function($query) {
+                $query->where('key', 'documents');
+            })
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'id' => $asset->id,
+                    'name' => $asset->display_name,
+                    'url' => $asset->filename, // MinIO URL
+                    'type' => $asset->assetType ? $asset->assetType->key : 'documents',
+                ];
+            })
+            ->toArray();
+
+        $profileData = [
+            'id' => $profile->id,
+            'name' => $profile->name,
+            'bio' => $profile->bio,
+            'profile_photo_url' => $profilePhoto ? $profilePhoto->filename : null,
+            'links' => $links,
+            'documents' => $documents,
+        ];
+
+        \Log::info('Profile data for navbar:', [
+            'user_id' => $user->id,
+            'profile_photo_found' => $profilePhoto ? true : false,
+            'profile_photo_url' => $profilePhoto ? $profilePhoto->filename : null,
+            'links_count' => count($links),
+            'documents_count' => count($documents),
+            'profile_data' => $profileData
+        ]);
+
+        return $profileData;
     }
 }

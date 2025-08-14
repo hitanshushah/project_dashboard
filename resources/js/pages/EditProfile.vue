@@ -220,9 +220,57 @@ const handleProfilePhotoSelect = (event: Event) => {
   }
 };
 
-const removeProfilePhoto = () => {
-  profilePhoto.value = null;
-  profilePhotoPreview.value = null;
+const removeProfilePhoto = async () => {
+  // If there's a new photo selected, just clear the local state
+  if (profilePhoto.value) {
+    profilePhoto.value = null;
+    profilePhotoPreview.value = null;
+    return;
+  }
+  
+  // If there's an existing profile photo, remove it from server
+  const existingProfilePhoto = existingAssets.value.find(asset => 
+    asset.asset_type?.key === 'images' && asset.display_name === 'Profile Photo'
+  );
+  
+  console.log('Remove photo clicked. Existing profile photo:', existingProfilePhoto);
+  
+  if (existingProfilePhoto) {
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+      console.log('CSRF Token:', csrfToken);
+      
+      const response = await fetch('/profile/photo', {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('Response status:', response.status);
+      const result = await response.json();
+      console.log('Response result:', result);
+      
+      if (result.success) {
+        // Remove the profile photo from the existing assets list
+        const photoIndex = existingAssets.value.findIndex(asset => 
+          asset.asset_type?.key === 'images' && asset.display_name === 'Profile Photo'
+        );
+        if (photoIndex !== -1) {
+          existingAssets.value.splice(photoIndex, 1);
+        }
+        showToastNotification('Profile photo removed successfully', 'success');
+      } else {
+        showToastNotification(result.message || 'Failed to remove profile photo', 'error');
+      }
+    } catch (error) {
+      console.error('Error removing profile photo:', error);
+      showToastNotification('Failed to remove profile photo', 'error');
+    }
+  } else {
+    console.log('No existing profile photo found');
+  }
 };
 
 const triggerProfilePhotoInput = () => {
@@ -259,8 +307,44 @@ const removeAsset = (index: number) => {
   newAssets.value.splice(index, 1);
 };
 
-const removeExistingAsset = (index: number) => {
-  existingAssets.value.splice(index, 1);
+const removeExistingAsset = async (index: number) => {
+  const asset = existingAssets.value[index];
+  
+  console.log('Removing existing asset:', asset);
+  
+  if (!asset || !asset.id) {
+    console.error('Asset not found or missing ID:', asset);
+    showToastNotification('Asset not found', 'error');
+    return;
+  }
+  
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    console.log('CSRF Token:', csrfToken);
+    
+    const response = await fetch(`/profile/assets/${asset.id}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    console.log('Response status:', response.status);
+    const result = await response.json();
+    console.log('Response result:', result);
+    
+    if (result.success) {
+      // Remove the asset from the existing assets list
+      existingAssets.value.splice(index, 1);
+      showToastNotification('Document removed successfully', 'success');
+    } else {
+      showToastNotification(result.message || 'Failed to remove document', 'error');
+    }
+  } catch (error) {
+    console.error('Error removing document:', error);
+    showToastNotification('Failed to remove document', 'error');
+  }
 };
 
 const triggerFileInput = (docType: string = 'other') => {
@@ -276,7 +360,7 @@ const triggerFileInput = (docType: string = 'other') => {
 
 
 const cancel = () => {
-  window.history.back();
+  router.visit('/');
 };
 
 // Show toast notification

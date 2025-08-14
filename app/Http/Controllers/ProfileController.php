@@ -138,8 +138,10 @@ class ProfileController extends Controller
             
             if ($existingProfilePhoto) {
                 // Delete from MinIO - extract filename from the stored URL
-                $filename = basename($existingProfilePhoto->filename);
-                $minioService->deleteFile($bucketName, 'images', $filename);
+                // The URL format is: http://localhost:4811/projectsdashboard/username/images/filename.jpg
+                $urlParts = explode('/', $existingProfilePhoto->filename);
+                $existingFilename = end($urlParts); // Get the last part which is the actual filename
+                $minioService->deleteFile($bucketName, 'images', $existingFilename);
                 // Delete from database
                 $existingProfilePhoto->delete();
             }
@@ -316,6 +318,240 @@ class ProfileController extends Controller
         }
 
         return redirect()->route('profile.edit')->with('success', 'Profile updated successfully!');
+    }
+
+    /**
+     * Remove the user's profile photo.
+     */
+    public function removePhoto(Request $request)
+    {
+        \Log::info('Profile photo removal request received', [
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'headers' => $request->headers->all(),
+        ]);
+        
+        $user = $request->attributes->get('user');
+        
+        if (!$user) {
+            \Log::error('User not found in profile photo removal request');
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        \Log::info('User found for profile photo removal', [
+            'user_id' => $user->id,
+            'username' => $user->username,
+        ]);
+
+        // Get the user's profile
+        $profile = $user->profile;
+        if (!$profile) {
+            \Log::error('Profile not found for user', ['user_id' => $user->id]);
+            return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
+        }
+
+        \Log::info('Profile found for user', [
+            'user_id' => $user->id,
+            'profile_id' => $profile->id,
+        ]);
+
+        // Find the existing profile photo
+        $existingProfilePhoto = $profile->assets()
+            ->where('display_name', 'Profile Photo')
+            ->whereHas('assetType', function($query) {
+                $query->where('key', 'images');
+            })
+            ->first();
+
+        \Log::info('Profile photo search result', [
+            'user_id' => $user->id,
+            'profile_id' => $profile->id,
+            'existing_photo_found' => $existingProfilePhoto ? true : false,
+            'existing_photo_id' => $existingProfilePhoto ? $existingProfilePhoto->id : null,
+            'existing_photo_filename' => $existingProfilePhoto ? $existingProfilePhoto->filename : null,
+        ]);
+
+        if (!$existingProfilePhoto) {
+            \Log::info('No profile photo found for user', ['user_id' => $user->id]);
+            return response()->json(['success' => false, 'message' => 'No profile photo found'], 404);
+        }
+
+        try {
+            $minioService = new MinIOService();
+            $bucketName = $user->username;
+            
+            // Extract filename from the stored URL
+            // The URL format is: http://localhost:4811/projectsdashboard/username/images/filename.jpg
+            $urlParts = explode('/', $existingProfilePhoto->filename);
+            $filename = end($urlParts); // Get the last part which is the actual filename
+            
+            \Log::info('Extracted filename for deletion', [
+                'user_id' => $user->id,
+                'original_url' => $existingProfilePhoto->filename,
+                'extracted_filename' => $filename,
+                'bucket_name' => $bucketName,
+            ]);
+            
+            // Delete from MinIO
+            $deleteResult = $minioService->deleteFile($bucketName, 'images', $filename);
+            
+            \Log::info('MinIO deletion result', [
+                'user_id' => $user->id,
+                'delete_result' => $deleteResult,
+                'filename' => $filename,
+                'bucket' => $bucketName
+            ]);
+            
+            if (!$deleteResult) {
+                \Log::error('Failed to delete profile photo from MinIO', [
+                    'user_id' => $user->id,
+                    'filename' => $filename,
+                    'bucket' => $bucketName
+                ]);
+                return response()->json(['success' => false, 'message' => 'Failed to delete file from storage'], 500);
+            }
+            
+            // Soft delete from database
+            $existingProfilePhoto->delete();
+            
+            \Log::info('Profile photo removed successfully', [
+                'user_id' => $user->id,
+                'filename' => $filename,
+                'bucket' => $bucketName,
+                'asset_id' => $existingProfilePhoto->id,
+            ]);
+            
+            return response()->json(['success' => true, 'message' => 'Profile photo removed successfully']);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error removing profile photo', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['success' => false, 'message' => 'Failed to remove profile photo'], 500);
+        }
+    }
+
+    /**
+     * Remove a specific asset from the user's profile.
+     */
+    public function removeAsset(Request $request, $assetId)
+    {
+        \Log::info('Profile asset removal request received', [
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'asset_id' => $assetId,
+            'headers' => $request->headers->all(),
+        ]);
+        
+        $user = $request->attributes->get('user');
+        
+        if (!$user) {
+            \Log::error('User not found in profile asset removal request');
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        \Log::info('User found for profile asset removal', [
+            'user_id' => $user->id,
+            'username' => $user->username,
+        ]);
+
+        // Get the user's profile
+        $profile = $user->profile;
+        if (!$profile) {
+            \Log::error('Profile not found for user', ['user_id' => $user->id]);
+            return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
+        }
+
+        \Log::info('Profile found for user', [
+            'user_id' => $user->id,
+            'profile_id' => $profile->id,
+        ]);
+
+        // Find the specific asset
+        $asset = $profile->assets()->find($assetId);
+        
+        if (!$asset) {
+            \Log::info('Asset not found', [
+                'user_id' => $user->id,
+                'asset_id' => $assetId,
+            ]);
+            return response()->json(['success' => false, 'message' => 'Asset not found'], 404);
+        }
+
+        \Log::info('Asset found for deletion', [
+            'user_id' => $user->id,
+            'asset_id' => $asset->id,
+            'asset_name' => $asset->display_name,
+            'asset_filename' => $asset->filename,
+        ]);
+
+        try {
+            $minioService = new MinIOService();
+            $bucketName = $user->username;
+            
+            // Extract filename from the stored URL
+            // The URL format is: http://localhost:4811/projectsdashboard/username/assettype/filename.jpg
+            $urlParts = explode('/', $asset->filename);
+            $filename = end($urlParts); // Get the last part which is the actual filename
+            
+            // Get asset type for MinIO deletion
+            $assetType = $asset->assetType ? $asset->assetType->key : 'documents';
+            
+            \Log::info('Extracted filename for deletion', [
+                'user_id' => $user->id,
+                'original_url' => $asset->filename,
+                'extracted_filename' => $filename,
+                'asset_type' => $assetType,
+                'bucket_name' => $bucketName,
+            ]);
+            
+            // Delete from MinIO
+            $deleteResult = $minioService->deleteFile($bucketName, $assetType, $filename);
+            
+            \Log::info('MinIO deletion result', [
+                'user_id' => $user->id,
+                'delete_result' => $deleteResult,
+                'filename' => $filename,
+                'asset_type' => $assetType,
+                'bucket' => $bucketName
+            ]);
+            
+            if (!$deleteResult) {
+                \Log::error('Failed to delete asset from MinIO', [
+                    'user_id' => $user->id,
+                    'filename' => $filename,
+                    'asset_type' => $assetType,
+                    'bucket' => $bucketName
+                ]);
+                return response()->json(['success' => false, 'message' => 'Failed to delete file from storage'], 500);
+            }
+            
+            // Soft delete from database
+            $asset->delete();
+            
+            \Log::info('Asset removed successfully', [
+                'user_id' => $user->id,
+                'filename' => $filename,
+                'asset_type' => $assetType,
+                'bucket' => $bucketName,
+                'asset_id' => $asset->id,
+            ]);
+            
+            return response()->json(['success' => true, 'message' => 'Asset removed successfully']);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error removing asset', [
+                'user_id' => $user->id,
+                'asset_id' => $assetId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json(['success' => false, 'message' => 'Failed to remove asset'], 500);
+        }
     }
 
     /**

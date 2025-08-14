@@ -394,14 +394,41 @@ class MinIOService
         try {
             $key = $username . '/' . $assetType . '/' . $filename;
             
+            Log::info('MinIOService: Deleting file from MinIO', [
+                'bucket' => $this->bucket,
+                'key' => $key,
+                'username' => $username,
+                'asset_type' => $assetType,
+                'filename' => $filename,
+            ]);
+            
             $this->s3Client->deleteObject([
                 'Bucket' => $this->bucket,
                 'Key' => $key,
             ]);
 
+            Log::info('MinIOService: File deleted successfully', [
+                'bucket' => $this->bucket,
+                'key' => $key,
+            ]);
+
             return true;
         } catch (AwsException $e) {
-            Log::error('Error deleting file from MinIO: ' . $e->getMessage());
+            Log::error('MinIOService: AWS error deleting file from MinIO', [
+                'bucket' => $this->bucket,
+                'key' => $username . '/' . $assetType . '/' . $filename,
+                'error' => $e->getMessage(),
+                'code' => $e->getAwsErrorCode(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return false;
+        } catch (\Exception $e) {
+            Log::error('MinIOService: Unexpected error deleting file from MinIO', [
+                'bucket' => $this->bucket,
+                'key' => $username . '/' . $assetType . '/' . $filename,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return false;
         }
     }

@@ -112,7 +112,7 @@ const clearFilters = () => {
 <template>
   <AppLayout>
     <v-main>
-      <v-container class="py-8">
+      <v-container class="py-8 !max-w-none !px-8">
         <v-alert
           v-if="flash?.success"
           type="success"
