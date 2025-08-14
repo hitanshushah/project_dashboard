@@ -13,10 +13,12 @@
       isDark ? 'text-white' : 'text-gray-900'
     ]">
       <div class="flex items-center">
-        <div class="w-8 h-8 bg-blue-500 rounded mr-2 flex items-center justify-center">
-          <span class="text-white font-bold text-sm">L</span>
-        </div>
-        <span>LogoApp</span>
+        <img 
+          src="/images/logo.png" 
+          alt="LogoApp" 
+          class="w-24 h-12 rounded mr-2 object-cover"
+        >
+        <span>Admin Panel</span>
       </div>
     </v-app-bar-title>
 
