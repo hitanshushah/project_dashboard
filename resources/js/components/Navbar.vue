@@ -3,7 +3,7 @@
     app 
     :color="isDark ? 'grey-darken-4' : 'white'" 
     :dark="isDark"
-    height="64" 
+    height="72" 
     class="px-4 transition-colors duration-300"
     elevation="1"
   >
@@ -30,10 +30,9 @@
             icon
             size="xx-large"
             variant="text"
-            class="hover:bg-blue-50 transition-colors duration-200"
             :title="`Visit ${linkedinLink.title}`"
           >
-            <v-icon class="text-blue-600 hover:text-blue-700" size="small">mdi-linkedin</v-icon>
+            <v-icon class="text-gray-300 hover:text-gray-700" size="small">mdi-linkedin</v-icon>
           </v-btn>
 
           <!-- GitHub -->
@@ -44,10 +43,9 @@
             icon
             size="xx-large"
             variant="text"
-            class="hover:bg-gray-50 transition-colors duration-200"
             :title="`Visit ${githubLink.title}`"
           >
-            <v-icon class="text-gray-300 hover:text-gray-900" size="small">mdi-github</v-icon>
+            <v-icon class="text-gray-300 hover:text-gray-700" size="small">mdi-github</v-icon>
           </v-btn>
 
           <!-- Personal Website -->
@@ -58,10 +56,9 @@
             icon
             size="xx-large"
             variant="text"
-            class="hover:bg-green-50 transition-colors duration-200"
             :title="`Visit ${portfolioLink.title}`"
           >
-            <v-icon class="text-green-600 hover:text-green-700" size="small">mdi-web</v-icon>
+            <v-icon class="text-gray-300 hover:text-gray-700" size="small">mdi-web</v-icon>
           </v-btn>
         </div>
         <v-menu offset-y v-if="documents.length > 0">
@@ -71,15 +68,15 @@
           v-bind="props"
           size="small"
           variant="text"
-          color="orange"
-          class="mr-2 mt-2 ml-2"
+          color="gray-300"
+          class="mr-2 ml-2"
           :title="`${documents.length} document${documents.length !== 1 ? 's' : ''} available`"
         >
           <v-badge
             :content="documents.length"
-            color="orange"
-            offset-x="8"
-            offset-y="-8"
+            color="gray-300"
+            offset-x="-2"
+            offset-y="-6"
           >
             <v-icon>mdi-file-document-multiple</v-icon>
           </v-badge>

@@ -1055,8 +1055,60 @@ class ProjectController extends Controller
             ->values()
             ->toArray();
 
-        // Get user profile for website-like display
-        $userProfile = $user->profile ?? null;
+        // Get user profile for website-like display with processed data
+        $userProfile = null;
+        if ($user && $user->profile) {
+            $profile = $user->profile;
+            
+            // Get profile photo URL
+            $profilePhoto = $profile->assets()
+                ->where('display_name', 'Profile Photo')
+                ->whereHas('assetType', function($query) {
+                    $query->where('key', 'images');
+                })
+                ->first();
+
+            // Get profile links
+            $links = $profile->links()->with('linkType')->get()->map(function ($link) {
+                return [
+                    'title' => $link->name,
+                    'url' => $link->url,
+                    'type' => $link->linkType->key ?? 'portfolio',
+                ];
+            })->toArray();
+
+            // Get profile documents (excluding profile photo)
+            $documents = $profile->assets()
+                ->where('display_name', '!=', 'Profile Photo')
+                ->whereHas('assetType', function($query) {
+                    $query->where('key', 'documents');
+                })
+                ->get()
+                ->map(function ($asset) {
+                    return [
+                        'id' => $asset->id,
+                        'name' => $asset->display_name,
+                        'display_name' => $asset->display_name,
+                        'url' => $asset->filename, // MinIO URL
+                        'filename' => $asset->filename,
+                        'type' => $asset->assetType ? $asset->assetType->key : 'documents',
+                    ];
+                })
+                ->toArray();
+
+            $userProfile = [
+                'id' => $profile->id,
+                'name' => $profile->name,
+                'designation' => $profile->designation,
+                'bio' => $profile->bio,
+                'city' => $profile->city,
+                'country' => $profile->country,
+                'email' => $user->email,
+                'profile_photo_url' => $profilePhoto ? $profilePhoto->filename : null,
+                'links' => $links,
+                'documents' => $documents,
+            ];
+        }
 
         return Inertia::render('PublicProjects', [
             'projects' => $projects,

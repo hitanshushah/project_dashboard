@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import ProjectCard from '@/components/ProjectCard.vue';
-import SearchFilters from '@/components/SearchFilters.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 import type { Project } from '@/types';
 
 const page = usePage();
@@ -11,114 +11,300 @@ const projects = computed(() => page.props.projects as Project[] || []);
 const categories = computed(() => page.props.categories as Array<{ name: string; key: string }> || []);
 const statuses = computed(() => page.props.statuses as Array<{ name: string; key: string }> || []);
 const technologies = computed(() => page.props.technologies as string[] || []);
-const userProfile = computed(() => page.props.userProfile as any || null);
-const currentFilters = computed(() => page.props.filters as {
-  search: string;
-  categories: string[];
-  statuses: string[];
-  technologies: string[];
-  sort_by: string;
-  sort_direction: string;
-} || {
-  search: '',
-  categories: [],
-  statuses: [],
-  technologies: [],
-  sort_by: 'created_at',
-  sort_direction: 'desc'
-});
-
-// Reference to SearchFilters component
-const searchFiltersRef = ref<InstanceType<typeof SearchFilters>>();
-
-// Computed property for checking if filters are active
-const hasActiveFilters = computed(() => {
-  return currentFilters.value.search ||
-         currentFilters.value.categories.length > 0 ||
-         currentFilters.value.statuses.length > 0 ||
-         currentFilters.value.technologies.length > 0 ||
-         currentFilters.value.sort_by !== 'created_at' ||
-         currentFilters.value.sort_direction !== 'desc';
-});
-
-// Clear filters function
-const clearFilters = () => {
-  if (searchFiltersRef.value) {
-    searchFiltersRef.value.clearFilters();
+const userProfile = computed(() => {
+  const profile = page.props.userProfile as any || null;
+  console.log('User Profile Data:', profile);
+  if (profile?.links) {
+    console.log('Available links:', profile.links);
+    profile.links.forEach((link: any, index: number) => {
+      console.log(`Link ${index}:`, link);
+    });
   }
-};
+  return profile;
+});
+
+// Category filter state
+const selectedCategory = ref('all');
+
+// Get categories that have projects
+const availableCategories = computed(() => {
+  const projectCategories = new Set(projects.value.map(project => project.category).filter(Boolean));
+  return categories.value.filter(category => projectCategories.has(category.key));
+});
+
+// Filtered projects based on selected category
+const filteredProjects = computed(() => {
+  if (selectedCategory.value === 'all') {
+    return projects.value;
+  }
+  return projects.value.filter(project => project.category === selectedCategory.value);
+});
+
+// Get user initials
+const userInitials = computed(() => {
+  if (!userProfile.value?.name) return 'U';
+  return userProfile.value.name
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+});
 
 // Get current year for footer
 const currentYear = new Date().getFullYear();
+
+// Handle image error
+const handleImageError = () => {
+  console.log('Profile image failed to load');
+};
+
+// Filter out duplicate documents based on display_name
+const uniqueDocuments = computed(() => {
+  if (!userProfile.value?.documents) return [];
+  
+  const seen = new Set();
+  return userProfile.value.documents.filter((document: any) => {
+    const displayName = document.display_name || '';
+    if (seen.has(displayName)) {
+      return false;
+    }
+    seen.add(displayName);
+    return true;
+  });
+});
+
+// Document helper functions
+const getDocumentIcon = (filename: string): string => {
+  const lowerFilename = filename.toLowerCase();
+  if (lowerFilename.includes('resume') || lowerFilename.includes('cv')) {
+    return 'mdi-file-document';
+  } else if (lowerFilename.includes('cover') || lowerFilename.includes('letter')) {
+    return 'mdi-file-document-outline';
+  } else if (lowerFilename.includes('certificate') || lowerFilename.includes('cert')) {
+    return 'mdi-certificate';
+  } else if (lowerFilename.includes('portfolio')) {
+    return 'mdi-briefcase';
+  } else {
+    return 'mdi-file-document-multiple';
+  }
+};
+
+const getDocumentColor = (filename: string): string => {
+  const lowerFilename = filename.toLowerCase();
+  if (lowerFilename.includes('resume') || lowerFilename.includes('cv')) {
+    return 'blue';
+  } else if (lowerFilename.includes('cover') || lowerFilename.includes('letter')) {
+    return 'green';
+  } else if (lowerFilename.includes('certificate') || lowerFilename.includes('cert')) {
+    return 'orange';
+  } else if (lowerFilename.includes('portfolio')) {
+    return 'purple';
+  } else {
+    return 'gray';
+  }
+};
+
+const getDocumentLabel = (filename: string): string => {
+  const lowerFilename = filename.toLowerCase();
+  if (lowerFilename.includes('resume') || lowerFilename.includes('cv')) {
+    return 'Resume';
+  } else if (lowerFilename.includes('cover') || lowerFilename.includes('letter')) {
+    return 'Cover Letter';
+  } else if (lowerFilename.includes('certificate') || lowerFilename.includes('cert')) {
+    return 'Certificate';
+  } else if (lowerFilename.includes('portfolio')) {
+    return 'Portfolio';
+  } else {
+    // Return a cleaned version of the filename
+    return filename.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+  }
+};
+
+// Link icon helper function
+const getLinkIcon = (linkType: string): string => {
+  const lowerType = linkType.toLowerCase();
+  if (lowerType.includes('github')) {
+    return 'mdi-github';
+  } else if (lowerType.includes('linkedin')) {
+    return 'mdi-linkedin';
+  } else if (lowerType.includes('portfolio') || lowerType.includes('website')) {
+    return 'mdi-web';
+  } else if (lowerType.includes('twitter')) {
+    return 'mdi-twitter';
+  } else if (lowerType.includes('facebook')) {
+    return 'mdi-facebook';
+  } else if (lowerType.includes('instagram')) {
+    return 'mdi-instagram';
+  } else if (lowerType.includes('youtube')) {
+    return 'mdi-youtube';
+  } else {
+    return 'mdi-link';
+  }
+};
 </script>
 
 <template>
   <!-- Public Projects Portfolio Website -->
-  <div class="public-portfolio">
-    <!-- Hero Section -->
-    <section class="hero-section text-white">
-      <!-- Floating geometric elements -->
-      <div class="floating-elements">
-        <div class="floating-circle circle-1"></div>
-        <div class="floating-circle circle-2"></div>
-        <div class="floating-circle circle-3"></div>
-        <div class="floating-triangle triangle-1"></div>
-        <div class="floating-triangle triangle-2"></div>
+  <div class="bg-gradient-to-br from-[#0c0c0c] to-[#1A1A1C]">
+          <!-- Profile Header Section -->
+      <div class="px-8 pt-8 pb-4">
+        <div class="flex flex-row justify-between">
+        <div class="flex items-center gap-3 mb-4">
+          <v-icon icon="mdi-periodic-table" color="blue" size="large"></v-icon>
+          <h1 class="text-2xl font-bold text-gray-300">Projects Dashboard</h1>
+        </div>
+        <div class="flex justify-end mb-4">
+          <ThemeToggle class="mr-4" />
+        </div>
+        </div>
+        <div class="w-full h-px bg-gray-800"></div>
       </div>
-      
-      <div class="container mx-auto px-6 py-20">
-        <div class="text-center max-w-4xl mx-auto">
-          <h1 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent hero-title">
-            My Project Portfolio
-          </h1>
-          <p class="text-xl md:text-2xl text-gray-100 mb-8 leading-relaxed max-w-3xl mx-auto opacity-90">
-            Welcome to my collection of public projects. Explore my work, technologies, and creative solutions.
-          </p>
-          <div class="flex justify-center space-x-4">
-            <v-chip
-              v-if="projects.length > 0"
-              size="large"
-              color="rgba(255,255,255,0.15)"
-              text-color="white"
-              class="font-semibold backdrop-blur-sm border border-white/30 hover:border-white/50 transition-all duration-300"
-            >
-              <v-icon icon="mdi-folder-multiple" size="small" class="mr-2"></v-icon>
-              {{ projects.length }} Project{{ projects.length !== 1 ? 's' : '' }} Available
-            </v-chip>
+      <section class="bg-black !mx-8 !my-8 rounded-xl">
+      <div class="mx-auto px-6 py-12">
+        <!-- Theme Toggle Button -->
+
+        
+        <div class="flex items-start space-x-8">
+          <!-- Profile Avatar -->
+          <div class="flex-shrink-0 mr-8 ml-8">
+            <div v-if="userProfile?.profile_photo_url" class="w-24 h-24 rounded-full overflow-hidden">
+              <v-img
+                :src="userProfile.profile_photo_url"
+                :alt="userProfile?.name || 'Profile Photo'"
+                class="w-full h-full object-cover bg-gradient-to-br from-blue-800 to-blue-950"
+                @error="handleImageError"
+              />
+            </div>
+            <div v-else class="w-24 h-24 bg-primary rounded-full flex items-center justify-center">
+              <span class="text-2xl font-bold text-gray-300">{{ userInitials }}</span>
+            </div>
+          </div>
+          
+          <!-- Profile Info -->
+          <div class="flex-1">
+            <div class="flex flex-row gap-8 justify-between">
+            <div>
+            <h1 class="text-3xl font-bold text-gray-300 mb-2">
+              {{ userProfile?.name || 'Your Name' }}
+            </h1>
+            </div>
+            <div v-if="uniqueDocuments.length > 0" class="flex flex-wrap gap-3 items-center">
+              <v-btn
+                v-for="document in uniqueDocuments"
+                :key="`${document.id}-${document.display_name}`"
+                variant="elevated"
+                size="small"
+                :href="document.url || document.filename"
+                target="_blank"
+                class="!bg-black !text-gray-300 !border-gray-800 hover:bg-gray-700 border"
+              >
+                <v-icon 
+                  :icon="getDocumentIcon(document.display_name || '')" 
+                  class="mr-2"
+                  :color="getDocumentColor(document.display_name || '')"
+                ></v-icon>
+                {{ document.display_name || 'Document' }}
+                <v-icon icon="mdi-download" size="small" class="ml-2"></v-icon>
+              </v-btn>
+            </div>
+            </div>
+            <p class="text-xl text-blue-400 mb-4">
+              {{ userProfile?.designation || 'Full Stack Developer' }}
+            </p>
+            <p class="text-gray-400 text-lg mb-6 max-w-3xl">
+              {{ userProfile?.bio || 'Passionate developer with experience building modern web applications. I love creating beautiful, functional, and user-friendly solutions.' }}
+            </p>
+            
+            <!-- Contact Info -->
+            <div class="flex items-center space-x-6 mb-6 gap-8">
+              <div v-if="userProfile?.city || userProfile?.country" class="flex items-center text-gray-400">
+                <v-icon icon="mdi-map-marker-outline" size="small" variant="outlined" class="mr-2 text-gray-400"></v-icon>
+                <span>{{ [userProfile?.city, userProfile?.country].filter(Boolean).join(', ') }}</span>
+              </div>
+              <div v-if="userProfile?.email" class="flex items-center text-gray-400">
+                <v-icon icon="mdi-email-outline" size="small" class="mr-2 text-gray-400"></v-icon>
+                <span>{{ userProfile.email }}</span>
+              </div>
+            </div>
+            
+                        <!-- Social Links -->
+            <div class="flex flex-wrap gap-3">
+              <v-btn
+                v-for="link in userProfile?.links || []"
+                :key="`${link.title}-${link.url}`"
+                variant="outlined"
+                size="medium"
+                :href="link.url"
+                target="_blank"
+                class="!bg-black text-gray-300 !border-gray-800 hover:!border-gray-400 hover:!bg-gray-900 transition-all duration-200 px-4 py-2"
+              >
+                <v-icon :icon="getLinkIcon(link.type || link.title)" class="mr-2" size="18"></v-icon>
+                <span class="font-medium text-sm">{{ link.title.toUpperCase() }}</span>
+              </v-btn>
+            </div>
+
+            <!-- Document Downloads -->
+            
           </div>
         </div>
-      </div>
-      
-      <!-- Wave divider -->
-      <div class="wave-divider">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-16 text-white fill-current">
-          <path d="M0,60 C200,100 400,20 600,60 C800,100 1000,20 1200,60 L1200,120 L0,120 Z"></path>
-        </svg>
       </div>
     </section>
 
     <!-- Main Content -->
-    <main class="main-content bg-gray-50 min-h-screen">
-      <div class="container mx-auto px-6 py-12">
-        
-        <!-- Search and Filter Controls (if projects exist) -->
-        <div v-if="projects.length > 0" class="mb-12">
-          <SearchFilters
-            ref="searchFiltersRef"
-            :categories="categories"
-            :statuses="statuses"
-            :technologies="technologies"
-            :current-filters="currentFilters"
-            :results-count="projects.length"
-            class="bg-white rounded-xl shadow-lg p-6"
-          />
+    <main class="!mx-8 !my-8">
+      <div class="mx-auto px-6 py-12">
+        <!-- Category Filters -->
+        <div class="mb-8">
+          <div class="flex flex-wrap gap-3">
+            <v-btn
+              variant="elevated"
+              :class="[
+                selectedCategory === 'all' 
+                  ? '!bg-gradient-to-br !from-blue-950 !to-blue-800 !text-white rounded-lg' 
+                  : '!bg-black text-gray-300 !border !border-gray-800 rounded-lg'
+              ]"
+              @click="selectedCategory = 'all'"
+            >
+              All Projects
+            </v-btn>
+            <v-btn
+              v-for="category in availableCategories"
+              :key="category.key"
+              variant="elevated"
+              :color="selectedCategory === category.key ? ' bg-gradient-to-br from-blue-800 to-blue-950' : 'gray'"
+              :class="[
+                selectedCategory === category.key 
+                  ? '!bg-gradient-to-br !from-blue-950 !to-blue-800 !text-white rounded-lg' 
+                  : '!bg-black text-gray-300 !border !border-gray-800 rounded-lg'
+              ]"
+              @click="selectedCategory = category.key"
+            >
+              {{ category.name }}
+            </v-btn>
+          </div>
+        </div>
+
+        <!-- Technologies Section -->
+        <div v-if="technologies.length > 0" class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">Technologies Used:</h2>
+          <div class="flex flex-wrap gap-3">
+            <v-chip
+              v-for="tech in technologies"
+              :key="tech"
+              size="large"
+              class="!border-2 !border-blue-900 !bg-[#23153A] !text-blue-400"
+            >
+              {{ tech }}
+            </v-chip>
+          </div>
         </div>
 
         <!-- Projects Grid -->
-        <section v-if="projects.length > 0" class="projects-section">
+        <section v-if="filteredProjects.length > 0" class="projects-section">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div 
-              v-for="project in projects" 
+              v-for="project in filteredProjects" 
               :key="project.id" 
               class="project-item transform transition-all duration-300 hover:scale-105"
             >
@@ -135,296 +321,51 @@ const currentYear = new Date().getFullYear();
 
         <!-- No Projects State -->
         <section v-else class="no-projects-section text-center py-20">
-          <div class="max-w-2xl mx-auto">
+          <div class="max-w-md mx-auto">
             <v-icon 
-              :icon="hasActiveFilters ? 'mdi-filter-off' : 'mdi-folder-open-outline'" 
-              size="120" 
-              color="grey-lighten-1" 
-              class="mb-8"
+              icon="mdi-folder-open" 
+              size="64" 
+              color="gray-600" 
+              class="mb-6"
             ></v-icon>
-            
-            <h2 class="text-4xl font-bold text-gray-700 mb-6">
-              <span v-if="hasActiveFilters">
-                No projects match your criteria
-              </span>
-              <span v-else>
-                No public projects yet
-              </span>
-            </h2>
-            
-            <p class="text-xl text-gray-500 mb-10 leading-relaxed">
-              <span v-if="hasActiveFilters">
-                Try adjusting your search and filter criteria to discover more projects.
-              </span>
-              <span v-else>
-                Public projects will appear here once they are made available.
-              </span>
+            <h3 class="text-2xl font-bold text-gray-300 mb-4">
+              {{ selectedCategory === 'all' ? 'No Projects Available' : 'No Projects in This Category' }}
+            </h3>
+            <p class="text-gray-500 mb-6">
+              {{ selectedCategory === 'all' 
+                ? 'There are no public projects available at the moment.' 
+                : `No projects found in the "${categories.find(c => c.key === selectedCategory)?.name || selectedCategory}" category.` 
+              }}
             </p>
-            
             <v-btn
-              v-if="hasActiveFilters"
-              color="primary"
-              size="large"
+              v-if="selectedCategory !== 'all'"
               variant="outlined"
-              @click="clearFilters"
-              class="font-semibold"
+              color="primary"
+              @click="selectedCategory = 'all'"
             >
-              Clear All Filters
+              View All Projects
             </v-btn>
-          </div>
-        </section>
-
-        <!-- Technologies Section (if projects exist) -->
-        <section v-if="projects.length > 0 && technologies.length > 0" class="technologies-section mt-16 py-12 bg-white rounded-xl shadow-lg">
-          <div class="text-center mb-8">
-            <h3 class="text-3xl font-bold text-gray-800 mb-4">Technologies I Use</h3>
-            <p class="text-gray-600 text-lg">A collection of tools and technologies featured in my projects</p>
-          </div>
-          
-          <div class="flex flex-wrap justify-center gap-3 px-6">
-            <v-chip
-              v-for="tech in technologies"
-              :key="tech"
-              size="large"
-              color="primary"
-              variant="outlined"
-              class="font-medium hover:bg-primary hover:text-white transition-colors duration-200"
-            >
-              {{ tech }}
-            </v-chip>
           </div>
         </section>
       </div>
     </main>
 
     <!-- Footer -->
-    <footer class="footer bg-gray-900 text-white py-12">
-      <div class="container mx-auto px-6">
-        <div class="text-center">
-          <h4 class="text-2xl font-bold mb-4">Project Portfolio</h4>
-          <p class="text-gray-400 mb-6">
-            Showcasing innovation through code and creativity
-          </p>
-          
-          <!-- Social Links placeholder -->
-          <div class="flex justify-center space-x-6 mb-6">
-            <v-btn
-              icon="mdi-github"
-              variant="text"
-              color="white"
-              size="large"
-              href="#"
-              target="_blank"
-            ></v-btn>
-            <v-btn
-              icon="mdi-linkedin"
-              variant="text"
-              color="white"
-              size="large"
-              href="#"
-              target="_blank"
-            ></v-btn>
-            <v-btn
-              icon="mdi-email"
-              variant="text"
-              color="white"
-              size="large"
-              href="mailto:"
-            ></v-btn>
-          </div>
-          
-          <div class="border-t border-gray-700 pt-6">
-            <p class="text-sm text-gray-500">
-              © {{ currentYear }} Project Portfolio. Built with passion and code.
-            </p>
-          </div>
-        </div>
+    <footer class="bg-black border-t border-gray-800 py-8">
+      <div class="container mx-auto px-6 text-center">
+        <p class="text-gray-400">
+          © {{ currentYear }} {{ userProfile?.name || 'Portfolio' }}. All rights reserved.
+        </p>
       </div>
     </footer>
   </div>
 </template>
 
-<style scoped>
-.public-portfolio {
-  min-height: 100vh;
-  background: #f8fafc;
-}
-
-.hero-section {
-  position: relative;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-  overflow: hidden;
-}
-
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(245, 87, 108, 0.2) 100%);
-  z-index: 1;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.hero-section > * {
-  position: relative;
-  z-index: 2;
-}
-
-/* Floating elements */
-.floating-elements {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
+<style>
+html, body {
+  background: linear-gradient(to bottom right, #0c0c0c, #1A1A1C) !important;
   height: 100%;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.floating-circle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-.circle-1 {
-  width: 120px;
-  height: 120px;
-  top: 20%;
-  left: 10%;
-  animation: float 20s ease-in-out infinite;
-}
-
-.circle-2 {
-  width: 80px;
-  height: 80px;
-  top: 60%;
-  right: 15%;
-  animation: float 25s ease-in-out infinite reverse;
-}
-
-.circle-3 {
-  width: 60px;
-  height: 60px;
-  top: 40%;
-  left: 80%;
-  animation: float 18s ease-in-out infinite;
-}
-
-.floating-triangle {
-  position: absolute;
-  width: 0;
-  height: 0;
-  border-style: solid;
-}
-
-.triangle-1 {
-  border-left: 30px solid transparent;
-  border-right: 30px solid transparent;
-  border-bottom: 52px solid rgba(255, 255, 255, 0.08);
-  top: 30%;
-  right: 25%;
-  animation: float 22s ease-in-out infinite;
-}
-
-.triangle-2 {
-  border-left: 25px solid transparent;
-  border-right: 25px solid transparent;
-  border-bottom: 43px solid rgba(255, 255, 255, 0.06);
-  bottom: 30%;
-  left: 20%;
-  animation: float 28s ease-in-out infinite reverse;
-}
-
-@keyframes float {
-  0%, 100% { 
-    transform: translateY(0px) rotate(0deg);
-    opacity: 0.7;
-  }
-  50% { 
-    transform: translateY(-30px) rotate(180deg);
-    opacity: 0.9;
-  }
-}
-
-.hero-title {
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  animation: titleGlow 3s ease-in-out infinite alternate;
-}
-
-@keyframes titleGlow {
-  from { 
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
-  }
-  to { 
-    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
-  }
-}
-
-.wave-divider {
-  position: relative;
-  z-index: 2;
-  transform: translateY(-1px);
-}
-
-.container {
-  max-width: 1200px;
-}
-
-.project-item {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.bg-clip-text {
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-.text-transparent {
-  color: transparent;
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-/* Custom scrollbar for better aesthetics */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  margin: 0;
+  padding: 0;
 }
 </style>
