@@ -13,13 +13,7 @@ const statuses = computed(() => page.props.statuses as Array<{ name: string; key
 const technologies = computed(() => page.props.technologies as string[] || []);
 const userProfile = computed(() => {
   const profile = page.props.userProfile as any || null;
-  console.log('User Profile Data:', profile);
-  if (profile?.links) {
-    console.log('Available links:', profile.links);
-    profile.links.forEach((link: any, index: number) => {
-      console.log(`Link ${index}:`, link);
-    });
-  }
+
   return profile;
 });
 
@@ -56,7 +50,7 @@ const currentYear = new Date().getFullYear();
 
 // Handle image error
 const handleImageError = () => {
-  console.log('Profile image failed to load');
+  
 };
 
 // Filter out duplicate documents based on display_name

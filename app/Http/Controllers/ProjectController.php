@@ -316,11 +316,6 @@ class ProjectController extends Controller
         
         $user = request()->attributes->get('user');
         if (!$user || $project->user_id !== $user->id) {
-            Log::error('EditProject: Unauthorized access attempt', [
-                'project_id' => $project->id,
-                'user_id' => $user ? $user->id : null,
-                'project_user_id' => $project->user_id
-            ]);
             return back()->withErrors(['error' => 'Unauthorized'])->withInput();
         }
 
@@ -448,11 +443,6 @@ class ProjectController extends Controller
             
             // Delete assets from MinIO and database
             foreach ($assetsToDelete as $asset) {
-                Log::info('Deleting asset from project', [
-                    'project_id' => $project->id,
-                    'asset_id' => $asset->id,
-                    'filename' => $asset->filename
-                ]);
                 
                 // Extract filename from MinIO URL for deletion
                 if ($asset->filename && $asset->assetType) {
@@ -467,11 +457,6 @@ class ProjectController extends Controller
                         
                         // Delete from MinIO
                         $minioService->deleteFile($username, $assetType, $filename);
-                        Log::info('Asset deleted from MinIO', [
-                            'username' => $username,
-                            'asset_type' => $assetType,
-                            'filename' => $filename
-                        ]);
                     }
                 }
                 
@@ -733,11 +718,6 @@ class ProjectController extends Controller
 
     private function createProjectSettings($project, $user, $previewSettings = [])
     {
-        \Log::info('Creating project settings with:', [
-            'project_id' => $project->id,
-            'user_id' => $user->id,
-            'preview_settings' => $previewSettings
-        ]);
         
         return ProjectSetting::create([
             'project_id' => $project->id,

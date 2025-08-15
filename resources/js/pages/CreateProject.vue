@@ -364,7 +364,7 @@ const previewFile = (file: File) => {
     window.open(url, '_blank');
   } else {
     // For text files, could implement a text preview modal
-    console.log('Preview not implemented for this file type');
+    
   }
 };
 

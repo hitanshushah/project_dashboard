@@ -89,7 +89,7 @@ const confirmToggle = () => {
       router.reload();
     },
     onError: (errors) => {
-      console.error('Failed to toggle project visibility:', errors);
+      
     }
   });
 };

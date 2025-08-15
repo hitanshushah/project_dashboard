@@ -111,16 +111,7 @@ class HandleInertiaRequests extends Middleware
             'documents' => $documents,
         ];
 
-        \Log::info('Profile data for navbar:', [
-            'user_id' => $user->id,
-            'profile_photo_found' => $profilePhoto ? true : false,
-            'profile_photo_url' => $profilePhoto ? $profilePhoto->filename : null,
-            'links_count' => count($links),
-            'documents_count' => count($documents),
-            'public_url' => $profile->public_url,
-            'share_profile' => $profile->share_profile,
-            'profile_data' => $profileData
-        ]);
+
 
         return $profileData;
     }

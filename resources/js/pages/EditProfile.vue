@@ -233,12 +233,11 @@ const removeProfilePhoto = async () => {
     asset.asset_type?.key === 'images' && asset.display_name === 'Profile Photo'
   );
   
-  console.log('Remove photo clicked. Existing profile photo:', existingProfilePhoto);
+  
   
   if (existingProfilePhoto) {
     try {
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-      console.log('CSRF Token:', csrfToken);
       
       const response = await fetch('/profile/photo', {
         method: 'DELETE',
@@ -248,9 +247,7 @@ const removeProfilePhoto = async () => {
         },
       });
       
-      console.log('Response status:', response.status);
       const result = await response.json();
-      console.log('Response result:', result);
       
       if (result.success) {
         // Remove the profile photo from the existing assets list
@@ -265,11 +262,8 @@ const removeProfilePhoto = async () => {
         showToastNotification(result.message || 'Failed to remove profile photo', 'error');
       }
     } catch (error) {
-      console.error('Error removing profile photo:', error);
       showToastNotification('Failed to remove profile photo', 'error');
     }
-  } else {
-    console.log('No existing profile photo found');
   }
 };
 
@@ -310,17 +304,15 @@ const removeAsset = (index: number) => {
 const removeExistingAsset = async (index: number) => {
   const asset = existingAssets.value[index];
   
-  console.log('Removing existing asset:', asset);
+
   
   if (!asset || !asset.id) {
-    console.error('Asset not found or missing ID:', asset);
     showToastNotification('Asset not found', 'error');
     return;
   }
   
   try {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    console.log('CSRF Token:', csrfToken);
     
     const response = await fetch(`/profile/assets/${asset.id}`, {
       method: 'DELETE',
@@ -330,9 +322,7 @@ const removeExistingAsset = async (index: number) => {
       },
     });
     
-    console.log('Response status:', response.status);
     const result = await response.json();
-    console.log('Response result:', result);
     
     if (result.success) {
       // Remove the asset from the existing assets list
@@ -341,10 +331,9 @@ const removeExistingAsset = async (index: number) => {
     } else {
       showToastNotification(result.message || 'Failed to remove document', 'error');
     }
-  } catch (error) {
-    console.error('Error removing document:', error);
-    showToastNotification('Failed to remove document', 'error');
-  }
+      } catch (error) {
+      showToastNotification('Failed to remove document', 'error');
+    }
 };
 
 const triggerFileInput = (docType: string = 'other') => {
@@ -411,7 +400,6 @@ const submit = () => {
       showToastNotification('Profile updated successfully!', 'success');
     },
     onError: (errors) => {
-      console.error('Form submission errors:', errors);
       showToastNotification('Failed to update profile. Please check the form and try again.', 'error');
     },
   });

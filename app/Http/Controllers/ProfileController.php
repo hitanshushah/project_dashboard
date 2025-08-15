@@ -113,8 +113,7 @@ class ProfileController extends Controller
         // Update profile with validated data (excluding links, assets, and profile_photo)
         $profileData = array_diff_key($validatedData, array_flip(['links', 'assets', 'profile_photo']));
         
-        // Debug: Log the profile data being saved
-        \Log::info('Profile data to save:', $profileData);
+
         
         $profile->fill($profileData);
         $profile->save();
@@ -162,23 +161,15 @@ class ProfileController extends Controller
                         'assetable_type' => Profile::class,
                     ]);
                     
-                    \Log::info('Profile photo uploaded successfully:', [
-                        'filename' => $filename,
-                        'url' => $uploadResult['url']
-                    ]);
+
                 }
-            } else {
-                \Log::error('Failed to upload profile photo:', ['result' => $uploadResult]);
             }
         }
 
-        // Debug: Log the saved profile
-        \Log::info('Saved profile:', $profile->toArray());
+
 
         // Handle links
         if ($request->has('links') && is_array($request->links)) {
-            // Debug: Log the links data
-            \Log::info('Links data to save:', $request->links);
             
             // Get existing links
             $existingLinks = $profile->links()->get()->keyBy('name');
@@ -188,7 +179,6 @@ class ProfileController extends Controller
             $linksToDelete = $existingLinks->keys()->diff($submittedLinks->keys());
             if ($linksToDelete->isNotEmpty()) {
                 $profile->links()->whereIn('name', $linksToDelete)->delete();
-                \Log::info('Deleted links:', $linksToDelete->toArray());
             }
             
             // Update or create links
@@ -208,9 +198,6 @@ class ProfileController extends Controller
                                 'link_type_id' => $linkType->id,
                                 'key' => $linkType->key,
                             ]);
-                            \Log::info('Updated link:', $existingLink->toArray());
-                        } else {
-                            \Log::info('Link unchanged:', $existingLink->toArray());
                         }
                     } else {
                         // Create new link
@@ -223,22 +210,13 @@ class ProfileController extends Controller
                             'linkable_type' => Profile::class,
                         ]);
                         
-                        // Debug: Log the created link
-                        \Log::info('Created link:', $link->toArray());
+
                     }
                 }
             }
-        } else {
-            \Log::info('No links data in request');
         }
 
         // Handle assets
-        \Log::info('Assets request data:', [
-            'has_assets' => $request->hasFile('assets'),
-            'assets_count' => $request->hasFile('assets') ? count($request->file('assets')) : 0,
-            'display_names' => $request->input('asset_display_names', []),
-            'doc_types' => $request->input('asset_doc_types', []),
-        ]);
         
         if ($request->hasFile('assets')) {
             $minioService = new MinIOService();
@@ -252,50 +230,34 @@ class ProfileController extends Controller
             $docTypes = $request->input('asset_doc_types', []);
             
             foreach ($assets as $index => $file) {
-                \Log::info('Processing asset:', [
-                    'index' => $index,
-                    'filename' => $file->getClientOriginalName(),
-                    'size' => $file->getSize(),
-                ]);
+
                 
                 // Get display name and doc type
                 $displayName = $displayNames[$index] ?? $file->getClientOriginalName();
                 $docType = $docTypes[$index] ?? 'other';
                 
-                \Log::info('Asset metadata:', [
-                    'display_name' => $displayName,
-                    'doc_type' => $docType,
-                ]);
+
                 
                 // Determine asset type based on doc type
                 $assetTypeKey = $this->determineAssetTypeForProfile($file, $docType);
                 
-                // Debug: Check all asset types
-                $allAssetTypes = AssetType::all(['id', 'key', 'name']);
-                \Log::info('All asset types in database:', $allAssetTypes->toArray());
+
                 
                 $assetType = AssetType::where('key', $assetTypeKey)->first();
                 
-                \Log::info('Asset type info:', [
-                    'asset_type_key' => $assetTypeKey,
-                    'asset_type_found' => $assetType ? true : false,
-                    'asset_type_id' => $assetType ? $assetType->id : null,
-                ]);
+
                 
                 if ($assetType) {
                     // Generate unique filename
                     $filename = time() . '_' . $file->getClientOriginalName();
                     $filePath = $profileFolder . $filename;
                     
-                    \Log::info('Uploading to MinIO:', [
-                        'bucket' => $bucketName,
-                        'file_path' => $filePath,
-                    ]);
+
                     
                     // Upload to MinIO
                     $uploadResult = $minioService->uploadFile($file, $bucketName, $assetTypeKey, $filename);
                     
-                    \Log::info('MinIO upload result:', $uploadResult);
+
                     
                     if ($uploadResult['success']) {
                         $asset = Asset::create([
@@ -307,12 +269,8 @@ class ProfileController extends Controller
                             'assetable_type' => Profile::class,
                         ]);
                         
-                        \Log::info('Asset created:', $asset->toArray());
-                    } else {
-                        \Log::error('MinIO upload failed:', ['result' => $uploadResult]);
+
                     }
-                } else {
-                    \Log::error('Asset type not found for key:', ['key' => $assetTypeKey]);
                 }
             }
         }
@@ -325,35 +283,17 @@ class ProfileController extends Controller
      */
     public function removePhoto(Request $request)
     {
-        \Log::info('Profile photo removal request received', [
-            'method' => $request->method(),
-            'url' => $request->url(),
-            'headers' => $request->headers->all(),
-        ]);
-        
         $user = $request->attributes->get('user');
         
         if (!$user) {
-            \Log::error('User not found in profile photo removal request');
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
-
-        \Log::info('User found for profile photo removal', [
-            'user_id' => $user->id,
-            'username' => $user->username,
-        ]);
 
         // Get the user's profile
         $profile = $user->profile;
         if (!$profile) {
-            \Log::error('Profile not found for user', ['user_id' => $user->id]);
             return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
         }
-
-        \Log::info('Profile found for user', [
-            'user_id' => $user->id,
-            'profile_id' => $profile->id,
-        ]);
 
         // Find the existing profile photo
         $existingProfilePhoto = $profile->assets()
@@ -363,16 +303,7 @@ class ProfileController extends Controller
             })
             ->first();
 
-        \Log::info('Profile photo search result', [
-            'user_id' => $user->id,
-            'profile_id' => $profile->id,
-            'existing_photo_found' => $existingProfilePhoto ? true : false,
-            'existing_photo_id' => $existingProfilePhoto ? $existingProfilePhoto->id : null,
-            'existing_photo_filename' => $existingProfilePhoto ? $existingProfilePhoto->filename : null,
-        ]);
-
         if (!$existingProfilePhoto) {
-            \Log::info('No profile photo found for user', ['user_id' => $user->id]);
             return response()->json(['success' => false, 'message' => 'No profile photo found'], 404);
         }
 
@@ -385,51 +316,23 @@ class ProfileController extends Controller
             $urlParts = explode('/', $existingProfilePhoto->filename);
             $filename = end($urlParts); // Get the last part which is the actual filename
             
-            \Log::info('Extracted filename for deletion', [
-                'user_id' => $user->id,
-                'original_url' => $existingProfilePhoto->filename,
-                'extracted_filename' => $filename,
-                'bucket_name' => $bucketName,
-            ]);
+
             
             // Delete from MinIO
             $deleteResult = $minioService->deleteFile($bucketName, 'images', $filename);
             
-            \Log::info('MinIO deletion result', [
-                'user_id' => $user->id,
-                'delete_result' => $deleteResult,
-                'filename' => $filename,
-                'bucket' => $bucketName
-            ]);
-            
             if (!$deleteResult) {
-                \Log::error('Failed to delete profile photo from MinIO', [
-                    'user_id' => $user->id,
-                    'filename' => $filename,
-                    'bucket' => $bucketName
-                ]);
                 return response()->json(['success' => false, 'message' => 'Failed to delete file from storage'], 500);
             }
             
             // Soft delete from database
             $existingProfilePhoto->delete();
             
-            \Log::info('Profile photo removed successfully', [
-                'user_id' => $user->id,
-                'filename' => $filename,
-                'bucket' => $bucketName,
-                'asset_id' => $existingProfilePhoto->id,
-            ]);
+
             
             return response()->json(['success' => true, 'message' => 'Profile photo removed successfully']);
             
         } catch (\Exception $e) {
-            \Log::error('Error removing profile photo', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
             return response()->json(['success' => false, 'message' => 'Failed to remove profile photo'], 500);
         }
     }
@@ -439,54 +342,24 @@ class ProfileController extends Controller
      */
     public function removeAsset(Request $request, $assetId)
     {
-        \Log::info('Profile asset removal request received', [
-            'method' => $request->method(),
-            'url' => $request->url(),
-            'asset_id' => $assetId,
-            'headers' => $request->headers->all(),
-        ]);
-        
         $user = $request->attributes->get('user');
         
         if (!$user) {
-            \Log::error('User not found in profile asset removal request');
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
-
-        \Log::info('User found for profile asset removal', [
-            'user_id' => $user->id,
-            'username' => $user->username,
-        ]);
 
         // Get the user's profile
         $profile = $user->profile;
         if (!$profile) {
-            \Log::error('Profile not found for user', ['user_id' => $user->id]);
             return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
         }
-
-        \Log::info('Profile found for user', [
-            'user_id' => $user->id,
-            'profile_id' => $profile->id,
-        ]);
 
         // Find the specific asset
         $asset = $profile->assets()->find($assetId);
         
         if (!$asset) {
-            \Log::info('Asset not found', [
-                'user_id' => $user->id,
-                'asset_id' => $assetId,
-            ]);
             return response()->json(['success' => false, 'message' => 'Asset not found'], 404);
         }
-
-        \Log::info('Asset found for deletion', [
-            'user_id' => $user->id,
-            'asset_id' => $asset->id,
-            'asset_name' => $asset->display_name,
-            'asset_filename' => $asset->filename,
-        ]);
 
         try {
             $minioService = new MinIOService();
@@ -500,56 +373,23 @@ class ProfileController extends Controller
             // Get asset type for MinIO deletion
             $assetType = $asset->assetType ? $asset->assetType->key : 'documents';
             
-            \Log::info('Extracted filename for deletion', [
-                'user_id' => $user->id,
-                'original_url' => $asset->filename,
-                'extracted_filename' => $filename,
-                'asset_type' => $assetType,
-                'bucket_name' => $bucketName,
-            ]);
+
             
             // Delete from MinIO
             $deleteResult = $minioService->deleteFile($bucketName, $assetType, $filename);
             
-            \Log::info('MinIO deletion result', [
-                'user_id' => $user->id,
-                'delete_result' => $deleteResult,
-                'filename' => $filename,
-                'asset_type' => $assetType,
-                'bucket' => $bucketName
-            ]);
-            
             if (!$deleteResult) {
-                \Log::error('Failed to delete asset from MinIO', [
-                    'user_id' => $user->id,
-                    'filename' => $filename,
-                    'asset_type' => $assetType,
-                    'bucket' => $bucketName
-                ]);
                 return response()->json(['success' => false, 'message' => 'Failed to delete file from storage'], 500);
             }
             
             // Soft delete from database
             $asset->delete();
             
-            \Log::info('Asset removed successfully', [
-                'user_id' => $user->id,
-                'filename' => $filename,
-                'asset_type' => $assetType,
-                'bucket' => $bucketName,
-                'asset_id' => $asset->id,
-            ]);
+
             
             return response()->json(['success' => true, 'message' => 'Asset removed successfully']);
             
         } catch (\Exception $e) {
-            \Log::error('Error removing asset', [
-                'user_id' => $user->id,
-                'asset_id' => $assetId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
             return response()->json(['success' => false, 'message' => 'Failed to remove asset'], 500);
         }
     }
