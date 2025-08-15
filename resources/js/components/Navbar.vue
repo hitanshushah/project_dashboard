@@ -320,10 +320,7 @@ const currentUser = computed(() => page.props.auth?.user);
 const currentProfile = computed(() => page.props.auth?.profile);
 const profilePhotoUrl = computed(() => {
   const url = currentProfile.value?.profile_photo_url || null;
-  console.log('Profile photo URL:', url);
-  console.log('Current profile data:', currentProfile.value);
-  console.log('Profile links:', currentProfile.value?.links);
-  console.log('Profile documents:', currentProfile.value?.documents);
+  
   return url;
 });
 
@@ -372,7 +369,7 @@ const goHome = () => {
 };
 
 const handleImageError = (error: any) => {
-  console.error('Profile photo failed to load:', error);
+  
   // The fallback to initials will happen automatically due to v-else
 };
 
@@ -519,17 +516,17 @@ const deletePublicUrl = async () => {
       // Refresh the page to get updated profile data
       window.location.reload();
     } else {
-      console.error('Failed to delete public URL:', data.message);
+      
     }
   } catch (error) {
-    console.error('Network error while deleting public URL:', error);
+    
   } finally {
     isDeleting.value = false;
   }
 };
 
 const logout = () => {
-  console.log('Logout clicked');
+  
   // Add your logout logic here
   // Example: router.visit('/logout');
 };

@@ -885,14 +885,31 @@ class ProjectController extends Controller
         }
     }
 
-    public function publicProjects(Request $request)
+    /**
+     * Get the current authenticated user for public projects
+     */
+    public function getUserForPublicProjects()
     {
         $user = request()->attributes->get('user');
         if (!$user) {
-            return redirect()->route('home');
+            return response()->json(['error' => 'User not found'], 404);
+        }
+        
+        return response()->json(['user_id' => $user->id]);
+    }
+
+    /**
+     * Get public projects by user ID - reusable method
+     */
+    public function getPublicProjectsByUserId($userId)
+    {
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
         }
 
-        // Get search, filter, and sort parameters
+        // Get filter parameters
+        $request = request();
         $search = $request->get('search', '');
         $categories = $request->get('categories', []);
         $statuses = $request->get('statuses', []);
@@ -1090,7 +1107,7 @@ class ProjectController extends Controller
             ];
         }
 
-        return Inertia::render('PublicProjects', [
+        return [
             'projects' => $projects,
             'categories' => $allCategories,
             'statuses' => $allStatuses,
@@ -1104,6 +1121,30 @@ class ProjectController extends Controller
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
             ]
-        ]);
+        ];
+    }
+
+    public function publicProjects(Request $request)
+    {
+        $user = request()->attributes->get('user');
+        if (!$user) {
+            return redirect('/');
+        }
+
+        // Use the reusable method to get data
+        $data = $this->getPublicProjectsByUserId($user->id);
+
+        return Inertia::render('PublicProjects', $data);
+    }
+
+    /**
+     * Display public projects for a specific user by user_id
+     */
+    public function publicProjectsByUserId($userId)
+    {
+        // Use the reusable method to get data
+        $data = $this->getPublicProjectsByUserId($userId);
+
+        return Inertia::render('PublicProjects', $data);
     }
 } 

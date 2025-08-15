@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 import { usePage, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectCard from '@/components/ProjectCard.vue';
 import SearchFilters from '@/components/SearchFilters.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
+import { usePublicProjects } from '@/composables/usePublicProjects';
 import type { Project } from '@/types';
 
 const page = usePage();
@@ -63,8 +65,8 @@ const editProject = (projectId: number) => {
 };
 
 const openPublicPreview = () => {
-  // Open the public projects page in a new tab
-  window.open('/public-projects', '_blank');
+      // Open the public projects page in a new tab
+    window.open('/public-projects', '_blank');
 };
 
 const toggleProjectVisibility = (project: Project) => {

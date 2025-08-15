@@ -20,6 +20,11 @@ Route::post('/projects/{project}', [ProjectController::class, 'update'])->name('
 // Public projects preview route
 Route::get('/public-projects', [ProjectController::class, 'publicProjects'])->name('projects.public');
 
+// Reusable public projects routes
+Route::get('/api/public-projects/user', [ProjectController::class, 'getUserForPublicProjects'])->name('api.public-projects.user');
+Route::get('/api/public-projects/{userId}', [ProjectController::class, 'getPublicProjectsByUserId'])->name('api.public-projects.by-user');
+Route::get('/public-projects/{userId}', [ProjectController::class, 'publicProjectsByUserId'])->name('projects.public.by-user');
+
 // Profile routes
 Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');

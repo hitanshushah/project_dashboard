@@ -161,4 +161,64 @@ export const getFileUrl = (file: any): string => {
   }
   // Fallback
   return '';
+};
+
+/**
+ * Get the current user's ID for public projects
+ */
+export const getUserForPublicProjects = async (): Promise<number> => {
+  const response = await fetch('/api/public-projects/user');
+  if (!response.ok) {
+    throw new Error('Failed to get user information');
+  }
+  
+  const data = await response.json();
+  return data.user_id;
+};
+
+/**
+ * Get public projects data for a specific user by user_id
+ */
+export const getPublicProjectsByUserId = async (userId: number, filters?: {
+  search?: string;
+  categories?: string[];
+  statuses?: string[];
+  technologies?: string[];
+  sort_by?: string;
+  sort_direction?: string;
+}): Promise<any> => {
+  const params = new URLSearchParams();
+  
+  if (filters) {
+    if (filters.search) params.append('search', filters.search);
+    if (filters.categories) filters.categories.forEach(cat => params.append('categories[]', cat));
+    if (filters.statuses) filters.statuses.forEach(status => params.append('statuses[]', status));
+    if (filters.technologies) filters.technologies.forEach(tech => params.append('technologies[]', tech));
+    if (filters.sort_by) params.append('sort_by', filters.sort_by);
+    if (filters.sort_direction) params.append('sort_direction', filters.sort_direction);
+  }
+  
+  const url = `/api/public-projects/${userId}${params.toString() ? '?' + params.toString() : ''}`;
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    throw new Error('Failed to get public projects data');
+  }
+  
+  return await response.json();
+};
+
+/**
+ * Open public projects page for a specific user
+ */
+export const openPublicProjectsPage = (userId: number): void => {
+  window.open(`/public-projects/${userId}`, '_blank');
+};
+
+/**
+ * Get current user's public projects page URL
+ */
+export const getCurrentUserPublicProjectsUrl = async (): Promise<string> => {
+  const userId = await getUserForPublicProjects();
+  return `/public-projects/${userId}`;
 }; 
