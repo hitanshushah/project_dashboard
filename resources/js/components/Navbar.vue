@@ -18,7 +18,6 @@
           alt="LogoApp" 
           class="w-24 h-12 rounded mr-2 object-cover"
         >
-        <span>Admin Panel</span>
         
         <!-- Social Media Links -->
         <div class="flex items-center gap-4 ml-8">
@@ -105,6 +104,117 @@
         </v-list>
       </v-card>
     </v-menu>
+    <div v-if="currentProfile?.public_url" class="ml-4">
+      <v-btn-group>
+        <!-- Visit Live URL -->
+        <v-btn
+          :href="`https://${currentProfile.public_url}.${publicUrl}`"
+          target="_blank"
+          size="medium"
+          variant="text"
+          append-icon="mdi-open-in-new"
+          class="!bg-black text-white !border-gray-600 border !text-sm py-2 px-2"
+        >
+          <span class="mr-2">Visit Live URL</span>
+        </v-btn>
+
+        <!-- Edit Public URL -->
+        <v-menu v-model="editMenuOpen" offset-y @update:model-value="setupEditPublicUrl">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              v-bind="props"
+              icon
+              size="x-small"
+              variant="text"
+              class="!bg-black text-white !border-gray-600 border !text-sm px-2 text-gray-400 hover:text-gray-600"
+              :title="`Edit public URL`"
+            >
+              <v-icon icon="mdi-pencil" size="small"></v-icon>
+            </v-btn>
+          </template>
+          <!-- Edit Menu Content -->
+          <v-card min-width="400" class="pa-4" @click.stop>
+            <v-card-title class="text-lg font-semibold pb-2">Edit Public URL</v-card-title>
+            <v-card-text class="pa-0 pb-4">
+              <p class="text-sm text-gray-400 mb-4">
+                Update your custom public URL. This will change your unique profile link.
+              </p>
+              <v-form @submit.prevent="updatePublicUrl" @click.stop>
+                <v-text-field
+                  v-model="publicUrlInput"
+                  label="Custom URL"
+                  variant="outlined"
+                  :error-messages="urlError"
+                  :loading="isLoading"
+                  :disabled="isLoading"
+                  prepend-inner-icon="mdi-link"
+                  :hint="`Your URL will be: ${fullPublicUrl}`"
+                  persistent-hint
+                  density="compact"
+                  @click.stop
+                >
+                  <template v-slot:append>
+                    <span class="text-gray-400 text-sm">.projects.local.hitanshushah.com</span>
+                  </template>
+                </v-text-field>
+              </v-form>
+            </v-card-text>
+            <v-card-actions class="pa-0">
+              <v-spacer></v-spacer>
+              <v-btn variant="outlined" @click="closeEditMenu" :disabled="isLoading" size="small" class="px-2">Cancel</v-btn>
+              <v-btn color="success" @click="updatePublicUrl" :loading="isLoading" :disabled="!publicUrlInput.trim()" size="small" variant="tonal">Update URL</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-menu>
+
+        <!-- Delete Public URL -->
+        <v-menu v-model="deleteMenuOpen" offset-y>
+          <template v-slot:activator="{ props }">
+            <v-btn
+              v-bind="props"
+              icon
+              size="x-small"
+              variant="text"
+              class="!bg-black text-white !border-gray-600 border !text-sm px-2 text-red-400 hover:text-red-600"
+              :title="`Delete public URL`"
+            >
+              <v-icon icon="mdi-delete" size="small"></v-icon>
+            </v-btn>
+          </template>
+          <!-- Delete Menu Content -->
+          <v-card min-width="300" class="pa-4" @click.stop>
+            <v-card-title class="text-lg font-semibold pb-2">Delete Public URL</v-card-title>
+            <v-card-text class="pa-0 pb-4">
+              <p class="text-sm text-gray-400 mb-4">
+                Are you sure you want to delete your public URL?
+              </p>
+            </v-card-text>
+            <v-card-actions class="pa-0">
+              <v-spacer></v-spacer>
+              <v-btn variant="outlined" @click="closeDeleteMenu" size="small">Cancel</v-btn>
+              <v-btn color="error" @click="deletePublicUrl" :loading="isDeleting" size="small" variant="tonal">Delete URL</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-menu>
+      </v-btn-group>
+    </div>
+
+    <!-- Create Public URL Button if none exists -->
+    <v-menu v-model="createMenuOpen" offset-y v-else>
+      <template v-slot:activator="{ props }">
+        <v-btn
+          v-bind="props"
+          size="medium"
+          variant="text"
+          append-icon="mdi-chevron-down"
+          class="!bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-2 ml-4"
+        >
+          <span class="mr-2">Set Live URL</span>
+        </v-btn>
+      </template>
+      <!-- Create Menu Content (same as before) -->
+    </v-menu>
+
               </div>
       </v-app-bar-title>
   
@@ -181,10 +291,13 @@
       </v-card>
     </v-menu>
   </v-app-bar>
+
+  <!-- Public URL Setup Modal -->
+  
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import ThemeToggle from './ThemeToggle.vue';
 import { useAppearance } from '@/composables/useAppearance';
@@ -192,10 +305,19 @@ import { useAppearance } from '@/composables/useAppearance';
 const page = usePage();
 const { isDark } = useAppearance();
 
+const publicUrl = import.meta.env.VITE_PUBLIC_URL;
+// Public URL dropdown state
+const publicUrlInput = ref('');
+const urlError = ref('');
+const isLoading = ref(false);
+const isDeleting = ref(false);
+const editMenuOpen = ref(false);
+const deleteMenuOpen = ref(false);
+const createMenuOpen = ref(false);
+
 const currentUser = computed(() => page.props.auth?.user);
 
 const currentProfile = computed(() => page.props.auth?.profile);
-
 const profilePhotoUrl = computed(() => {
   const url = currentProfile.value?.profile_photo_url || null;
   console.log('Profile photo URL:', url);
@@ -273,6 +395,138 @@ const editProfile = () => {
   router.visit('/profile/edit');
 };
 
+// Computed property for full public URL
+const fullPublicUrl = computed(() => {
+  if (!publicUrlInput.value.trim()) return '';
+  return `${publicUrlInput.value.trim()}.projects.local.hitanshushah.com`;
+});
+
+const setupPublicUrl = () => {
+  publicUrlInput.value = '';
+  urlError.value = '';
+};
+
+const setupEditPublicUrl = () => {
+  publicUrlInput.value = currentProfile.value?.public_url || '';
+  urlError.value = '';
+};
+
+const savePublicUrl = async () => {
+  if (!publicUrlInput.value.trim()) {
+    urlError.value = 'Please enter a custom URL';
+    return;
+  }
+
+  isLoading.value = true;
+  urlError.value = '';
+
+  try {
+    const response = await fetch('/api/profile/public-url', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+      },
+      body: JSON.stringify({
+        public_url: publicUrlInput.value.trim()
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Refresh the page to get updated profile data
+      window.location.reload();
+    } else {
+      urlError.value = data.message || 'Failed to save public URL';
+    }
+  } catch (error) {
+    urlError.value = 'Network error. Please try again.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const updatePublicUrl = async () => {
+  if (!publicUrlInput.value.trim()) {
+    urlError.value = 'Please enter a custom URL';
+    return;
+  }
+
+  // Check if the URL is the same as current
+  if (publicUrlInput.value.trim() === currentProfile.value?.public_url) {
+    urlError.value = 'This is already your current URL';
+    return;
+  }
+
+  isLoading.value = true;
+  urlError.value = '';
+
+  try {
+    const response = await fetch('/api/profile/public-url', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+      },
+      body: JSON.stringify({
+        public_url: publicUrlInput.value.trim()
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Refresh the page to get updated profile data
+      window.location.reload();
+    } else {
+      urlError.value = data.message || 'Failed to update public URL';
+    }
+  } catch (error) {
+    urlError.value = 'Network error. Please try again.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const closeEditMenu = () => {
+  editMenuOpen.value = false;
+};
+
+const closeDeleteMenu = () => {
+  deleteMenuOpen.value = false;
+};
+
+const closeCreateMenu = () => {
+  createMenuOpen.value = false;
+};
+
+const deletePublicUrl = async () => {
+  isDeleting.value = true;
+
+  try {
+    const response = await fetch('/api/profile/public-url', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+      }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Refresh the page to get updated profile data
+      window.location.reload();
+    } else {
+      console.error('Failed to delete public URL:', data.message);
+    }
+  } catch (error) {
+    console.error('Network error while deleting public URL:', error);
+  } finally {
+    isDeleting.value = false;
+  }
+};
 
 const logout = () => {
   console.log('Logout clicked');

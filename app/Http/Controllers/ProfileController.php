@@ -555,6 +555,150 @@ class ProfileController extends Controller
     }
 
     /**
+     * Set public URL for the user's profile
+     */
+    public function setPublicUrl(Request $request)
+    {
+        $user = $request->attributes->get('user');
+        
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        $request->validate([
+            'public_url' => 'required|string|max:50|regex:/^[a-zA-Z0-9_-]+$/'
+        ], [
+            'public_url.required' => 'Public URL is required',
+            'public_url.max' => 'Public URL must be less than 50 characters',
+            'public_url.regex' => 'Public URL can only contain letters, numbers, hyphens, and underscores'
+        ]);
+
+        $publicUrl = $request->input('public_url');
+        
+        // Check if this public URL already exists
+        $existingProfile = Profile::where('public_url', $publicUrl)
+            ->where('user_id', '!=', $user->id)
+            ->first();
+            
+        if ($existingProfile) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'This URL is already taken. Please choose a different one.'
+            ], 422);
+        }
+
+        // Get or create profile for the user
+        $profile = $user->profile;
+        if (!$profile) {
+            $profile = new Profile();
+            $profile->user_id = $user->id;
+        }
+
+        $profile->public_url = $publicUrl;
+        $profile->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Public URL set successfully',
+            'public_url' => $publicUrl
+        ]);
+    }
+
+    /**
+     * Update public URL for the user's profile
+     */
+    public function updatePublicUrl(Request $request)
+    {
+        $user = $request->attributes->get('user');
+        
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        $request->validate([
+            'public_url' => 'required|string|max:50|regex:/^[a-zA-Z0-9_-]+$/'
+        ], [
+            'public_url.required' => 'Public URL is required',
+            'public_url.max' => 'Public URL must be less than 50 characters',
+            'public_url.regex' => 'Public URL can only contain letters, numbers, hyphens, and underscores'
+        ]);
+
+        $publicUrl = $request->input('public_url');
+        
+        // Get the user's profile
+        $profile = $user->profile;
+        if (!$profile) {
+            return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
+        }
+
+        // Check if the new URL is the same as the current one
+        if ($profile->public_url === $publicUrl) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'This is already your current URL'
+            ], 422);
+        }
+        
+        // Check if this public URL already exists for another user
+        $existingProfile = Profile::where('public_url', $publicUrl)
+            ->where('user_id', '!=', $user->id)
+            ->first();
+            
+        if ($existingProfile) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'This URL is already taken. Please choose a different one.'
+            ], 422);
+        }
+
+        // Update the profile
+        $profile->public_url = $publicUrl;
+        $profile->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Public URL updated successfully',
+            'public_url' => $publicUrl
+        ]);
+    }
+
+    /**
+     * Delete public URL for the user's profile
+     */
+    public function deletePublicUrl(Request $request)
+    {
+        $user = $request->attributes->get('user');
+        
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        // Get the user's profile
+        $profile = $user->profile;
+        if (!$profile) {
+            return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
+        }
+
+        // Check if profile has a public URL to delete
+        if (!$profile->public_url) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'No public URL to delete'
+            ], 422);
+        }
+
+        // Set public_url to null and disable sharing
+        $profile->public_url = null;
+        $profile->share_profile = false;
+        $profile->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Public URL deleted successfully'
+        ]);
+    }
+
+    /**
      * Determine the appropriate link type based on the title
      */
     private function determineLinkType($title)

@@ -104,6 +104,8 @@ class HandleInertiaRequests extends Middleware
             'id' => $profile->id,
             'name' => $profile->name,
             'bio' => $profile->bio,
+            'public_url' => $profile->public_url,
+            'share_profile' => $profile->share_profile,
             'profile_photo_url' => $profilePhoto ? $profilePhoto->filename : null,
             'links' => $links,
             'documents' => $documents,
@@ -115,6 +117,8 @@ class HandleInertiaRequests extends Middleware
             'profile_photo_url' => $profilePhoto ? $profilePhoto->filename : null,
             'links_count' => count($links),
             'documents_count' => count($documents),
+            'public_url' => $profile->public_url,
+            'share_profile' => $profile->share_profile,
             'profile_data' => $profileData
         ]);
 

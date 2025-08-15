@@ -26,6 +26,11 @@ Route::post('/profile', [ProfileController::class, 'update'])->name('profile.upd
 Route::delete('/profile/photo', [ProfileController::class, 'removePhoto'])->name('profile.remove-photo');
 Route::delete('/profile/assets/{asset}', [ProfileController::class, 'removeAsset'])->name('profile.remove-asset');
 
+// API route for setting public URL
+Route::post('/api/profile/public-url', [ProfileController::class, 'setPublicUrl'])->name('profile.set-public-url');
+Route::put('/api/profile/public-url', [ProfileController::class, 'updatePublicUrl'])->name('profile.update-public-url');
+Route::delete('/api/profile/public-url', [ProfileController::class, 'deletePublicUrl'])->name('profile.delete-public-url');
+
 // API routes for project data
 Route::get('/api/categories', function () {
     return response()->json(\App\Models\Category::all(['id', 'name', 'key']));

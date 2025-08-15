@@ -131,16 +131,17 @@ const clearFilters = () => {
           <div class="d-flex gap-3">
             <v-btn
               v-if="publicProjects.length > 0"
-              color="blue"
-              prepend-icon="mdi-eye"
-              variant="outlined"
+              prepend-icon="mdi-open-in-new"
+              variant="text"
               @click="openPublicPreview"
               :title="`Preview your ${publicProjects.length} public project${publicProjects.length !== 1 ? 's' : ''}`"
+              :class="[
+                  '!bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-4 ml-4' 
+                ]"
             >
               Preview Public
               <v-badge
                 :content="publicProjects.length"
-                color="#1d76ba"
                 inline
                 class="ml-2"
               ></v-badge>

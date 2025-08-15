@@ -48,6 +48,8 @@ export interface Profile {
     province: string | null;
     country: string | null;
     profile_photo_url?: string | null;
+    public_url?: string | null;
+    share_profile?: boolean;
     links?: ProjectLink[];
     documents?: ProjectAsset[];
 }
