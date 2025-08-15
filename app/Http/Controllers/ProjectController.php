@@ -85,8 +85,12 @@ class ProjectController extends Controller
         $validSortDirections = ['asc', 'desc'];
         
         if (in_array($sortBy, $validSortFields) && in_array($sortDirection, $validSortDirections)) {
+            // For public projects, always order by sorting_order first, then by the selected field
+            $query->orderBy('sorting_order', 'asc');
             $query->orderBy($sortBy, $sortDirection);
         } else {
+            // Default sorting: sorting_order first, then created_at
+            $query->orderBy('sorting_order', 'asc');
             $query->orderBy('created_at', 'desc');
         }
 
@@ -100,6 +104,7 @@ class ProjectController extends Controller
                 'start_date' => $project->start_date,
                 'end_date' => $project->end_date,
                 'is_public' => $project->is_public,
+                'sorting_order' => $project->sorting_order,
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
                 'category' => $project->category ? $project->category->key : null,
@@ -966,8 +971,12 @@ class ProjectController extends Controller
         $validSortDirections = ['asc', 'desc'];
         
         if (in_array($sortBy, $validSortFields) && in_array($sortDirection, $validSortDirections)) {
+            // For public projects, always order by sorting_order first, then by the selected field
+            $query->orderBy('sorting_order', 'asc');
             $query->orderBy($sortBy, $sortDirection);
         } else {
+            // Default sorting: sorting_order first, then created_at
+            $query->orderBy('sorting_order', 'asc');
             $query->orderBy('created_at', 'desc');
         }
 
@@ -981,6 +990,7 @@ class ProjectController extends Controller
                 'start_date' => $project->start_date,
                 'end_date' => $project->end_date,
                 'is_public' => $project->is_public,
+                'sorting_order' => $project->sorting_order,
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
                 'category' => $project->category ? $project->category->key : null,
@@ -1146,5 +1156,45 @@ class ProjectController extends Controller
         $data = $this->getPublicProjectsByUserId($userId);
 
         return Inertia::render('PublicProjects', $data);
+    }
+
+    /**
+     * Update sorting orders for public projects
+     */
+    public function updateSortingOrders(Request $request)
+    {
+        $user = request()->attributes->get('user');
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'project_ids' => 'required|array',
+            'project_ids.*' => 'integer|exists:projects,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Invalid project IDs'], 400);
+        }
+
+        try {
+            // Verify all projects belong to the user and are public
+            $userProjects = Project::where('user_id', $user->id)
+                ->where('is_public', true)
+                ->whereIn('id', $request->project_ids)
+                ->pluck('id')
+                ->toArray();
+
+            if (count($userProjects) !== count($request->project_ids)) {
+                return response()->json(['error' => 'Some projects are not accessible'], 403);
+            }
+
+            // Update sorting orders
+            Project::updateSortingOrders($user->id, $request->project_ids);
+
+            return response()->json(['success' => true, 'message' => 'Project order updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update sorting orders'], 500);
+        }
     }
 } 

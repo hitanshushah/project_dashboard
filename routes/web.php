@@ -10,6 +10,7 @@ Route::get('/', [ProjectController::class, 'index'])->name('home');
 
 // Project routes
 Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+Route::post('/projects/update-sorting-orders', [ProjectController::class, 'updateSortingOrders'])->name('projects.update-sorting-orders');
 Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
 Route::patch('/projects/{project}/toggle-visibility', [ProjectController::class, 'toggleVisibility'])->name('projects.toggle-visibility');
 Route::post('/saveProject', [ProjectController::class, 'saveProject'])->name('projects.saveProject');

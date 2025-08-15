@@ -21,6 +21,7 @@ class Project extends Model
         'category_id',
         'user_id',
         'is_public',
+        'sorting_order',
     ];
 
     protected $casts = [
@@ -274,5 +275,68 @@ class Project extends Model
         if (!$this->tags()->where('tag_id', $tag->id)->exists()) {
             $this->tags()->attach($tag->id);
         }
+    }
+
+    /**
+     * Get the next sorting order for public projects
+     */
+    public static function getNextSortingOrder(int $userId): int
+    {
+        $maxOrder = self::where('user_id', $userId)
+            ->where('is_public', true)
+            ->max('sorting_order');
+        
+        return ($maxOrder ?? 0) + 1;
+    }
+
+    /**
+     * Recalculate sorting orders for all public projects of a user
+     */
+    public static function recalculateSortingOrders(int $userId): void
+    {
+        $publicProjects = self::where('user_id', $userId)
+            ->where('is_public', true)
+            ->orderBy('sorting_order', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        foreach ($publicProjects as $index => $project) {
+            $project->update(['sorting_order' => $index + 1]);
+        }
+    }
+
+    /**
+     * Update sorting orders for multiple projects
+     */
+    public static function updateSortingOrders(int $userId, array $projectIds): void
+    {
+        foreach ($projectIds as $index => $projectId) {
+            self::where('id', $projectId)
+                ->where('user_id', $userId)
+                ->where('is_public', true)
+                ->update(['sorting_order' => $index + 1]);
+        }
+    }
+
+    /**
+     * Boot method to handle automatic sorting order assignment
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // When a project is made public, assign it the next sorting order
+        static::updating(function ($project) {
+            if ($project->isDirty('is_public') && $project->is_public && $project->sorting_order === null) {
+                $project->sorting_order = self::getNextSortingOrder($project->user_id);
+            }
+        });
+
+        // When a project is made private, recalculate sorting orders
+        static::updated(function ($project) {
+            if ($project->wasChanged('is_public') && !$project->is_public) {
+                self::recalculateSortingOrders($project->user_id);
+            }
+        });
     }
 } 

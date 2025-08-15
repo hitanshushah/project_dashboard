@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectCard from '@/components/ProjectCard.vue';
 import SearchFilters from '@/components/SearchFilters.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import ProjectReorder from '@/components/ProjectReorder.vue';
 import { usePublicProjects } from '@/composables/usePublicProjects';
 import type { Project } from '@/types';
 
@@ -56,6 +57,9 @@ const showConfirmationModal = ref(false);
 const projectToToggle = ref<Project | null>(null);
 const toggleAction = ref<'public' | 'hidden'>('public');
 
+// Reorder modal state
+const showReorderModal = ref(false);
+
 const createProject = () => {
   router.visit('/projects/create');
 };
@@ -99,6 +103,20 @@ const confirmToggle = () => {
 const cancelToggle = () => {
   showConfirmationModal.value = false;
   projectToToggle.value = null;
+};
+
+// Reorder methods
+const openReorderModal = () => {
+  showReorderModal.value = true;
+};
+
+const closeReorderModal = () => {
+  showReorderModal.value = false;
+};
+
+const handleReorderSaved = (reorderedProjects: Project[]) => {
+  // Refresh the page to get updated project data
+  router.reload();
 };
 
 // Clear filters function for accessing from SearchFilters component
@@ -227,6 +245,21 @@ const clearFilters = () => {
 
           <!-- Public Projects -->
           <div v-if="selectedView === 'public' && publicProjects.length > 0" class="mb-8">
+            <!-- Public Projects Header with Reorder Button -->
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-300">
+                Public Projects ({{ publicProjects.length }})
+              </h3>
+              <v-btn
+                prepend-icon="mdi-drag"
+                variant="outlined"
+                @click="openReorderModal"
+                class="text-sm !bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-4 ml-4"
+              >
+                Reorder Projects
+              </v-btn>
+            </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div v-for="project in publicProjects" :key="project.id" class="relative">
                 <ProjectCard
@@ -343,6 +376,19 @@ const clearFilters = () => {
             </v-btn>
           </div>
         </div>
+
+        <!-- Reorder Modal -->
+        <v-dialog v-model="showReorderModal" class="!max-w-4xl" persistent>
+          <v-card class="!p-6">
+            <ProjectReorder
+              :projects="publicProjects"
+              :categories="categories"
+              :statuses="statuses"
+              @close="closeReorderModal"
+              @saved="handleReorderSaved"
+            />
+          </v-card>
+        </v-dialog>
 
         <!-- Confirmation Modal -->
         <v-dialog v-model="showConfirmationModal" class="!max-w-xl">
