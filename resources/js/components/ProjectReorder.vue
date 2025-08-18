@@ -4,19 +4,19 @@
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
         <v-icon icon="mdi-drag" color="blue" size="large"></v-icon>
-        <h2 class="text-xl font-semibold text-gray-300">Reorder Public Projects</h2>
+        <h2 :class="isDark ? 'text-xl font-semibold text-gray-300' : 'text-xl font-semibold text-gray-900'">Reorder Public Projects</h2>
       </div>
       <div class="flex gap-2">
         <v-btn
           variant="outlined"
-          color="gray"
+          :color="isDark ? 'gray-300' : 'gray-800'"
           @click="$emit('close')"
         >
           Cancel
         </v-btn>
         <v-btn
-          color="success"
-          variant="tonal"
+          :color="isDark ? 'success' : 'success'"
+          :variant="isDark ? 'tonal' : 'elevated'"
           :loading="saving"
           :disabled="!hasChanges"
           @click="saveOrder"
@@ -35,7 +35,7 @@
       <div class="flex items-start gap-3">
         <div>
           <div class="font-medium mb-1">Drag and drop to reorder your public projects</div>
-          <div class="text-sm text-gray-600">
+          <div :class="isDark ? 'text-sm text-gray-600' : 'text-sm text-gray-800'">
             The order you set here will be displayed on your public portfolio page. 
             Hidden projects are automatically removed from the order.
           </div>
@@ -62,31 +62,31 @@
               <div class="flex items-center gap-4 p-4">
                 <!-- Drag Handle -->
                 <div class="drag-handle">
-                  <v-icon icon="mdi-drag" color="gray" size="small"></v-icon>
+                  <v-icon icon="mdi-drag" :color="isDark ? 'gray-300' : 'gray-800'" size="small"></v-icon>
                 </div>
 
                 <!-- Project Info -->
                 <div class="flex-1">
                   <div class="flex items-center gap-3 mb-2">
-                    <h3 class="text-lg font-medium text-gray-300">{{ project.name }}</h3>
+                    <h3 :class="isDark ? 'text-lg font-medium text-gray-300' : 'text-lg font-medium text-gray-900'">{{ project.name }}</h3>
                     <v-chip
                       v-if="project.category"
                       size="small"
                       variant="outlined"
-                      color="blue"
+                      :color="isDark ? 'blue' : 'blue'"
                     >
                       {{ getCategoryName(project.category, categories) }}
                     </v-chip>
                     <v-chip
                       v-if="project.status"
                       size="small"
-                      :color="getStatusColor(project.status)"
+                      :color="isDark ? getStatusColor(project.status) : getStatusColor(project.status)"
                     >
                       {{ getStatusName(project.status, statuses) }}
                     </v-chip>
                   </div>
                   
-                  <p v-if="project.description" class="text-sm text-gray-500 line-clamp-2">
+                  <p v-if="project.description" :class="isDark ? 'text-sm text-gray-500 line-clamp-2' : 'text-sm text-gray-800 line-clamp-2'">
                     {{ project.description }}
                   </p>
                 </div>
@@ -96,7 +96,7 @@
                   <v-chip
                     size="small"
                     variant="outlined"
-                    color="primary"
+                    :color="isDark ? 'primary' : 'primary'"
                   >
                     {{ index + 1 }}
                   </v-chip>
@@ -110,9 +110,9 @@
 
     <!-- Empty State -->
     <div v-if="orderedProjects.length === 0" class="text-center py-12">
-      <v-icon icon="mdi-folder-open" size="x-large" color="gray" class="mb-4"></v-icon>
-      <h3 class="text-lg font-medium text-gray-300 mb-2">No Public Projects</h3>
-      <p class="text-gray-500">Make some projects public to reorder them here.</p>
+      <v-icon icon="mdi-folder-open" size="x-large" :color="isDark ? 'gray-300' : 'gray-800'" class="mb-4"></v-icon>
+      <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-2' : 'text-lg font-medium text-gray-900 mb-2'">No Public Projects</h3>
+      <p :class="isDark ? 'text-gray-500' : 'text-gray-800'">Make some projects public to reorder them here.</p>
     </div>
 
     <!-- Snackbar for feedback -->
@@ -140,6 +140,7 @@ interface Props {
   projects: Project[];
   categories?: Array<{ name: string; key: string }>;
   statuses?: Array<{ name: string; key: string }>;
+  isDark?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {

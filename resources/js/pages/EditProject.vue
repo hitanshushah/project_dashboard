@@ -13,6 +13,7 @@ import {
   getFileUrl 
 } from '@/lib/projectUtils';
 import PreviewSettings from '@/components/PreviewSettings.vue';
+import { useAppearance } from '@/composables/useAppearance';
 
 const page = usePage();
 
@@ -208,6 +209,9 @@ const projectDemo = ref('');
 // Preview settings
 const showPreviewSettings = ref(false);
 const previewSettings = computed(() => form.preview_settings);
+
+// Theme management
+const { isDark } = useAppearance();
 
 // Methods
 const addTag = () => {
@@ -428,10 +432,10 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             color="gray"
             class="mb-4"
           ></v-btn>
-          <h1 class="text-3xl font-bold text-gray-300">
+          <h1 :class="isDark ? 'text-3xl font-bold text-gray-300' : 'text-3xl font-bold text-gray-900'">
             Edit Project
           </h1>
-          <p class="text-gray-500 mt-2">Edit the details below to modify your project</p>
+          <p :class="isDark ? 'text-gray-500 mt-2' : 'text-gray-700 mt-2'">Edit the details below to modify your project</p>
           </div>
           <div class="d-flex gap-2">
             <v-btn
@@ -452,12 +456,12 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
 
         <v-row>
           <!-- Form Section -->
-          <v-col cols="12" lg="7" class="bg-[#212121] rounded-lg !p-6">
+          <v-col cols="12" lg="7" :class="[isDark ? 'bg-[#212121]' : '!bg-[#DBDBDB]', 'rounded-lg !p-6']">
               <!-- Project Information Section -->
               <div class="mb-8">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
-                  <h2 class="text-2xl font-bold text-gray-300">Project Information</h2>
+                  <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Project Information</h2>
                 </div>
                 
                 <v-row>
@@ -468,7 +472,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                   placeholder="Enter your project name"
                   variant="outlined"
                   :error-messages="form.errors.name"
-                  color="gray-300"
+                  :color="isDark ? 'gray-300' : 'gray-600'"
                   density="compact"
                   class="text-field-modern"
                   required
@@ -489,7 +493,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     placeholder="Select category"
                     variant="outlined"
                     :error-messages="form.errors.category"
-                    color="gray-300"
+                    :color="isDark ? 'gray-300' : 'gray-600'"
                     density="compact"
                     class="select-modern"
                     required
@@ -507,7 +511,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                   placeholder="Describe your project vision, goals, and what makes it special..."
                   variant="outlined"
                   rows="5"
-                  color="gray-300"
+                  :color="isDark ? 'gray-300' : 'gray-600'"
                   density="compact"
                   :error-messages="form.errors.description"
                   class="textarea-modern"
@@ -522,7 +526,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               <div class="mb-2">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
-                  <h2 class="text-2xl font-bold text-gray-300">Project Timeline</h2>
+                  <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Project Timeline</h2>
                 </div>
                 
                 <v-row>
@@ -541,7 +545,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           prepend-inner-icon="mdi-calendar-start"
                           readonly
                           density="compact"
-                          color="gray"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
                           v-bind="props"
                           class="date-field-modern"
                         ></v-text-field>
@@ -550,7 +554,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         v-model="form.start_date"
                         @update:model-value="updateStartDate"
                         show-adjacent-months
-                        color="gray"
+                        :color="isDark ? 'gray-300' : 'gray-600'"
                         @click:date="() => {}"
                       ></v-date-picker>
                     </v-menu>
@@ -571,7 +575,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           prepend-inner-icon="mdi-calendar-check"
                           readonly
                           density="compact"
-                          color="gray-300"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
                           v-bind="props"
                           class="date-field-modern"
                         ></v-text-field>
@@ -580,7 +584,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         v-model="form.end_date"
                         @update:model-value="updateEndDate"
                         show-adjacent-months
-                        color="gray"
+                        :color="isDark ? 'gray-300' : 'gray-600'"
                         @click:date="() => {}"
                       ></v-date-picker>
                     </v-menu>
@@ -595,7 +599,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                       density="compact"
                       label="Current Status"
                       variant="outlined"
-                      color="gray-300"
+                      :color="isDark ? 'gray-300' : 'gray-600'"
                       :error-messages="form.errors.status"
                       class="select-modern"
                     >
@@ -611,7 +615,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               <div class="mb-2">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-4"></div>
-                  <h2 class="text-2xl font-bold text-gray-300">Tags & Technologies</h2>
+                  <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Tags & Technologies</h2>
                 </div>
                 
                 <v-row>
@@ -632,7 +636,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                       hide-selected
                       clearable
                       density="compact"
-                      color="gray-300"
+                      :color="isDark ? 'gray-300' : 'gray-600'"
                       class="text-field-modern"
                     >
                       <template v-slot:prepend-inner>
@@ -667,7 +671,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                       hide-selected
                       clearable
                       density="compact"
-                      color="gray-300"
+                      :color="isDark ? 'gray-300' : 'gray-600'"
                       class="select-modern"
                     >
                       <template v-slot:prepend-inner>
@@ -692,7 +696,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               <div class="mb-8">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full mr-4"></div>
-                  <h2 class="text-2xl font-bold text-gray-300">Links</h2>
+                  <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Links</h2>
                 </div>
                 
                 <div>
@@ -706,7 +710,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           placeholder="https://github.com/..."
                           variant="outlined"
                           density="compact"
-                          color="gray-300"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
                           class="text-field-modern compact-field"
                           @keydown="handleGithubKeydown"
                         >
@@ -741,6 +745,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           placeholder="https://..."
                           variant="outlined"
                           density="compact"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
                           class="text-field-modern compact-field"
                           @keydown="handleDemoKeydown"
                         >
@@ -776,6 +781,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         variant="outlined"
                         @keydown="handleLinkKeydown"
                         density="compact"
+                        :color="isDark ? 'gray-300' : 'gray-600'"
                         class="text-field-modern compact-field"
                       >
                         <template v-slot:prepend-inner>
@@ -792,6 +798,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         variant="outlined"
                         @keydown="handleLinkKeydown"
                         density="compact"
+                        :color="isDark ? 'gray-300' : 'gray-600'"
                         class="text-field-modern compact-field"
                       >
                         <template v-slot:prepend-inner>
@@ -851,7 +858,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             icon="mdi-open-in-new"
                             variant="text"
                             size="x-small"
-                            color="gray-300"
+                            :color="isDark ? 'gray-300' : 'gray-600'"
                             :href="link.url"
                             target="_blank"
                             :disabled="!link.url"
@@ -860,7 +867,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             icon="mdi-close"
                             variant="text"
                             size="x-small"
-                            color="error"
+                            :color="isDark ? 'error' : 'error'"
                             @click="removeLink(index)"
                           />
                         </div>
@@ -874,12 +881,12 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               <div class="mb-8">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-gray-500 to-orange-500 rounded-full mr-4"></div>
-                  <h2 class="text-2xl font-bold text-gray-300">Assets</h2>
+                  <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Assets</h2>
                 </div>
                 
                 <!-- Existing Assets -->
                 <div v-if="form.existingAssets.length > 0" class="mb-4">
-                  <h4 class="text-lg font-medium mb-4">Existing Assets</h4>
+                  <h4 :class="isDark ? 'text-lg font-medium mb-4' : 'text-lg font-medium mb-4'">Existing Assets</h4>
                   <div class="flex flex-wrap gap-2 mb-4">
                     <v-chip
                       v-for="(asset, index) in form.existingAssets"
@@ -898,10 +905,10 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             class="mr-2"
                           />
                           <div class="min-w-0">
-                            <div class="text-sm font-medium text-gray-300 truncate max-w-[180px]">
+                            <div :class="isDark ? 'text-sm font-medium text-gray-300 truncate max-w-[180px]' : 'text-sm font-medium text-gray-900 truncate max-w-[180px]'">
                               {{ asset.name }}
                             </div>
-                            <div class="text-xs text-gray-500">
+                            <div :class="isDark ? 'text-xs text-gray-500' : 'text-xs text-gray-700'">
                               {{ getFileType(asset.type || asset.name) }}
                             </div>
                           </div>
@@ -913,7 +920,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             icon="mdi-eye"
                             variant="text"
                             size="medium"
-                            color="gray-300"
+                            :color="isDark ? 'gray-300' : 'gray-600'"
                             :href="asset.url"
                             target="_blank"
                             v-if="isPreviewable(asset.type || asset.name)"
@@ -922,7 +929,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             icon="mdi-close"
                             variant="text"
                             size="medium"
-                            color="error"
+                            :color="isDark ? 'error' : 'error'"
                             @click="removeExistingAsset(index)"
                           />
                         </div>
@@ -933,19 +940,18 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 
                 <div class="mb-4">
                   <div 
-                    class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors duration-200 
-                    hover:bg-gray-800 cursor-pointer"
+                    :class="['border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200', isDark ? 'hover:bg-gray-800 cursor-pointer border-gray-300' : 'hover:bg-gray-100 cursor-pointer border-gray-800']"
                     @click="openFileDialog"
                     @dragover.prevent
                     @drop.prevent="handleFileDrop"
                   >
                     <div class="flex flex-col items-center justify-center !p-4">
-                      <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center">
+                      <div :class="['w-16 h-16 rounded-full flex items-center justify-center', isDark ? 'bg-gray-800' : 'bg-gray-300']">
                         <v-icon size="32">mdi-cloud-upload</v-icon>
                       </div>
                       <div>
-                        <h3 class="text-lg font-semibold text-gray-300 mb-2">Upload Project Assets</h3>
-                        <p class="text-gray-500 mb-4">Drag and drop files here, or click to browse</p>
+                        <h3 :class="isDark ? 'text-lg font-semibold text-gray-300 mb-2' : 'text-lg font-semibold text-gray-900 mb-2'">Upload Project Assets</h3>
+                        <p :class="isDark ? 'text-gray-500 mb-4' : 'text-gray-700 mb-4'">Drag and drop files here, or click to browse</p>
                         <v-btn
                           variant="outlined"
                           size="large"
@@ -956,7 +962,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           Choose Files
                         </v-btn>
                       </div>
-                      <div class="text-xs text-gray-400 mt-1">
+                      <div :class="isDark ? 'text-xs text-gray-400 mt-1' : 'text-xs text-gray-700 mt-1'">
                         Supports: Images, PDFs, Documents, Spreadsheets, Archives
                       </div>
                     </div>
@@ -990,10 +996,10 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           class="mr-2"
                         />
                         <div class="min-w-0">
-                          <div class="text-sm font-medium text-gray-800 truncate max-w-[180px]">
+                          <div :class="isDark ? 'text-sm font-medium text-gray-800 truncate max-w-[180px]' : 'text-sm font-medium text-gray-900 truncate max-w-[180px]'">
                             {{ file.name }}
                           </div>
-                          <div class="text-xs text-gray-500">
+                          <div :class="isDark ? 'text-xs text-gray-500' : 'text-xs text-gray-700'">
                             {{ formatFileSize(file.size) }} • {{ getFileType(file.type || file.name) }}
                           </div>
                         </div>
@@ -1005,7 +1011,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           icon="mdi-eye"
                           variant="text"
                           size="medium"
-                          color="gray-300"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
                           @click="previewFile(file)"
                           v-if="isPreviewable(file.type || file.name)"
                         />
@@ -1013,7 +1019,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           icon="mdi-close"
                           variant="text"
                           size="medium"
-                          color="error"
+                          :color="isDark ? 'error' : 'error'"
                           @click="removeAsset(index)"
                         />
                       </div>
@@ -1040,10 +1046,10 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
 
           <!-- Preview Section -->
           <v-col cols="12" lg="5" class="!mt-[-26px]">
-            <v-card class="pa-6 h-fit sticky top-4">
+            <v-card :class="[isDark ? 'bg-[#212121]' : '!bg-[#DBDBDB]', 'pa-6 h-fit sticky top-4']">
               <div class="mb-6">
                 <div class="flex items-center mb-4">
-                  <h2 class="text-xl font-semibold text-gray-300">Live Preview</h2>
+                  <h2 :class="isDark ? 'text-xl font-semibold text-gray-300' : 'text-xl font-semibold text-gray-900'">Live Preview</h2>
                   <v-btn
                     icon="mdi-cog"
                     variant="text"

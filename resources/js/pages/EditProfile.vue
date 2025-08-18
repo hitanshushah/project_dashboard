@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { User, Profile, ProjectLink, ProjectAsset } from '@/types';
 import { getLinkIcon, getFileIcon, getFileColor, formatFileSize } from '@/lib/projectUtils';
+import { useAppearance } from '@/composables/useAppearance';
 
 interface Props {
   user: User;
@@ -61,6 +62,9 @@ const form = useForm({
   province: props.profile.province || '',
   country: props.profile.country || '',
 });
+
+// Theme management
+const { isDark } = useAppearance();
 
 // Methods for managing links
 const addLink = () => {
@@ -454,8 +458,8 @@ onMounted(() => {
               color="gray"
               class="mb-4"
             ></v-btn>
-            <h1 class="text-3xl font-bold text-gray-300">Edit Profile</h1>
-            <p class="text-gray-500 mt-2">Update your profile information</p>
+            <h1   :class="isDark ? 'text-3xl font-bold text-gray-300' : 'text-3xl font-bold text-gray-900'">Edit Profile</h1>
+            <p :class="isDark ? 'text-gray-500 mt-2' : 'text-gray-800 mt-2'">Update your profile information</p>
           </div>
           <div class="flex gap-4 justify-end">
             <v-btn
@@ -487,7 +491,7 @@ onMounted(() => {
                 <div class="mb-0">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full mr-4"></div>
-                    <h2 class="text-2xl font-bold text-gray-300">Account Information</h2>
+                    <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Account Information</h2>
                   </div>
                   
                   <v-row>
@@ -520,7 +524,7 @@ onMounted(() => {
                 <div class="mb-0">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-green-500 to-teal-500 rounded-full mr-4"></div>
-                    <h2 class="text-2xl font-bold text-gray-300">Personal Information</h2>
+                    <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Personal Information</h2>
                   </div>
                   <v-row>
                     <v-col cols="12" md="6">
@@ -638,7 +642,7 @@ onMounted(() => {
                 <div class="mb-0">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-orange-500 to-red-500 rounded-full mr-4"></div>
-                    <h2 class="text-2xl font-bold text-gray-300">Address Information</h2>
+                    <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Address Information</h2>
                   </div>
                   
                   <v-row>
@@ -692,7 +696,7 @@ onMounted(() => {
                 <div class="mt-4">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full mr-4"></div>
-                    <h2 class="text-2xl font-bold text-gray-300">Links</h2>
+                    <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Links</h2>
                   </div>
                   
                   <div>
@@ -790,7 +794,7 @@ onMounted(() => {
 
                     <!-- Custom Links -->
                     <div class="mb-4">
-                      <h3 class="text-lg font-medium text-gray-300 mb-3">Add Custom Link</h3>
+                      <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-3' : 'text-lg font-medium text-gray-900 mb-3'">Add Custom Link</h3>
                       <v-row>
                         <v-col cols="12" md="5">
                           <v-text-field
@@ -853,7 +857,7 @@ onMounted(() => {
                               <a
                                 :href="link.url"
                                 target="_blank"
-                                class="text-blue-600 hover:underline truncate max-w-[200px]"
+                                :class="isDark ? 'text-blue-600 hover:underline truncate max-w-[200px]' : 'text-blue-950 hover:underline truncate max-w-[200px]'"
                               >
                                 {{ link.url }}
                               </a>
@@ -881,7 +885,7 @@ onMounted(() => {
                 <div class="mt-4">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-yellow-500 to-orange-500 rounded-full mr-4"></div>
-                    <h2 class="text-2xl font-bold text-gray-300">Documents & Files</h2>
+                    <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Documents & Files</h2>
                   </div>
                   
                   <!-- Predefined Document Upload -->
@@ -896,7 +900,7 @@ onMounted(() => {
                         <div class="flex items-center gap-3">
                           <v-icon :icon="doc.icon" size="large" color="blue"></v-icon>
                           <div>
-                            <h4 class="font-medium text-gray-300">{{ doc.label }}</h4>
+                            <h4 :class="isDark ? 'font-medium text-gray-300' : 'font-medium text-gray-900'">{{ doc.label }}</h4>
                             <p class="text-sm text-gray-500">{{ doc.description }}</p>
                           </div>
                         </div>
@@ -906,7 +910,7 @@ onMounted(() => {
 
                   <!-- New Assets -->
                   <div v-if="newAssets.length > 0" class="mb-4">
-                    <h3 class="text-lg font-medium text-gray-300 mb-3">New Files to Upload</h3>
+                    <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-3' : 'text-lg font-medium text-gray-900 mb-3'">New Files to Upload</h3>
                     <div class="flex flex-wrap gap-2">
                       <v-chip
                         v-for="(asset, index) in newAssets"
@@ -940,7 +944,7 @@ onMounted(() => {
 
                   <!-- Existing Assets -->
                   <div v-if="existingAssets.length > 0" class="mb-4">
-                    <h3 class="text-lg font-medium text-gray-300 mb-3">Uploaded Files</h3>
+                    <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-3' : 'text-lg font-medium text-gray-900 mb-3'">Uploaded Files</h3>
                     <div class="flex flex-wrap gap-2">
                       <v-chip
                         v-for="(asset, index) in existingAssets"

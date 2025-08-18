@@ -1,7 +1,7 @@
 <template>
   <v-app-bar 
     app 
-    :color="isDark ? 'grey-darken-4' : 'white'" 
+    :color="isDark ? 'grey-darken-4' : '#dbdbdb'" 
     :dark="isDark"
     height="72" 
     class="px-4 transition-colors duration-300"
@@ -31,7 +31,7 @@
             variant="text"
             :title="`Visit ${linkedinLink.title}`"
           >
-            <v-icon class="text-gray-300 hover:text-gray-700" size="small">mdi-linkedin</v-icon>
+            <v-icon :class="[isDark ? 'text-gray-300 hover:text-gray-700' : 'text-blue-800']" size="small">mdi-linkedin</v-icon>
           </v-btn>
 
           <!-- GitHub -->
@@ -44,7 +44,7 @@
             variant="text"
             :title="`Visit ${githubLink.title}`"
           >
-            <v-icon class="text-gray-300 hover:text-gray-700" size="small">mdi-github</v-icon>
+            <v-icon :class="[ isDark ? 'text-gray-300' : 'text-gray-950']" size="small">mdi-github</v-icon>
           </v-btn>
 
           <!-- Personal Website -->
@@ -57,7 +57,7 @@
             variant="text"
             :title="`Visit ${portfolioLink.title}`"
           >
-            <v-icon class="text-gray-300 hover:text-gray-700" size="small">mdi-web</v-icon>
+            <v-icon :class="[isDark ? 'text-gray-300 hover:text-gray-700' : 'text-orange-400']" size="small">mdi-web</v-icon>
           </v-btn>
         </div>
         <v-menu offset-y v-if="documents.length > 0">
@@ -67,7 +67,7 @@
           v-bind="props"
           size="small"
           variant="text"
-          color="gray-300"
+          :class="[isDark ? '!text-gray-300' : '!text-blue-600']"
           class="mr-2 ml-2"
           :title="`${documents.length} document${documents.length !== 1 ? 's' : ''} available`"
         >
@@ -113,7 +113,7 @@
           size="medium"
           variant="text"
           append-icon="mdi-open-in-new"
-          class="!bg-black text-white !border-gray-600 border !text-sm py-2 px-2"
+          :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm py-2 px-2' : '!bg-white text-gray-700 !border-gray-300 border !text-sm py-2 px-2']"
         >
           <span class="mr-2">Visit Live URL</span>
         </v-btn>
@@ -126,7 +126,7 @@
               icon
               size="x-small"
               variant="text"
-              class="!bg-black text-white !border-gray-600 border !text-sm px-2 text-gray-400 hover:text-gray-600"
+              :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm px-2 text-gray-400 hover:text-gray-600' : '!bg-white text-gray-700 !border-gray-300 border !text-sm px-2 text-gray-400 hover:text-gray-600']"
               :title="`Edit public URL`"
             >
               <v-icon icon="mdi-pencil" size="small"></v-icon>
@@ -136,7 +136,7 @@
           <v-card min-width="400" class="pa-4" @click.stop>
             <v-card-title class="text-lg font-semibold pb-2">Edit Public URL</v-card-title>
             <v-card-text class="pa-0 pb-4">
-              <p class="text-sm text-gray-400 mb-4">
+              <p :class="[isDark ? 'text-sm text-gray-400 mb-4' : 'text-sm text-gray-700 mb-4']">
                 Update your custom public URL. This will change your unique profile link.
               </p>
               <v-form @submit.prevent="updatePublicUrl" @click.stop>
@@ -154,7 +154,7 @@
                   @click.stop
                 >
                   <template v-slot:append>
-                    <span class="text-gray-400 text-sm">.projects.local.hitanshushah.com</span>
+                    <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.projects.local.hitanshushah.com</span>
                   </template>
                 </v-text-field>
               </v-form>
@@ -162,7 +162,7 @@
             <v-card-actions class="pa-0">
               <v-spacer></v-spacer>
               <v-btn variant="outlined" @click="closeEditMenu" :disabled="isLoading" size="small" class="px-2">Cancel</v-btn>
-              <v-btn color="success" @click="updatePublicUrl" :loading="isLoading" :disabled="!publicUrlInput.trim()" size="small" variant="tonal">Update URL</v-btn>
+              <v-btn color="success" @click="updatePublicUrl" :loading="isLoading" :disabled="!publicUrlInput.trim()" size="small" :variant="isDark ? 'tonal' : 'elevated'">Update URL</v-btn>
             </v-card-actions>
           </v-card>
         </v-menu>
@@ -175,7 +175,7 @@
               icon
               size="x-small"
               variant="text"
-              class="!bg-black text-white !border-gray-600 border !text-sm px-2 text-red-400 hover:text-red-600"
+              :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm px-2 text-red-400 hover:text-red-600' : '!bg-white text-gray-700 !border-gray-300 border !text-sm px-2 text-red-400 hover:text-red-600']"
               :title="`Delete public URL`"
             >
               <v-icon icon="mdi-delete" size="small"></v-icon>
@@ -185,14 +185,14 @@
           <v-card min-width="300" class="pa-4" @click.stop>
             <v-card-title class="text-lg font-semibold pb-2">Delete Public URL</v-card-title>
             <v-card-text class="pa-0 pb-4">
-              <p class="text-sm text-gray-400 mb-4">
+              <p :class="[isDark ? 'text-sm text-gray-400 mb-4' : 'text-sm text-gray-700 mb-4']">
                 Are you sure you want to delete your public URL?
               </p>
             </v-card-text>
             <v-card-actions class="pa-0">
               <v-spacer></v-spacer>
               <v-btn variant="outlined" @click="closeDeleteMenu" size="small">Cancel</v-btn>
-              <v-btn color="error" @click="deletePublicUrl" :loading="isDeleting" size="small" variant="tonal">Delete URL</v-btn>
+              <v-btn color="error" @click="deletePublicUrl" :loading="isDeleting" size="small" :variant="isDark ? 'tonal' : 'elevated'">Delete URL</v-btn>
             </v-card-actions>
           </v-card>
         </v-menu>
@@ -207,12 +207,44 @@
           size="medium"
           variant="text"
           append-icon="mdi-chevron-down"
-          class="!bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-2 ml-4"
+          :class="[isDark ? '!bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-2 ml-4' : '!bg-white text-gray-700 !border-gray-300 border rounded-lg !text-sm py-2 px-2 ml-4']"
         >
           <span class="mr-2">Set Live URL</span>
         </v-btn>
       </template>
-      <!-- Create Menu Content (same as before) -->
+      <!-- Create Menu Content -->
+      <v-card min-width="400" class="pa-4" @click.stop>
+        <v-card-title class="text-lg font-semibold pb-2">Create Public URL</v-card-title>
+        <v-card-text class="pa-0 pb-4">
+          <p :class="[isDark ? 'text-sm text-gray-400 mb-4' : 'text-sm text-gray-700 mb-4']">
+            Create a custom public URL for your portfolio. This will be your unique profile link.
+          </p>
+          <v-form @submit.prevent="savePublicUrl" @click.stop>
+            <v-text-field
+              v-model="publicUrlInput"
+              label="Custom URL"
+              variant="outlined"
+              :error-messages="urlError"
+              :loading="isLoading"
+              :disabled="isLoading"
+              prepend-inner-icon="mdi-link"
+              :hint="`Your URL will be: ${fullPublicUrl}`"
+              persistent-hint
+              density="compact"
+              @click.stop
+            >
+              <template v-slot:append>
+                <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.projects.local.hitanshushah.com</span>
+              </template>
+            </v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="pa-0">
+          <v-spacer></v-spacer>
+          <v-btn variant="outlined" @click="closeCreateMenu" :disabled="isLoading" size="small" class="px-2">Cancel</v-btn>
+          <v-btn color="success" @click="savePublicUrl" :loading="isLoading" :disabled="!publicUrlInput.trim()" size="small" :variant="isDark ? 'tonal' : 'elevated'">Create URL</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-menu>
 
               </div>
@@ -230,7 +262,7 @@
             v-bind="props"
             class="ml-2"
           >
-            <v-avatar size="40" class="bg-gradient-to-br from-purple-400 to-blue-500">
+            <v-avatar size="40" :class="isDark ? 'bg-gray-300' : 'bg-white'">
               <v-img
                 v-if="profilePhotoUrl"
                 :src="profilePhotoUrl"
@@ -256,8 +288,8 @@
                 <span v-else class="text-white font-semibold text-xl">{{ userInitials }}</span>
               </v-avatar>
             <div>
-              <div class="font-semibold text-white">{{ currentProfile?.name || currentUser?.username || 'User' }}</div>
-              <div class="text-sm text-gray-400">{{ currentUser?.email || 'user@example.com' }}</div>
+              <div :class="isDark ? 'font-semibold text-white' : 'font-semibold text-gray-900'">{{ currentProfile?.name || currentUser?.username || 'User' }}</div>
+              <div :class="isDark ? 'text-sm text-gray-400' : 'text-sm text-gray-700'">{{ currentUser?.email || 'user@example.com' }}</div>
             </div>
           </div>
         </v-card-text>
@@ -271,7 +303,7 @@
             @click="editProfile"
           >
             <template v-slot:append>
-              <v-icon icon="mdi-chevron-right" size="small" class="text-gray-400"></v-icon>
+              <v-icon icon="mdi-chevron-right" size="small" :class="isDark ? 'text-gray-400' : 'text-gray-700'"></v-icon>
             </template>
           </v-list-item>
 
@@ -284,7 +316,7 @@
             class="hover:bg-red-50 transition-colors text-red-600"
           >
             <template v-slot:append>
-              <v-icon icon="mdi-chevron-right" size="small" class="text-gray-400"></v-icon>
+              <v-icon icon="mdi-chevron-right" size="small" :class="isDark ? 'text-gray-400' : 'text-gray-700'"></v-icon>
             </template>
           </v-list-item>
         </v-list>

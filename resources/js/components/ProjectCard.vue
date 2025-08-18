@@ -2,7 +2,7 @@
   <v-card 
     :class="[
       'rounded-xl !p-6 h-full flex flex-col',
-      isDarkMode ? 'bg-black' : 'bg-white',
+      isDarkMode ? 'bg-black' : '!bg-gray-300',
     ]"
   >
     <!-- Content Wrapper (flex-grow) -->
@@ -57,11 +57,11 @@
           direction="vertical"
           height="300"
           show-arrows
-          progress="blue"
+          :progress="isDarkMode ? 'blue' : 'black'"
           vertical-arrows="left"
           vertical-delimiters="right"
           hide-delimiter-background
-          class="bg-gradient-to-r from-blue-800 to-blue-950 rounded-lg"
+          :class="isDarkMode ? 'bg-gradient-to-r from-blue-800 to-blue-950 rounded-lg' : 'bg-gradient-to-r from-[#f5f5f5] to-[#bfbfbf] rounded-lg'"
         >
           <v-carousel-item
             v-for="(file, index) in mediaAssets"
@@ -71,10 +71,11 @@
           />
         </v-carousel>
 
-        <div v-else class="h-80 rounded-lg overflow-hidden bg-gradient-to-r from-blue-800 to-blue-950 flex items-center justify-center">
-          <div class="text-center text-white">
-            <v-icon size="64" color="white" class="mb-4">mdi-cellphone</v-icon>
-            <p class="text-lg font-medium">Project Preview</p>
+        <div v-else :class="isDarkMode ? 'h-80 rounded-lg overflow-hidden bg-gradient-to-r from-blue-800 to-blue-950 flex items-center justify-center' : 
+        'h-80 rounded-lg overflow-hidden bg-gradient-to-r from-[#f5f5f5] to-[#bfbfbf] flex items-center justify-center'">
+          <div :class="isDarkMode ? 'text-center text-white' : 'text-center text-black'">
+            <v-icon size="64" :color="isDarkMode ? 'white' : 'black'" class="mb-4">mdi-cellphone</v-icon>
+            <p :class="isDarkMode ? 'text-lg font-medium text-white' : 'text-lg font-medium text-black'">Project Preview</p>
           </div>
         </div>
       </v-sheet>
@@ -112,7 +113,7 @@
           size="small"
           :class="[
             'text-lg !font-bold',
-            isDarkMode ? '!border-2 !border-blue-900 !bg-[#23153A] !text-blue-400' : 'bg-blue-500 text-white'
+            isDarkMode ? '!border-2 !border-blue-900 !bg-[#23153A] !text-blue-400' : '!border-2 !border-blue-900 !bg-blue-200 !text-blue-800'
           ]"
         >
           {{ tech }}
@@ -125,13 +126,13 @@
       <div class="flex items-center gap-2 text-sm">
         <v-icon 
           size="16" 
-          :color="isDarkMode ? 'gray-300' : 'gray-500'"
+          :color="isDarkMode ? 'gray-300' : 'gray-800'"
         >
           mdi-calendar
         </v-icon>
         <span :class="[
           'transition-colors',
-          isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          isDarkMode ? 'text-gray-300' : 'text-gray-800'
         ]">
           {{ formatDate(project.start_date || '')}} 
           {{ project.end_date ? `- ${formatDate(project.end_date)}` : '' }}
@@ -195,8 +196,8 @@
           :class="[
             'flex-1 border rounded-lg !text-sm',
             isDarkMode 
-              ? '!bg-black text-white !border-gray-600' 
-              : 'bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:bg-blue-50'
+              ? '!bg-blue-950 text-white' 
+              : '!bg-[#AAC8F7] text-black'
           ]"
           :href="githubLink.url"
           target="_blank"
@@ -214,7 +215,7 @@
             'flex-1 rounded-lg !text-sm',
             isDarkMode 
               ? '!bg-blue-950 text-white' 
-              : 'bg-blue-600 text-white'
+              : '!bg-[#AAC8F7] text-black'
           ]"
           :href="demoLink.url"
           target="_blank"
@@ -233,7 +234,7 @@
             'flex-1 rounded-lg',
             isDarkMode 
               ? '!bg-blue-950 text-white' 
-              : 'bg-blue-600 text-white'
+              : '!bg-[#AAC8F7] text-black'
           ]"
           :href="link.url"
           target="_blank"

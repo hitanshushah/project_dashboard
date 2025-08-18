@@ -13,6 +13,7 @@ import {
   getFileUrl 
 } from '@/lib/projectUtils';
 import PreviewSettings from '@/components/PreviewSettings.vue';
+import { useAppearance } from '@/composables/useAppearance';
 
 const page = usePage();
 
@@ -95,6 +96,9 @@ const projectDemo = ref('');
 // Preview settings
 const showPreviewSettings = ref(false);
 const previewSettings = computed(() => form.preview_settings);
+
+// Theme management
+const { isDark } = useAppearance();
 
 // Methods
 const addTag = () => {
@@ -407,8 +411,8 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             color="gray"
             class="mb-4"
           ></v-btn>
-          <h1 class="text-3xl font-bold text-gray-300">Create New Project</h1>
-          <p class="text-gray-500 mt-2">Fill in the details below to create your new project</p>
+          <h1 :class="isDark ? 'text-3xl font-bold text-gray-300' : 'text-3xl font-bold text-gray-900'">Create New Project</h1>
+          <p :class="isDark ? 'text-gray-500 mt-2' : 'text-gray-700 mt-2'">Fill in the details below to create your new project</p>
           </div>
           <div class="flex gap-4 justify-end">
               <v-btn
@@ -435,12 +439,12 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
           <!-- Left Section - Form -->
           <v-col cols="12" lg="7">
             <v-form @submit.prevent="submit">
-              <v-card class="pa-6">
+              <v-card :class="[isDark ? 'bg-[#212121]' : '!bg-[#DBDBDB]', 'pa-6']">
             <!-- Basic Information -->
                   <div class="mb-2">
                     <div class="flex items-center mb-8">
                       <div class="w-1 h-8 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full mr-4"></div>
-                      <h2 class="text-2xl font-bold text-gray-300">Project Information</h2>
+                      <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Project Information</h2>
                     </div>
                     
                     <v-row>
@@ -451,7 +455,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           placeholder="Enter an inspiring project name"
                           variant="outlined"
                           :error-messages="form.errors.name"
-                          color="gray-300"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
                           class="text-field-modern"
                           density="compact"
                           required
@@ -472,7 +476,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           placeholder="Select category"
                           variant="outlined"
                           :error-messages="form.errors.category"
-                          color="gray-300"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
                           density="compact"
                           class="select-modern"
                           required
@@ -490,7 +494,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                       placeholder="Describe your project vision, goals, and what makes it special..."
                       variant="outlined"
                       rows="5"
-                      color="gray-300"
+                      :color="isDark ? 'gray-300' : 'gray-600'"
                       density="compact"
                       :error-messages="form.errors.description"
                       class="textarea-modern"
@@ -505,7 +509,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                   <div class="mb-2">
                     <div class="flex items-center mb-8">
                       <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
-                      <h2 class="text-2xl font-bold text-gray-300">Project Timeline</h2>
+                      <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Project Timeline</h2>
                     </div>
                     
                     <v-row>
@@ -524,7 +528,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                               prepend-inner-icon="mdi-calendar-start"
                               readonly
                               density="compact"
-                              color="gray"
+                              :color="isDark ? 'gray-300' : 'gray-600'"
                               v-bind="props"
                               class="date-field-modern"
                             ></v-text-field>
@@ -533,7 +537,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             v-model="form.start_date"
                             @update:model-value="updateStartDate"
                             show-adjacent-months
-                            color="gray"
+                            :color="isDark ? 'gray-300' : 'gray-600'"
                             @click:date="() => {}"
                           ></v-date-picker>
                         </v-menu>
@@ -554,7 +558,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                               prepend-inner-icon="mdi-calendar-check"
                               readonly
                               density="compact"
-                              color="gray-300"
+                              :color="isDark ? 'gray-300' : 'gray-600'"
                               v-bind="props"
                               class="date-field-modern"
                             ></v-text-field>
@@ -563,7 +567,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             v-model="form.end_date"
                             @update:model-value="updateEndDate"
                             show-adjacent-months
-                            color="gray"
+                            :color="isDark ? 'gray-300' : 'gray-600'"
                             @click:date="() => {}"
                           ></v-date-picker>
                         </v-menu>
@@ -578,7 +582,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           density="compact"
                           label="Current Status"
                           variant="outlined"
-                          color="gray-300"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
                           :error-messages="form.errors.status"
                           class="select-modern"
                         >
@@ -594,7 +598,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             <div class="mb-2">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-4"></div>
-                <h2 class="text-2xl font-bold text-gray-300">Tags & Technologies</h2>
+                <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Tags & Technologies</h2>
               </div>
               
               <v-row>
@@ -615,7 +619,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     hide-selected
                     clearable
                     density="compact"
-                    color="gray-300"
+                    :color="isDark ? 'gray-300' : 'gray-600'"
                     class="text-field-modern"
                   >
                     <template v-slot:prepend-inner>
@@ -651,7 +655,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     hide-selected
                     clearable
                     density="compact"
-                    color="gray-300"
+                    :color="isDark ? 'gray-300' : 'gray-600'"
                     class="select-modern"
                   >
                     <template v-slot:prepend-inner>
@@ -676,7 +680,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             <div class="mb-8">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full mr-4"></div>
-                <h2 class="text-2xl font-bold text-gray-300">Links</h2>
+                <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Links</h2>
               </div>
               
               <div>
@@ -690,7 +694,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         placeholder="https://github.com/..."
                         variant="outlined"
                         density="compact"
-                        color="gray-300"
+                        :color="isDark ? 'gray-300' : 'gray-600'"
                         @keydown="handleGithubKeydown"
                         class="text-field-modern compact-field"
                       >
@@ -859,24 +863,24 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             <div class="mb-8">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-gray-500 to-orange-500 rounded-full mr-4"></div>
-                <h2 class="text-2xl font-bold text-gray-300">Assets</h2>
+                <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Assets</h2>
               </div>
               
               <div class="mb-4">
                 <div 
-                  class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors duration-200 
-                  hover:bg-gray-800 cursor-pointer"
+                  :class="['border-2 border-dashed  rounded-lg p-8 text-center transition-colors duration-200', isDark ? 'hover:bg-gray-800 cursor-pointer border-gray-300' : 
+                  'hover:bg-gray-100 cursor-pointer border-gray-800']"
                   @click="openFileDialog"
                   @dragover.prevent
                   @drop.prevent="handleFileDrop"
                 >
                   <div class="flex flex-col items-center justify-center !p-4">
-                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center">
+                    <div :class="['w-16 h-16 rounded-full flex items-center justify-center', isDark ? 'bg-gray-800' : 'bg-gray-300']">
                       <v-icon size="32">mdi-cloud-upload</v-icon>
                     </div>
                     <div>
-                      <h3 class="text-lg font-semibold text-gray-300 mb-2">Upload Project Assets</h3>
-                      <p class="text-gray-500 mb-4">Drag and drop files here, or click to browse</p>
+                      <h3 :class="isDark ? 'text-lg font-semibold text-gray-300 mb-2' : 'text-lg font-semibold text-gray-900 mb-2'">Upload Project Assets</h3>
+                      <p :class="isDark ? 'text-gray-500 mb-4' : 'text-gray-700 mb-4'">Drag and drop files here, or click to browse</p>
                       <v-btn
                         variant="outlined"
                         size="large"
@@ -921,10 +925,10 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         class="mr-2"
                       />
                       <div class="min-w-0">
-                        <div class="text-sm font-medium text-gray-300 truncate max-w-[180px]">
+                        <div :class="isDark ? 'text-sm font-medium text-gray-300 truncate max-w-[180px]' : 'text-sm font-medium text-gray-900 truncate max-w-[180px]'">
                           {{ file.name }}
                         </div>
-                        <div class="text-xs text-gray-500">
+                        <div :class="isDark ? 'text-xs text-gray-500' : 'text-xs text-gray-700'">
                           {{ formatFileSize(file.size) }} • {{ getFileType(file.type || file.name) }}
                         </div>
                       </div>
@@ -980,10 +984,10 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
 
           <!-- Right Section - Live Preview -->
           <v-col cols="12" lg="5" class="!mt-[-15px]">
-            <v-card class="pa-6 h-fit sticky top-4">
+            <v-card :class="[isDark ? 'bg-[#212121]' : '!bg-[#DBDBDB]', 'pa-6 h-fit sticky top-4']">
               <div class="mb-6">
                 <div class="flex items-center mb-4">
-                  <h2 class="text-xl font-semibold text-gray-300">Live Preview</h2>
+                  <h2 :class="isDark ? 'text-xl font-semibold text-gray-300' : 'text-xl font-semibold text-gray-900'">Live Preview</h2>
                   <v-btn
                     icon="mdi-cog"
                     variant="text"

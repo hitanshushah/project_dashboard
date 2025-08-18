@@ -8,6 +8,7 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
 import ProjectReorder from '@/components/ProjectReorder.vue';
 import { usePublicProjects } from '@/composables/usePublicProjects';
 import type { Project } from '@/types';
+import { useAppearance } from '@/composables/useAppearance';
 
 const page = usePage();
 
@@ -59,6 +60,9 @@ const toggleAction = ref<'public' | 'hidden'>('public');
 
 // Reorder modal state
 const showReorderModal = ref(false);
+
+// Theme management
+const { isDark } = useAppearance();
 
 const createProject = () => {
   router.visit('/projects/create');
@@ -145,7 +149,7 @@ const clearFilters = () => {
 
         <!-- Header with Action Buttons -->
         <div class="d-flex justify-space-between align-center mb-6">
-          <h1 class="text-3xl font-bold text-white">
+          <h1 :class="['text-3xl font-bold',  isDark ? 'text-white' : 'text-gray-900']">
             My Projects
           </h1>
           <div class="d-flex gap-3">
@@ -156,7 +160,8 @@ const clearFilters = () => {
               @click="openPublicPreview"
               :title="`Preview your ${publicProjects.length} public project${publicProjects.length !== 1 ? 's' : ''}`"
               :class="[
-                  '!bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-4 ml-4' 
+                  ' border rounded-lg !text-sm py-2 px-4 ml-4',
+                  isDark ? 'text-white !bg-black !border-gray-600' : 'text-gray-900 !bg-gray-100 !border-gray-600'
                 ]"
             >
               Preview Public
@@ -247,14 +252,11 @@ const clearFilters = () => {
           <div v-if="selectedView === 'public' && publicProjects.length > 0" class="mb-8">
             <!-- Public Projects Header with Reorder Button -->
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-300">
-                Public Projects ({{ publicProjects.length }})
-              </h3>
               <v-btn
                 prepend-icon="mdi-drag"
                 variant="outlined"
                 @click="openReorderModal"
-                class="text-sm !bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-4 ml-4"
+                :class="[isDark ? 'text-sm !bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-4 ml-4' : 'text-sm !bg-gray-100 text-black !border-gray-600 border rounded-lg !text-sm py-2 px-4 ml-4']"
               >
                 Reorder Projects
               </v-btn>
@@ -300,7 +302,7 @@ const clearFilters = () => {
             <v-icon 
               :icon="hasActiveFilters ? 'mdi-filter-off' : 'mdi-folder-open'" 
               size="120" 
-              color="grey-lighten-1" 
+              :color="isDark ? 'gray-300' : 'gray-600'" 
               class="mb-6"
             ></v-icon>
             <h2 class="text-2xl font-bold text-gray-700 mb-4">
@@ -335,7 +337,7 @@ const clearFilters = () => {
           <v-icon 
             :icon="hasActiveFilters ? 'mdi-filter-off' : 'mdi-folder-plus'" 
             size="120" 
-            color="grey-lighten-1" 
+            :color="isDark ? 'gray-300' : 'gray-600'" 
             class="mb-6"
           ></v-icon>
           
@@ -386,6 +388,7 @@ const clearFilters = () => {
               :statuses="statuses"
               @close="closeReorderModal"
               @saved="handleReorderSaved"
+              :isDark="isDark"
             />
           </v-card>
         </v-dialog>
@@ -407,7 +410,7 @@ const clearFilters = () => {
                 <strong>"{{ projectToToggle?.name }}"</strong> 
                 {{ toggleAction === 'public' ? 'public' : 'hidden' }}?
               </p>
-              <p class="text-sm text-gray-400">
+              <p :class="isDark ? 'text-sm text-gray-400' : 'text-sm text-gray-700'">
                 {{ toggleAction === 'public' 
                   ? 'This project will be visible to everyone.' 
                   : 'This project will only be visible to you.' 
@@ -423,7 +426,7 @@ const clearFilters = () => {
                 Cancel
               </v-btn>
               <v-btn
-                variant="tonal"
+                :variant="isDark ? 'tonal' : 'elevated'"
                 :color="toggleAction === 'public' ? 'success' : 'warning'"
                 @click="confirmToggle"
               >

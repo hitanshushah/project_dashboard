@@ -4,8 +4,10 @@ import { usePage } from '@inertiajs/vue3';
 import ProjectCard from '@/components/ProjectCard.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import type { Project } from '@/types';
+import { useAppearance } from '@/composables/useAppearance';
 
 const page = usePage();
+const { isDark } = useAppearance();
 
 const projects = computed(() => page.props.projects as Project[] || []);
 const categories = computed(() => page.props.categories as Array<{ name: string; key: string }> || []);
@@ -125,13 +127,13 @@ const getLinkIcon = (linkType: string): string => {
 
 <template>
   <!-- Public Projects Portfolio Website -->
-  <div class="bg-gradient-to-br from-[#0c0c0c] to-[#1A1A1C]">
+  <div :class="isDark ? '!bg-gradient-to-br from-[#0c0c0c] to-[#1A1A1C]' : '!bg-gradient-to-br from-[#bfbfbf] to-[#F5F5F5]'">
           <!-- Profile Header Section -->
       <div class="px-8 pt-8 pb-4">
         <div class="flex flex-row justify-between">
         <div class="flex items-center gap-3 mb-4">
-          <v-icon icon="mdi-periodic-table" color="blue" size="large"></v-icon>
-          <h1 class="text-2xl font-bold text-gray-300">Projects Dashboard</h1>
+          <v-icon icon="mdi-periodic-table" :color="isDark ? 'blue' : 'black'" size="large"></v-icon>
+          <h1 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Projects Dashboard</h1>
         </div>
         <div class="flex justify-end mb-4">
           <ThemeToggle class="mr-4" />
@@ -139,7 +141,7 @@ const getLinkIcon = (linkType: string): string => {
         </div>
         <div class="w-full h-px bg-gray-800"></div>
       </div>
-      <section class="bg-black !mx-8 !my-8 rounded-xl">
+      <section :class="isDark ? 'bg-black !mx-8 !my-8 rounded-xl' : '!bg-gray-100 !mx-8 !my-8 rounded-xl'">
       <div class="mx-auto px-6 py-12">
         <!-- Theme Toggle Button -->
 
@@ -151,12 +153,12 @@ const getLinkIcon = (linkType: string): string => {
               <v-img
                 :src="userProfile.profile_photo_url"
                 :alt="userProfile?.name || 'Profile Photo'"
-                class="w-full h-full object-cover bg-gradient-to-br from-blue-800 to-blue-950"
+                :class="isDark ? 'w-full h-full object-cover bg-gradient-to-br from-blue-800 to-blue-950' : 'w-full h-full object-cover bg-gradient-to-br from-[#f5f5f5] to-[#bfbfbf]'"
                 @error="handleImageError"
               />
             </div>
             <div v-else class="w-24 h-24 bg-primary rounded-full flex items-center justify-center">
-              <span class="text-2xl font-bold text-gray-300">{{ userInitials }}</span>
+              <span :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">{{ userInitials }}</span>
             </div>
           </div>
           
@@ -164,7 +166,7 @@ const getLinkIcon = (linkType: string): string => {
           <div class="flex-1">
             <div class="flex flex-row gap-8 justify-between">
             <div>
-            <h1 class="text-3xl font-bold text-gray-300 mb-2">
+            <h1 :class="isDark ? 'text-3xl font-bold text-gray-300 mb-2' : 'text-3xl font-bold text-gray-900 mb-2'">
               {{ userProfile?.name || 'Your Name' }}
             </h1>
             </div>
@@ -176,33 +178,33 @@ const getLinkIcon = (linkType: string): string => {
                 size="small"
                 :href="document.url || document.filename"
                 target="_blank"
-                class="!bg-black !text-gray-300 !border-gray-800 hover:bg-gray-700 border"
+                :class="isDark ? '!bg-black !text-gray-300 !border-gray-800 hover:bg-gray-700 border' : '!bg-gray-100 !text-gray-900 !border-gray-800 hover:bg-gray-700 border'"
               >
                 <v-icon 
                   :icon="getDocumentIcon(document.display_name || '')" 
                   class="mr-2"
-                  color="gray-300"
+                  :color="isDark ? 'gray-300' : 'gray-800'"
                 ></v-icon>
                 {{ document.display_name || 'Document' }}
                 <v-icon icon="mdi-download" size="small" class="ml-2"></v-icon>
               </v-btn>
             </div>
             </div>
-            <p class="text-xl text-blue-400 mb-4">
+            <p :class="isDark ? 'text-xl text-blue-400 mb-4' : 'text-xl text-blue-950 mb-4'">
               {{ userProfile?.designation || 'Full Stack Developer' }}
             </p>
-            <p class="text-gray-400 text-lg mb-6 max-w-3xl">
+            <p :class="isDark ? 'text-gray-400 text-lg mb-6 max-w-3xl' : 'text-gray-800 text-lg mb-6 max-w-3xl'">
               {{ userProfile?.bio || 'Passionate developer with experience building modern web applications. I love creating beautiful, functional, and user-friendly solutions.' }}
             </p>
             
             <!-- Contact Info -->
             <div class="flex items-center space-x-6 mb-6 gap-8">
-              <div v-if="userProfile?.city || userProfile?.country" class="flex items-center text-gray-400">
-                <v-icon icon="mdi-map-marker-outline" size="small" variant="outlined" class="mr-2 text-gray-400"></v-icon>
+              <div v-if="userProfile?.city || userProfile?.country" :class="isDark ? 'flex items-center text-gray-400' : 'flex items-center text-gray-800'">
+                <v-icon icon="mdi-map-marker-outline" size="small" variant="outlined" :class="isDark ? 'mr-2 text-gray-400' : 'mr-2 text-gray-800'"></v-icon>
                 <span>{{ [userProfile?.city, userProfile?.country].filter(Boolean).join(', ') }}</span>
               </div>
-              <div v-if="userProfile?.email" class="flex items-center text-gray-400">
-                <v-icon icon="mdi-email-outline" size="small" class="mr-2 text-gray-400"></v-icon>
+              <div v-if="userProfile?.email" :class="isDark ? 'flex items-center text-gray-400' : 'flex items-center text-gray-800'">
+                <v-icon icon="mdi-email-outline" size="small" :class="isDark ? 'mr-2 text-gray-400' : 'mr-2 text-gray-800'"></v-icon>
                 <span>{{ userProfile.email }}</span>
               </div>
             </div>
@@ -216,7 +218,7 @@ const getLinkIcon = (linkType: string): string => {
                 size="medium"
                 :href="link.url"
                 target="_blank"
-                class="!bg-black text-gray-300 !border-gray-800 hover:!border-gray-400 hover:!bg-gray-900 transition-all duration-200 px-4 py-2"
+                :class="isDark ? '!bg-black text-gray-300 !border-gray-800 hover:!border-gray-400 hover:!bg-gray-900 transition-all duration-200 px-4 py-2' : '!bg-gray-100 text-gray-900 !border-gray-800 hover:!border-gray-400 hover:!bg-gray-900 transition-all duration-200 px-4 py-2'"
               >
                 <v-icon :icon="getLinkIcon(link.type || link.title)" class="mr-2" size="18"></v-icon>
                 <span class="font-medium text-sm">{{ link.title.toUpperCase() }}</span>
@@ -239,9 +241,13 @@ const getLinkIcon = (linkType: string): string => {
             <v-btn
               variant="elevated"
               :class="[
-                selectedCategory === 'all' 
-                  ? '!bg-gradient-to-br !from-blue-950 !to-blue-800 !text-white rounded-lg' 
-                  : '!bg-black text-gray-300 !border !border-gray-800 rounded-lg'
+                selectedCategory === 'all'
+                  ? (isDark
+                      ? '!bg-gradient-to-br !from-blue-950 !to-blue-800 !text-white rounded-lg'
+                      : '!bg-gray-950 !text-white rounded-lg')
+                  : (isDark
+                      ? '!bg-black text-gray-300 !border !border-gray-800 rounded-lg'
+                      : '!bg-white text-gray-800 !border !border-gray-300 rounded-lg')
               ]"
               @click="selectedCategory = 'all'"
             >
@@ -253,9 +259,13 @@ const getLinkIcon = (linkType: string): string => {
               variant="elevated"
               :color="selectedCategory === category.key ? ' bg-gradient-to-br from-blue-800 to-blue-950' : 'gray'"
               :class="[
-                selectedCategory === category.key 
-                  ? '!bg-gradient-to-br !from-blue-950 !to-blue-800 !text-white rounded-lg' 
-                  : '!bg-black text-gray-300 !border !border-gray-800 rounded-lg'
+                selectedCategory === category.key
+                  ? (isDark
+                      ? '!bg-gradient-to-br !from-blue-950 !to-blue-800 !text-white rounded-lg'
+                      : '!bg-gray-950 !text-white rounded-lg')
+                  : (isDark
+                      ? '!bg-black text-gray-300 !border !border-gray-800 rounded-lg'
+                      : '!bg-white text-gray-800 !border !border-gray-300 rounded-lg')
               ]"
               @click="selectedCategory = category.key"
             >
@@ -266,13 +276,13 @@ const getLinkIcon = (linkType: string): string => {
 
         <!-- Technologies Section -->
         <div v-if="technologies.length > 0" class="mb-12">
-          <h2 class="text-2xl font-bold text-white mb-6">Technologies Used:</h2>
+          <h2 :class="isDark ? 'text-2xl font-bold text-white mb-6' : 'text-2xl font-bold text-gray-900 mb-6'">Technologies Used:</h2>
           <div class="flex flex-wrap gap-3">
             <v-chip
               v-for="tech in technologies"
               :key="tech"
               size="large"
-              class="!border-2 !border-blue-900 !bg-[#23153A] !text-blue-400"
+              :class="isDark ? '!border-2 !border-blue-900 !bg-[#23153A] !text-blue-400' : '!border-2 !border-black !bg-white !text-black'"
             >
               {{ tech }}
             </v-chip>
@@ -307,10 +317,10 @@ const getLinkIcon = (linkType: string): string => {
               color="gray-600" 
               class="mb-6"
             ></v-icon>
-            <h3 class="text-2xl font-bold text-gray-300 mb-4">
+            <h3 :class="isDark ? 'text-2xl font-bold text-gray-300 mb-4' : 'text-2xl font-bold text-gray-900 mb-4'">
               {{ selectedCategory === 'all' ? 'No Projects Available' : 'No Projects in This Category' }}
             </h3>
-            <p class="text-gray-500 mb-6">
+            <p :class="isDark ? 'text-gray-500 mb-6' : 'text-gray-800 mb-6'">
               {{ selectedCategory === 'all' 
                 ? 'There are no public projects available at the moment.' 
                 : `No projects found in the "${categories.find(c => c.key === selectedCategory)?.name || selectedCategory}" category.` 
@@ -330,9 +340,9 @@ const getLinkIcon = (linkType: string): string => {
     </main>
 
     <!-- Footer -->
-    <footer class="bg-black border-t border-gray-800 py-8">
+    <footer :class="isDark ? 'bg-black border-t border-gray-800 py-8' : 'bg-gray-100 border-t border-gray-800 py-8'">
       <div class="container mx-auto px-6 text-center">
-        <p class="text-gray-400">
+        <p :class="isDark ? 'text-gray-400' : 'text-gray-800'">
           © {{ currentYear }} {{ userProfile?.name || 'Portfolio' }}. All rights reserved.
         </p>
       </div>
