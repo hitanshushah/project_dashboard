@@ -158,6 +158,7 @@
                       persistent-hint
                       density="compact"
                       @click.stop
+                      @input="validatePublicUrl"
                     >
                       <template v-slot:append>
                         <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.{{ domainUrl }}</span>
@@ -618,6 +619,18 @@ const savePublicUrl = async () => {
     return;
   }
 
+  // Validate that the URL doesn't contain dots
+  if (publicUrlInput.value.includes('.')) {
+    urlError.value = 'Public URL cannot contain dots (.). Use only letters, numbers, hyphens, and underscores.';
+    return;
+  }
+
+  // Validate URL format
+  if (!/^[a-zA-Z0-9_-]+$/.test(publicUrlInput.value.trim())) {
+    urlError.value = 'Public URL can only contain letters, numbers, hyphens, and underscores.';
+    return;
+  }
+
   isLoading.value = true;
   urlError.value = '';
 
@@ -651,6 +664,18 @@ const savePublicUrl = async () => {
 const updatePublicUrl = async () => {
   if (!publicUrlInput.value.trim()) {
     urlError.value = 'Please enter a custom URL';
+    return;
+  }
+
+  // Validate that the URL doesn't contain dots
+  if (publicUrlInput.value.includes('.')) {
+    urlError.value = 'Public URL cannot contain dots (.). Use only letters, numbers, hyphens, and underscores.';
+    return;
+  }
+
+  // Validate URL format
+  if (!/^[a-zA-Z0-9_-]+$/.test(publicUrlInput.value.trim())) {
+    urlError.value = 'Public URL can only contain letters, numbers, hyphens, and underscores.';
     return;
   }
 
@@ -692,6 +717,25 @@ const updatePublicUrl = async () => {
 
 const closeEditMenu = () => {
   editMenuOpen.value = false;
+};
+
+const validatePublicUrl = () => {
+  if (!publicUrlInput.value.trim()) {
+    urlError.value = '';
+    return;
+  }
+
+  if (publicUrlInput.value.includes('.')) {
+    urlError.value = 'Public URL cannot contain dots (.). Use only letters, numbers, hyphens, and underscores.';
+    return;
+  }
+
+  if (!/^[a-zA-Z0-9_-]+$/.test(publicUrlInput.value.trim())) {
+    urlError.value = 'Public URL can only contain letters, numbers, hyphens, and underscores.';
+    return;
+  }
+
+  urlError.value = '';
 };
 
 const closeDeleteMenu = () => {
