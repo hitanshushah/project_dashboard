@@ -729,8 +729,9 @@ const deletePublicUrl = async () => {
 };
 
 const logout = () => {
-  
-  // Add your logout logic here
-  // Example: router.visit('/logout');
+  const logoutUrl = usePage().props.logoutUrl as string;
+  if (logoutUrl) {
+    window.location.href = logoutUrl;
+  }
 };
 </script>

@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->attributes->get('user')?->only(['id', 'username', 'email']),
                 'profile' => $this->getProfileData($request->attributes->get('user')),
             ],
+            'logoutUrl' => env('APP_URL') . '/' . env('AUTHENTIK_LOGOUT_URL', 'outpost.goauthentik.io/sign_out'),
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
