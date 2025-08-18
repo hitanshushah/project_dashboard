@@ -142,11 +142,12 @@ const getLinkIcon = (linkType: string): string => {
         <div class="w-full h-px bg-gray-800"></div>
       </div>
       <section :class="isDark ? 'bg-black !mx-8 !my-8 rounded-xl' : '!bg-gray-100 !mx-8 !my-8 rounded-xl'">
-      <div class="mx-auto px-6 py-12">
+      <div class="mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <!-- Theme Toggle Button -->
 
         
-        <div class="flex items-start space-x-8">
+        <!-- Desktop Layout (unchanged) -->
+        <div class="hidden md:flex flex-row items-start space-x-8">
           <!-- Profile Avatar -->
           <div class="flex-shrink-0 mr-8 ml-8">
             <div v-if="userProfile?.profile_photo_url" class="w-24 h-24 rounded-full overflow-hidden">
@@ -209,7 +210,7 @@ const getLinkIcon = (linkType: string): string => {
               </div>
             </div>
             
-                        <!-- Social Links -->
+            <!-- Social Links -->
             <div class="flex flex-wrap gap-3">
               <v-btn
                 v-for="link in userProfile?.links || []"
@@ -224,17 +225,94 @@ const getLinkIcon = (linkType: string): string => {
                 <span class="font-medium text-sm">{{ link.title.toUpperCase() }}</span>
               </v-btn>
             </div>
+          </div>
+        </div>
 
-            <!-- Document Downloads -->
+        <!-- Mobile Layout -->
+        <div class="md:hidden flex flex-col items-center">
+          <!-- Documents at top -->
+          <div v-if="uniqueDocuments.length > 0" class="flex flex-wrap gap-3 justify-center w-full">
+            <v-btn
+              v-for="document in uniqueDocuments"
+              :key="`${document.id}-${document.display_name}`"
+              variant="elevated"
+              size="small"
+              :href="document.url || document.filename"
+              target="_blank"
+              :class="isDark ? '!bg-black !text-gray-300 !border-gray-800 hover:bg-gray-700 border' : '!bg-gray-100 !text-gray-900 !border-gray-800 hover:bg-gray-700 border'"
+            >
+              <v-icon 
+                :icon="getDocumentIcon(document.display_name || '')" 
+                class="mr-2"
+                :color="isDark ? 'gray-300' : 'gray-800'"
+              ></v-icon>
+              {{ document.display_name || 'Document' }}
+              <v-icon icon="mdi-download" size="small" class="ml-2"></v-icon>
+            </v-btn>
+          </div>
+
+          <!-- Profile Avatar in center -->
+          <div class="flex-shrink-0 mt-4 mb-4">
+            <div v-if="userProfile?.profile_photo_url" class="w-32 h-32 rounded-full overflow-hidden">
+              <v-img
+                :src="userProfile.profile_photo_url"
+                :alt="userProfile?.name || 'Profile Photo'"
+                :class="isDark ? 'w-full h-full object-cover bg-gradient-to-br from-blue-800 to-blue-950' : 'w-full h-full object-cover bg-gradient-to-br from-[#f5f5f5] to-[#bfbfbf]'"
+                @error="handleImageError"
+              />
+            </div>
+            <div v-else class="w-32 h-32 bg-primary rounded-full flex items-center justify-center">
+              <span :class="isDark ? 'text-3xl font-bold text-gray-300' : 'text-3xl font-bold text-gray-900'">{{ userInitials }}</span>
+            </div>
+          </div>
+          
+          <!-- Profile Info below image -->
+          <div class="flex-1 text-center">
+            <h1 :class="isDark ? 'text-2xl font-bold text-gray-300 mb-2' : 'text-2xl font-bold text-gray-900 mb-2'">
+              {{ userProfile?.name || 'Your Name' }}
+            </h1>
+            <p :class="isDark ? 'text-lg text-blue-400 mb-4' : 'text-lg text-blue-950 mb-4'">
+              {{ userProfile?.designation || 'Full Stack Developer' }}
+            </p>
+            <p :class="isDark ? 'text-gray-400 text-base mb-6' : 'text-gray-800 text-base mb-6'">
+              {{ userProfile?.bio || 'Passionate developer with experience building modern web applications. I love creating beautiful, functional, and user-friendly solutions.' }}
+            </p>
             
+            <!-- Contact Info -->
+            <div class="flex flex-col items-center space-y-3 mb-6">
+              <div v-if="userProfile?.city || userProfile?.country" :class="isDark ? 'flex items-center text-gray-400' : 'flex items-center text-gray-800'">
+                <v-icon icon="mdi-map-marker-outline" size="small" variant="outlined" :class="isDark ? 'mr-2 text-gray-400' : 'mr-2 text-gray-800'"></v-icon>
+                <span>{{ [userProfile?.city, userProfile?.country].filter(Boolean).join(', ') }}</span>
+              </div>
+              <div v-if="userProfile?.email" :class="isDark ? 'flex items-center text-gray-400' : 'flex items-center text-gray-800'">
+                <v-icon icon="mdi-email-outline" size="small" :class="isDark ? 'mr-2 text-gray-400' : 'mr-2 text-gray-800'"></v-icon>
+                <span>{{ userProfile.email }}</span>
+              </div>
+            </div>
+            
+            <!-- Social Links -->
+            <div class="flex flex-wrap gap-3 justify-center">
+              <v-btn
+                v-for="link in userProfile?.links || []"
+                :key="`${link.title}-${link.url}`"
+                variant="outlined"
+                size="medium"
+                :href="link.url"
+                target="_blank"
+                :class="isDark ? '!bg-black text-gray-300 !border-gray-800 hover:!border-gray-400 hover:!bg-gray-900 transition-all duration-200 px-4 py-2' : '!bg-gray-100 text-gray-900 !border-gray-800 hover:!border-gray-400 hover:!bg-gray-900 transition-all duration-200 px-4 py-2'"
+              >
+                <v-icon :icon="getLinkIcon(link.type || link.title)" class="mr-2" size="18"></v-icon>
+                <span class="font-medium text-sm">{{ link.title.toUpperCase() }}</span>
+              </v-btn>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Main Content -->
-    <main class="!mx-8 !my-8">
-      <div class="mx-auto px-6 py-12">
+    <main class="md:!mx-8 !mx-0 !my-8">
+      <div class="mx-auto px-6 md:py-12 py-2">
         <!-- Category Filters -->
         <div class="mb-8">
           <div class="flex flex-wrap gap-3">

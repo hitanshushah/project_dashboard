@@ -148,36 +148,39 @@ const clearFilters = () => {
         </v-alert>
 
         <!-- Header with Action Buttons -->
-        <div class="d-flex justify-space-between align-center mb-6">
-          <h1 :class="['text-3xl font-bold',  isDark ? 'text-white' : 'text-gray-900']">
-            My Projects
-          </h1>
-          <div class="d-flex gap-3">
-            <v-btn
-              v-if="publicProjects.length > 0"
-              prepend-icon="mdi-open-in-new"
-              variant="text"
-              @click="openPublicPreview"
-              :title="`Preview your ${publicProjects.length} public project${publicProjects.length !== 1 ? 's' : ''}`"
-              :class="[
-                  ' border rounded-lg !text-sm py-2 px-4 ml-4',
-                  isDark ? 'text-white !bg-black !border-gray-600' : 'text-gray-900 !bg-gray-100 !border-gray-600'
-                ]"
-            >
-              Preview Public
-              <v-badge
-                :content="publicProjects.length"
-                inline
-                class="ml-2"
-              ></v-badge>
-            </v-btn>
-            <v-btn
-              color="primary"
-              prepend-icon="mdi-plus"
-              @click="createProject"
-            >
-              Create Project
-            </v-btn>
+        <div class="mb-6">
+          <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 md:gap-0">
+            <h1 :class="['text-2xl md:text-3xl font-bold',  isDark ? 'text-white' : 'text-gray-900']">
+              My Projects
+            </h1>
+            <div class="flex flex-col md:flex-row gap-3">
+              <v-btn
+                v-if="publicProjects.length > 0"
+                prepend-icon="mdi-open-in-new"
+                variant="text"
+                @click="openPublicPreview"
+                :title="`Preview your ${publicProjects.length} public project${publicProjects.length !== 1 ? 's' : ''}`"
+                :class="[
+                    ' border rounded-lg !text-sm py-3 md:py-2 px-4 content-center',
+                    isDark ? 'text-white !bg-black !border-gray-600' : 'text-gray-900 !bg-gray-100 !border-gray-600'
+                  ]"
+              >
+                Preview Public
+                <v-badge
+                  :content="publicProjects.length"
+                  inline
+                  class="ml-2"
+                ></v-badge>
+              </v-btn>
+              <v-btn
+                color="primary"
+                prepend-icon="mdi-plus"
+                @click="createProject"
+                class="py-3 md:py-0 content-center"
+              >
+                Create Project
+              </v-btn>
+            </div>
           </div>
         </div>
 
@@ -194,19 +197,26 @@ const clearFilters = () => {
 
         <!-- Project Type Toggle -->
         <div v-if="projects.length > 0" class="mb-6">
-          <v-btn-toggle
-            v-model="selectedView"
-            mandatory
-            color="primary"
-            class="mb-4"
-          >
-            <v-btn value="hidden" prepend-icon="mdi-lock">
+          <div class="flex flex-col md:flex-row gap-2 md:gap-0 mb-4">
+            <v-btn
+              :color="selectedView === 'hidden' ? 'primary' : undefined"
+              :variant="selectedView === 'hidden' ? 'elevated' : 'outlined'"
+              prepend-icon="mdi-lock"
+              @click="selectedView = 'hidden'"
+              class="w-full md:w-auto py-4 md:py-0 content-center"
+            >
               Hidden Projects ({{ privateProjects.length }})
             </v-btn>
-            <v-btn value="public" prepend-icon="mdi-earth">
+            <v-btn
+              :color="selectedView === 'public' ? 'primary' : undefined"
+              :variant="selectedView === 'public' ? 'elevated' : 'outlined'"
+              prepend-icon="mdi-earth"
+              @click="selectedView = 'public'"
+              class="w-full md:w-auto py-4 md:py-0 content-center"
+            >
               Public Projects ({{ publicProjects.length }})
             </v-btn>
-          </v-btn-toggle>
+          </div>
         </div>
 
         <!-- Projects Grid -->

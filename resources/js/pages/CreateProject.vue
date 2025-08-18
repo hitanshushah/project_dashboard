@@ -402,7 +402,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
   <AppLayout>
     <v-main>
       <v-container class="py-8 max-w-7xl">
-        <div class="d-flex justify-space-between align-center mb-6">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-6 md:gap-0 mb-6">
           <div>
           <v-btn
             icon="mdi-arrow-left"
@@ -411,14 +411,15 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             color="gray"
             class="mb-4"
           ></v-btn>
-          <h1 :class="isDark ? 'text-3xl font-bold text-gray-300' : 'text-3xl font-bold text-gray-900'">Create New Project</h1>
+          <h1 :class="isDark ? 'text-2xl md:text-3xl font-bold text-gray-300' : 'text-2xl md:text-3xl font-bold text-gray-900'">Create New Project</h1>
           <p :class="isDark ? 'text-gray-500 mt-2' : 'text-gray-700 mt-2'">Fill in the details below to create your new project</p>
           </div>
-          <div class="flex gap-4 justify-end">
+          <div class="flex flex-col md:flex-row gap-3 md:gap-4 md:justify-end">
               <v-btn
                 variant="outlined"
                 size="large"
                 @click="cancel"
+                class="w-full md:w-auto py-3 md:py-0"
               >
                 Cancel
               </v-btn>
@@ -429,6 +430,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 size="large"
                 :loading="form.processing"
                 :disabled="form.processing"
+                class="w-full md:w-auto py-3 md:py-0"
               >
                 Create Project
               </v-btn>

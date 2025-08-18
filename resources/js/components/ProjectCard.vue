@@ -11,7 +11,7 @@
       <div class="p-6 pb-4">
         <!-- Title -->
         <h3 :class="[
-          'text-2xl font-bold mb-2',
+          'text-xl md:text-2xl font-bold mb-2',
           isDarkMode ? 'text-white' : 'text-gray-900'
         ]">
           {{ project.name }}
@@ -48,8 +48,25 @@
         </p>
       </div>
 
+        <!-- Category Tags -->
+        <div v-if="project.tags" class="md:px-6 px-0 md:pb-4 pb-2">
+      <div class="flex flex-wrap gap-2">
+        <v-chip
+          v-for="tag in (project.tags)"
+          :key="tag"
+          size="small"
+          :class="[
+            'text-xs !font-bold',
+            isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'
+          ]"
+        >
+          {{ tag }}
+        </v-chip>
+      </div>
+    </div>
+
     <!-- Image/Preview Section -->
-    <div class="px-6 pb-4">
+    <div class="md:px-6 px-0 md:pb-4 pb-2">
       <v-sheet class="overflow-hidden rounded-lg" max-width="700">
         <v-carousel
           v-if="mediaAssets.length > 0"
@@ -81,27 +98,10 @@
       </v-sheet>
     </div>
 
-    <!-- Category Tags -->
-    <div v-if="project.tags" class="px-6 pb-4">
-      <div class="flex flex-wrap gap-2">
-        <v-chip
-          v-for="tag in (project.tags)"
-          :key="tag"
-          size="small"
-          :class="[
-            'text-xs !font-bold',
-            isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'
-          ]"
-        >
-          {{ tag }}
-        </v-chip>
-      </div>
-    </div>
-
     <!-- Technologies Section -->
-    <div v-if="project.technologies" class="px-6 pb-4">
+    <div v-if="project.technologies" class="md:px-6 px-0 md:pb-4 pb-2">
       <h4 v-if="project.technologies.length > 0" :class="[
-        'font-bold mb-3',
+        'font-bold md:mb-3 mb-1',
         isDarkMode ? 'text-white' : 'text-gray-900'
       ]">
         Technologies
@@ -122,7 +122,7 @@
     </div>
 
     <!-- Date Range -->
-    <div v-if="project.start_date || project.end_date" class="px-6 pb-6">
+    <div v-if="project.start_date || project.end_date" class="md:px-6 px-0 md:pb-6 pb-2">
       <div class="flex items-center gap-2 text-sm">
         <v-icon 
           size="16" 
@@ -141,7 +141,7 @@
     </div>
 
     <!-- Documents Section -->
-    <div v-if="documentAssets.length > 0 && effectivePreviewSettings.showAssets" class="px-6 pb-6">
+    <div v-if="documentAssets.length > 0 && effectivePreviewSettings.showAssets" class="md:px-6 px-0 md:pb-6 pb-2">
       <div class="flex items-center gap-2 mb-3">
         <v-icon 
           size="16" 
@@ -186,15 +186,15 @@
     </div>
 
     <!-- Action Buttons -->
-    <div  v-if="githubLink || demoLink || additionalLinks.length" class="px-6 py-6 pb-0 border-t border-gray-400">
-      <div class="flex gap-3 flex-wrap">
+    <div  v-if="githubLink || demoLink || additionalLinks.length" class="md:px-6 px-0 md:py-6 py-2 md:pb-0 pb-2 border-t border-gray-400">
+      <div class="flex flex-col md:flex-row gap-2 md:gap-3">
         <!-- Code Button -->
         <v-btn
           v-if="githubLink"
           variant="elevated"
-          size="large"
+          size="small"
           :class="[
-            'flex-1 border rounded-lg !text-sm',
+            'w-full md:flex-1 border rounded-lg !text-sm py-2 md:py-0 content-center',
             isDarkMode 
               ? '!bg-blue-950 text-white' 
               : '!bg-[#AAC8F7] text-black'
@@ -210,9 +210,9 @@
         <v-btn
           v-if="demoLink"
           variant="elevated"
-          size="large"
+          size="small"
           :class="[
-            'flex-1 rounded-lg !text-sm',
+            'w-full md:flex-1 rounded-lg !text-sm py-2 md:py-0 content-center',
             isDarkMode 
               ? '!bg-blue-950 text-white' 
               : '!bg-[#AAC8F7] text-black'
@@ -229,9 +229,9 @@
           v-for="link in additionalLinks"
           :key="link.url"
           variant="elevated"
-          size="large"
+          size="small"
           :class="[
-            'flex-1 rounded-lg',
+            'w-full md:flex-1 rounded-lg py-2 md:py-0 content-center',
             isDarkMode 
               ? '!bg-blue-950 text-white' 
               : '!bg-[#AAC8F7] text-black'

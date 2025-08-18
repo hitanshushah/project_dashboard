@@ -1,16 +1,17 @@
 <template>
   <div class="project-reorder">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0 mb-6">
       <div class="flex items-center gap-3">
         <v-icon icon="mdi-drag" color="blue" size="large"></v-icon>
         <h2 :class="isDark ? 'text-xl font-semibold text-gray-300' : 'text-xl font-semibold text-gray-900'">Reorder Public Projects</h2>
       </div>
-      <div class="flex gap-2">
+      <div class="flex flex-col md:flex-row gap-2">
         <v-btn
           variant="outlined"
           :color="isDark ? 'gray-300' : 'gray-800'"
           @click="$emit('close')"
+          class="w-full md:w-auto py-3 md:py-0"
         >
           Cancel
         </v-btn>
@@ -20,6 +21,7 @@
           :loading="saving"
           :disabled="!hasChanges"
           @click="saveOrder"
+          class="w-full md:w-auto py-3 md:py-0"
         >
           Save Order
         </v-btn>

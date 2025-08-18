@@ -423,7 +423,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
     <v-main>
       <v-container class="py-8">
         <!-- Header -->
-        <div class="d-flex justify-space-between align-center mb-6">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-6 md:gap-0 mb-6">
           <div>
           <v-btn
             icon="mdi-arrow-left"
@@ -432,15 +432,16 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             color="gray"
             class="mb-4"
           ></v-btn>
-          <h1 :class="isDark ? 'text-3xl font-bold text-gray-300' : 'text-3xl font-bold text-gray-900'">
+          <h1 :class="isDark ? 'text-2xl md:text-3xl font-bold text-gray-300' : 'text-2xl md:text-3xl font-bold text-gray-900'">
             Edit Project
           </h1>
           <p :class="isDark ? 'text-gray-500 mt-2' : 'text-gray-700 mt-2'">Edit the details below to modify your project</p>
           </div>
-          <div class="d-flex gap-2">
+          <div class="flex flex-col md:flex-row gap-3 md:gap-2 md:justify-end">
             <v-btn
               variant="outlined"
               @click="cancelEdit"
+              class="w-full md:w-auto py-3 md:py-0"
             >
               Cancel
             </v-btn>
@@ -448,6 +449,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               color="primary"
               @click="updateProject"
               :loading="form.processing"
+              class="w-full md:w-auto py-3 md:py-0"
             >
               Update Project
             </v-btn>
