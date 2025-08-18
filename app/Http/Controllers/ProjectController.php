@@ -1197,4 +1197,24 @@ class ProjectController extends Controller
             return response()->json(['error' => 'Failed to update sorting orders'], 500);
         }
     }
+
+    /**
+     * Soft delete a project
+     */
+    public function destroy(Project $project)
+    {
+        $user = request()->attributes->get('user');
+        if (!$user || $project->user_id !== $user->id) {
+            return back()->withErrors(['error' => 'Unauthorized']);
+        }
+
+        try {
+            // Soft delete the project
+            $project->delete();
+
+            return back()->with('success', 'Project deleted successfully');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to delete project: ' . $e->getMessage()]);
+        }
+    }
 } 

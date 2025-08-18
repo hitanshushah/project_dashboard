@@ -401,7 +401,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
 <template>
   <AppLayout>
     <v-main>
-      <v-container class="py-8 max-w-7xl">
+      <v-container class="py-8 !max-w-none !px-8">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-6 md:gap-0 mb-6">
           <div>
           <v-btn

@@ -58,6 +58,10 @@ const showConfirmationModal = ref(false);
 const projectToToggle = ref<Project | null>(null);
 const toggleAction = ref<'public' | 'hidden'>('public');
 
+// Delete confirmation modal state
+const showDeleteModal = ref(false);
+const projectToDelete = ref<Project | null>(null);
+
 // Reorder modal state
 const showReorderModal = ref(false);
 
@@ -107,6 +111,36 @@ const confirmToggle = () => {
 const cancelToggle = () => {
   showConfirmationModal.value = false;
   projectToToggle.value = null;
+};
+
+const deleteProject = (project: Project) => {
+  projectToDelete.value = project;
+  showDeleteModal.value = true;
+};
+
+const confirmDelete = () => {
+  if (!projectToDelete.value) return;
+  
+  const form = useForm({
+    _method: 'DELETE'
+  });
+  
+  form.delete(`/projects/${projectToDelete.value.id}`, {
+    onSuccess: () => {
+      showDeleteModal.value = false;
+      projectToDelete.value = null;
+      // Refresh the page to get updated project data
+      router.reload();
+    },
+    onError: (errors) => {
+      
+    }
+  });
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  projectToDelete.value = null;
 };
 
 // Reorder methods
@@ -253,6 +287,14 @@ const clearFilters = () => {
                     @click="editProject(project.id!)"
                     title="Edit Project"
                   ></v-btn>
+                  <v-btn
+                    icon="mdi-delete"
+                    size="small"
+                    color="error"
+                    variant="tonal"
+                    @click="deleteProject(project)"
+                    title="Delete Project"
+                  ></v-btn>
                 </div>
               </div>
             </div>
@@ -301,6 +343,14 @@ const clearFilters = () => {
                     variant="tonal"
                     @click="editProject(project.id!)"
                     title="Edit Project"
+                  ></v-btn>
+                  <v-btn
+                    icon="mdi-delete"
+                    size="small"
+                    color="error"
+                    variant="tonal"
+                    @click="deleteProject(project)"
+                    title="Delete Project"
                   ></v-btn>
                 </div>
               </div>
@@ -441,6 +491,45 @@ const clearFilters = () => {
                 @click="confirmToggle"
               >
                 Confirm
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <!-- Delete Confirmation Modal -->
+        <v-dialog v-model="showDeleteModal" class="!max-w-xl">
+          <v-card class="!p-2">
+            <v-card-title class="text-h6">
+              <v-icon 
+                icon="mdi-delete" 
+                color="error"
+                class="mr-2"
+              ></v-icon>
+              Confirm Project Deletion
+            </v-card-title>
+            <v-card-text>
+              <p class="mb-2">
+                Are you sure you want to delete the project 
+                <strong>"{{ projectToDelete?.name }}"</strong>?
+              </p>
+              <p :class="isDark ? 'text-sm text-gray-400' : 'text-sm text-gray-700'">
+                This action will soft delete the project. It will be hidden from your dashboard but can be restored if needed.
+              </p>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                variant="outlined"
+                @click="cancelDelete"
+              >
+                Cancel
+              </v-btn>
+              <v-btn
+                :variant="isDark ? 'tonal' : 'elevated'"
+                color="error"
+                @click="confirmDelete"
+              >
+                Delete Project
               </v-btn>
             </v-card-actions>
           </v-card>
