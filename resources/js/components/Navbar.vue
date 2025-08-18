@@ -113,16 +113,16 @@
         <div v-if="currentProfile?.public_url" class="ml-4 hidden md:block">
           <v-btn-group>
             <!-- Visit Live URL -->
-            <v-btn
-              :href="`https://${currentProfile.public_url}.${publicUrl}`"
-              target="_blank"
-              size="medium"
-              variant="text"
-              append-icon="mdi-open-in-new"
-              :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm py-2 px-2' : '!bg-white text-gray-700 !border-gray-300 border !text-sm py-2 px-2']"
-            >
-              <span class="mr-2">Visit Live URL</span>
-            </v-btn>
+                          <v-btn
+                :href="`https://${currentProfile.public_url}.${domainUrl}`"
+                target="_blank"
+                size="medium"
+                variant="text"
+                append-icon="mdi-open-in-new"
+                :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm py-2 px-2' : '!bg-white text-gray-700 !border-gray-300 border !text-sm py-2 px-2']"
+              >
+                <span class="mr-2">Visit Live URL</span>
+              </v-btn>
 
             <!-- Edit Public URL -->
             <v-menu v-model="editMenuOpen" offset-y @update:model-value="setupEditPublicUrl">
@@ -160,7 +160,7 @@
                       @click.stop
                     >
                       <template v-slot:append>
-                        <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.projects.local.hitanshushah.com</span>
+                        <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.{{ domainUrl }}</span>
                       </template>
                     </v-text-field>
                   </v-form>
@@ -240,7 +240,7 @@
                   @click.stop
                 >
                   <template v-slot:append>
-                    <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.projects.local.hitanshushah.com</span>
+                    <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.{{ domainUrl }}</span>
                   </template>
                 </v-text-field>
               </v-form>
@@ -434,7 +434,7 @@
       
       <v-list-item
         v-if="currentProfile?.public_url"
-        :href="`https://${currentProfile.public_url}.${publicUrl}`"
+        :href="`https://${currentProfile.public_url}.${domainUrl}`"
         target="_blank"
         prepend-icon="mdi-link"
         :class="[isDark ? 'text-green-400' : 'text-green-600']"
@@ -506,6 +506,7 @@ const page = usePage();
 const { isDark } = useAppearance();
 
 const publicUrl = import.meta.env.VITE_PUBLIC_URL;
+const domainUrl = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
 // Public URL dropdown state
 const publicUrlInput = ref('');
 const urlError = ref('');
@@ -598,7 +599,7 @@ const editProfile = () => {
 // Computed property for full public URL
 const fullPublicUrl = computed(() => {
   if (!publicUrlInput.value.trim()) return '';
-  return `${publicUrlInput.value.trim()}.projects.local.hitanshushah.com`;
+  return `${publicUrlInput.value.trim()}.${domainUrl}`;
 });
 
 const setupPublicUrl = () => {
