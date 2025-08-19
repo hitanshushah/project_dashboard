@@ -6,6 +6,33 @@ use App\Models\User;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProfileController;
 
+$domainUrl = config('app.domain_url');
+if ($domainUrl) {
+    Route::domain('admin.'.$domainUrl)
+        ->group(function () {
+            Route::get('/', [ProjectController::class, 'index'])->name('admin.home');
+        });
+}
+
+$domainUrl = config('app.domain_url');
+if ($domainUrl) {
+    Route::domain('{subdomain}.'.$domainUrl)
+        ->group(function () {
+            Route::get('/', function () {
+                $publicUserId = request()->attributes->get('public_user_id');
+                
+                $controller = app(ProjectController::class);
+                $data = $controller->getPublicProjectsByUserId($publicUserId);
+                
+                return Inertia::render('PublicProjects', $data);
+            })->name('subdomain.public-projects');
+
+            Route::fallback(function () {
+                abort(404);
+            });
+        });
+}
+
 Route::get('/', [ProjectController::class, 'index'])->name('home');
 
 // Project routes

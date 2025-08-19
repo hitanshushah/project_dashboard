@@ -195,6 +195,12 @@ class ProjectController extends Controller
 
     public function create()
     {
+
+        $user = request()->attributes->get('user');
+        if (!$user) {
+            return redirect()->route('home');
+        }
+
         $categories = Category::all(['name', 'key']);
         $statuses = Status::where('is_active', true)->get(['name', 'key']);
         
