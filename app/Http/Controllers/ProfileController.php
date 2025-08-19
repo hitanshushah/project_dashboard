@@ -72,6 +72,8 @@ class ProfileController extends Controller
                 'city' => $profile->city,
                 'province' => $profile->province,
                 'country' => $profile->country,
+                'public_url' => $profile->public_url,
+                'share_profile' => $profile->share_profile,
                 'links' => $links,
                 'assets' => $assets,
             ]
@@ -435,12 +437,14 @@ class ProfileController extends Controller
         }
 
         $profile->public_url = $publicUrl;
+        $profile->share_profile = true; // Automatically enable sharing when URL is set
         $profile->save();
 
         return response()->json([
             'success' => true, 
-            'message' => 'Public URL set successfully',
-            'public_url' => $publicUrl
+            'message' => 'Public URL set successfully and profile sharing enabled',
+            'public_url' => $publicUrl,
+            'share_profile' => true
         ]);
     }
 
@@ -493,12 +497,50 @@ class ProfileController extends Controller
 
         // Update the profile
         $profile->public_url = $publicUrl;
+        $profile->share_profile = true; // Automatically enable sharing when URL is updated
         $profile->save();
 
         return response()->json([
             'success' => true, 
-            'message' => 'Public URL updated successfully',
-            'public_url' => $publicUrl
+            'message' => 'Public URL updated successfully and profile sharing enabled',
+            'public_url' => $publicUrl,
+            'share_profile' => true
+        ]);
+    }
+
+    /**
+     * Toggle share profile setting
+     */
+    public function toggleShareProfile(Request $request)
+    {
+        $user = $request->attributes->get('user');
+        
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        // Get the user's profile
+        $profile = $user->profile;
+        if (!$profile) {
+            return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
+        }
+
+        // Check if profile has a public URL
+        if (!$profile->public_url) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'You need to set a public URL before sharing your profile'
+            ], 422);
+        }
+
+        // Toggle the share_profile setting
+        $profile->share_profile = !$profile->share_profile;
+        $profile->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => $profile->share_profile ? 'Profile sharing enabled' : 'Profile sharing disabled',
+            'share_profile' => $profile->share_profile
         ]);
     }
 

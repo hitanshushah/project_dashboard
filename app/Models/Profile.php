@@ -20,6 +20,8 @@ class Profile extends Model
         'city',
         'province',
         'country',
+        'public_url',
+        'share_profile',
     ];
 
     public function user()

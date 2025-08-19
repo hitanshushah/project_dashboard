@@ -25,16 +25,14 @@ class AuthentikMiddleware
         
         $profile = Profile::where('public_url', $subdomain)->first();
         
-        if ($profile) {
-
+        if ($profile && $profile->share_profile) {
             $request->attributes->set('public_profile', $profile);
             $request->attributes->set('public_user_id', $profile->user_id);
             
             return $next($request);
         } else {
-            
             $logoutUrl = env('APP_URL') . env('AUTHENTIK_LOGOUT_URL');
-            return redirect($logoutUrl)->withErrors(['authentik' => 'Invalid subdomain.']);
+            return redirect($logoutUrl)->withErrors(['authentik' => 'Invalid subdomain or profile not shared.']);
         }
     }
 

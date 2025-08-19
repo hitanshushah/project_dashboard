@@ -42,6 +42,7 @@ if ($domainUrl) {
             Route::post('/api/profile/public-url', [ProfileController::class, 'setPublicUrl'])->name('profile.set-public-url');
             Route::put('/api/profile/public-url', [ProfileController::class, 'updatePublicUrl'])->name('profile.update-public-url');
             Route::delete('/api/profile/public-url', [ProfileController::class, 'deletePublicUrl'])->name('profile.delete-public-url');
+            Route::patch('/api/profile/toggle-share', [ProfileController::class, 'toggleShareProfile'])->name('profile.toggle-share');
 
             // API routes for project data
             Route::get('/api/categories', fn() => response()->json(\App\Models\Category::all(['id', 'name', 'key'])));

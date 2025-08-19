@@ -109,11 +109,12 @@
          </v-menu>
         </div>
          
-         <!-- Public URL Controls - Hidden on mobile -->
+                  <!-- Public URL Controls - Hidden on mobile -->
         <div v-if="currentProfile?.public_url" class="ml-4 hidden md:block">
-          <v-btn-group>
-            <!-- Visit Live URL -->
-                          <v-btn
+          <div class="flex items-center gap-2">
+            <v-btn-group>
+              <!-- Visit Live URL -->
+              <v-btn
                 :href="`https://${currentProfile.public_url}.${domainUrl}`"
                 target="_blank"
                 size="medium"
@@ -228,6 +229,40 @@
               </v-card>
             </v-menu>
           </v-btn-group>
+          
+          <!-- Share Status Indicator -->
+          <div class="flex items-center">
+            <v-tooltip
+              :text="currentProfile?.share_profile ? 'Profile sharing is enabled' : 'Profile sharing is disabled'"
+              location="bottom"
+            >
+              <template v-slot:activator="{ props }">
+                <div
+                  v-bind="props"
+                  class="w-3 h-3 rounded-full mr-2 cursor-help"
+                  :class="currentProfile?.share_profile ? 'bg-green-500' : 'bg-red-500'"
+                ></div>
+              </template>
+            </v-tooltip>
+            <span :class="[isDark ? 'text-gray-300 text-sm' : 'text-gray-700 text-sm']">
+              {{ currentProfile?.share_profile ? 'Public' : 'Private' }}
+            </span>
+            <v-tooltip
+              text="Change sharing settings in your profile page"
+              location="bottom"
+            >
+              <template v-slot:activator="{ props }">
+                <v-icon
+                  v-bind="props"
+                  icon="mdi-information"
+                  size="small"
+                  :class="isDark ? 'text-gray-400 ml-1' : 'text-gray-500 ml-1'"
+                ></v-icon>
+              </template>
+            </v-tooltip>
+          </div>
+        </div>
+
         </div>
 
         <!-- Create Public URL Button if none exists - Hidden on mobile -->
@@ -336,6 +371,23 @@
               </div>
             </div>
           </v-card-text>
+          <v-divider></v-divider>
+          <div class="md:hidden bg-black mx-2 rounded-lg">
+            <v-list-item v-if="currentProfile?.public_url">
+              <template v-slot:prepend>
+                <div
+                  class="w-3 h-3 rounded-full mr-4"
+                  :class="currentProfile?.share_profile ? 'bg-green-500' : 'bg-red-500'"
+                ></div>
+              </template>
+              <v-list-item-title :class="[isDark ? 'text-gray-300' : 'text-gray-700']">
+                {{ currentProfile?.share_profile ? 'Profile is Public' : 'Profile is Private' }}
+              </v-list-item-title>
+              <v-list-item-subtitle :class="isDark ? 'text-gray-500' : 'text-gray-600'">
+                Change in profile settings
+              </v-list-item-subtitle>
+            </v-list-item>
+            </div>
 
           <!-- Menu items -->
           <v-list density="compact" class="py-1">
@@ -348,7 +400,7 @@
                 <v-icon icon="mdi-chevron-right" size="small" :class="isDark ? 'text-gray-400' : 'text-gray-700'"></v-icon>
               </template>
             </v-list-item>
-
+    
             <v-divider class="my-1"></v-divider>
 
             <v-list-item
@@ -377,28 +429,7 @@
     width="300"
   >
     <v-list>
-      <!-- User Profile Section -->
-      <v-list-item class="py-4">
-        <template v-slot:prepend>
-          <v-avatar size="48" class="bg-gradient-to-br from-purple-400 to-blue-500">
-            <v-img
-              v-if="profilePhotoUrl"
-              :src="profilePhotoUrl"
-              cover
-              @error="handleImageError"
-            />
-            <span v-else class="text-white font-semibold text-xl">{{ userInitials }}</span>
-          </v-avatar>
-        </template>
-        <v-list-item-title :class="isDark ? 'text-white' : 'text-gray-900'">
-          {{ currentProfile?.name || currentUser?.username || 'User' }}
-        </v-list-item-title>
-        <v-list-item-subtitle :class="isDark ? 'text-gray-400' : 'text-gray-700'">
-          {{ currentUser?.email || 'user@example.com' }}
-        </v-list-item-subtitle>
-      </v-list-item>
 
-      <v-divider></v-divider>
 
              <!-- Social Media Links -->
        <v-list-subheader :class="isDark ? 'text-gray-300' : 'text-gray-700'">Social Links</v-list-subheader>
@@ -518,22 +549,7 @@
       </v-list-item>
 
       <!-- Profile Actions -->
-      <v-divider></v-divider>
-      <v-list-item
-        @click="editProfile"
-        prepend-icon="mdi-account-edit"
-        :class="[isDark ? 'text-gray-300' : 'text-gray-700']"
-      >
-        <v-list-item-title>Edit Profile</v-list-item-title>
-      </v-list-item>
 
-      <v-list-item
-        @click="logout"
-        prepend-icon="mdi-logout"
-        class="text-red-600"
-      >
-        <v-list-item-title>Logout</v-list-item-title>
-      </v-list-item>
     </v-list>
   </v-navigation-drawer>
 
