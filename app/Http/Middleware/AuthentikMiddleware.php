@@ -31,8 +31,7 @@ class AuthentikMiddleware
             
             return $next($request);
         } else {
-            $logoutUrl = env('APP_URL') . env('AUTHENTIK_LOGOUT_URL');
-            return redirect($logoutUrl)->withErrors(['authentik' => 'Invalid subdomain or profile not shared.']);
+            abort(404, 'Page not found');
         }
     }
 
