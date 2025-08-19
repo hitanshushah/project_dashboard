@@ -113,7 +113,7 @@
           size="small"
           :class="[
             'text-lg !font-bold',
-            isDarkMode ? '!border-2 !border-blue-900 !bg-[#23153A] !text-blue-400' : '!border-2 !border-blue-900 !bg-blue-200 !text-blue-800'
+            isDarkMode ? '!border-2 !border-blue-900 !bg-[#23153A] !text-blue-400' : '!border-2 !border-gray-950 !bg-white !text-gray-950'
           ]"
         >
           {{ tech }}
@@ -197,7 +197,7 @@
             'w-full md:flex-1 border rounded-lg !text-sm py-2 md:py-0 content-center',
             isDarkMode 
               ? '!bg-blue-950 text-white' 
-              : '!bg-[#AAC8F7] text-black'
+              : 'text-gray-900 !bg-gray-100 !border-gray-600'
           ]"
           :href="githubLink.url"
           target="_blank"
@@ -215,7 +215,7 @@
             'w-full md:flex-1 rounded-lg !text-sm py-2 md:py-0 content-center',
             isDarkMode 
               ? '!bg-blue-950 text-white' 
-              : '!bg-[#AAC8F7] text-black'
+              : 'text-gray-900 !bg-gray-100 !border-gray-600'
           ]"
           :href="demoLink.url"
           target="_blank"
@@ -234,7 +234,7 @@
             'w-full md:flex-1 rounded-lg py-2 md:py-0 content-center',
             isDarkMode 
               ? '!bg-blue-950 text-white' 
-              : '!bg-[#AAC8F7] text-black'
+              : 'text-gray-900 !bg-gray-100 !border-gray-600'
           ]"
           :href="link.url"
           target="_blank"

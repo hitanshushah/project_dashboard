@@ -108,6 +108,38 @@
                      </v-card>
          </v-menu>
         </div>
+
+        <!-- Share Status Indicator -->
+          <div class="flex items-center ml-2 hidden md:flex">
+            <v-tooltip
+              :text="currentProfile?.share_profile ? 'Projects URL is public' : 'Projects URL is private'"
+              location="bottom"
+            >
+              <template v-slot:activator="{ props }">
+                <div
+                  v-bind="props"
+                  class="w-3 h-3 rounded-full mr-2 cursor-help"
+                  :class="currentProfile?.share_profile ? 'bg-green-500' : 'bg-red-500'"
+                ></div>
+              </template>
+            </v-tooltip>
+            <span :class="[isDark ? 'text-gray-300 text-sm' : 'text-gray-700 text-sm']">
+              {{ currentProfile?.share_profile ? 'Public' : 'Private' }}
+            </span>
+            <v-tooltip
+              :text="currentProfile?.share_profile ? 'Change projects page to private in your profile page' : 'Change projects page to public in your profile page'"
+              location="bottom"
+            >
+              <template v-slot:activator="{ props }">
+                <v-icon
+                  v-bind="props"
+                  icon="mdi-information"
+                  size="small"
+                  :class="isDark ? 'text-gray-400 ml-1' : 'text-gray-500 ml-1'"
+                ></v-icon>
+              </template>
+            </v-tooltip>
+          </div>
          
                   <!-- Public URL Controls - Hidden on mobile -->
         <div v-if="currentProfile?.public_url" class="ml-4 hidden md:block">
@@ -122,7 +154,7 @@
                 append-icon="mdi-open-in-new"
                 :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm py-2 px-2' : '!bg-white text-gray-700 !border-gray-300 border !text-sm py-2 px-2']"
               >
-                <span class="mr-2">Live URL</span>
+                <span class="mr-2">Public URL</span>
               </v-btn>
 
             <!-- Edit Public URL -->
@@ -230,37 +262,6 @@
             </v-menu>
           </v-btn-group>
           
-          <!-- Share Status Indicator -->
-          <div class="flex items-center">
-            <v-tooltip
-              :text="currentProfile?.share_profile ? 'Profile sharing is enabled' : 'Profile sharing is disabled'"
-              location="bottom"
-            >
-              <template v-slot:activator="{ props }">
-                <div
-                  v-bind="props"
-                  class="w-3 h-3 rounded-full mr-2 cursor-help"
-                  :class="currentProfile?.share_profile ? 'bg-green-500' : 'bg-red-500'"
-                ></div>
-              </template>
-            </v-tooltip>
-            <span :class="[isDark ? 'text-gray-300 text-sm' : 'text-gray-700 text-sm']">
-              {{ currentProfile?.share_profile ? 'Public' : 'Private' }}
-            </span>
-            <v-tooltip
-              text="Change sharing settings in your profile page"
-              location="bottom"
-            >
-              <template v-slot:activator="{ props }">
-                <v-icon
-                  v-bind="props"
-                  icon="mdi-information"
-                  size="small"
-                  :class="isDark ? 'text-gray-400 ml-1' : 'text-gray-500 ml-1'"
-                ></v-icon>
-              </template>
-            </v-tooltip>
-          </div>
         </div>
 
         </div>
@@ -275,7 +276,7 @@
               append-icon="mdi-chevron-down"
               :class="[isDark ? '!bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-2 ml-4' : '!bg-white text-gray-700 !border-gray-300 border rounded-lg !text-sm py-2 px-2 ml-4']"
             >
-              <span class="mr-2">Set Live URL</span>
+              <span class="mr-2">Set Public URL</span>
             </v-btn>
           </template>
           <!-- Create Menu Content -->
@@ -363,7 +364,7 @@
                   cover
                   @error="handleImageError"
                 />
-                <span v-else class="text-white font-semibold text-xl">{{ userInitials }}</span>
+                <span v-else :class="isDark ? 'text-white font-semibold text-xl' : 'text-gray-900 font-semibold text-xl'">{{ userInitials }}</span>
               </v-avatar>
               <div>
                 <div :class="isDark ? 'font-semibold text-white' : 'font-semibold text-gray-900'">{{ currentProfile?.name || currentUser?.username || 'User' }}</div>
@@ -372,7 +373,7 @@
             </div>
           </v-card-text>
           <v-divider></v-divider>
-          <div class="md:hidden bg-black mx-2 rounded-lg">
+          <div :class="isDark ? 'md:hidden bg-black mx-2 rounded-lg' : 'md:hidden bg-[#DBDBDB] mx-2 rounded-lg'">
             <v-list-item v-if="currentProfile?.public_url">
               <template v-slot:prepend>
                 <div

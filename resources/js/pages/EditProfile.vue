@@ -675,52 +675,65 @@ onMounted(() => {
                 </div>
 
                 <!-- Public Profile Settings -->
-                <div class="mb-0">
-                  <div class="flex items-center mb-6">
-                    <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
-                    <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Public Profile Settings</h2>
-                  </div>
-                  
-                  <v-row>
-                    <v-col cols="12">
-                      <v-card variant="outlined" class="pa-4">
-                        <div class="flex items-center justify-between">
-                          <div class="flex-1">
-                            <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-2' : 'text-lg font-medium text-gray-900 mb-2'">
-                              Share Profile Publicly
-                            </h3>
-                            <p :class="isDark ? 'text-sm text-gray-500' : 'text-sm text-gray-700'">
-                              {{ shareProfile ? 'Your profile is currently shared publicly. Others can view your portfolio at your public URL.' : 'Enable this to make your profile accessible via your public URL. Your profile will be visible to anyone with the link.' }}
-                            </p>
-                            <div v-if="props.profile.public_url" class="mt-2">
-                                                              <p :class="isDark ? 'text-sm text-blue-400' : 'text-sm text-blue-600'">
-                                  <v-icon icon="mdi-link" size="small" class="mr-1"></v-icon>
-                                  Your public URL: <strong>{{ props.profile.public_url }}.{{ domainUrl }}</strong>
-                                </p>
-                            </div>
-                            <div v-else class="mt-2">
-                              <p :class="isDark ? 'text-sm text-orange-400' : 'text-sm text-orange-600'">
-                                <v-icon icon="mdi-alert" size="small" class="mr-1"></v-icon>
-                                You need to set a public URL in the navbar before sharing your profile.
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div class="ml-4">
-                            <v-switch
-                              v-model="shareProfile"
-                              :loading="isTogglingShare"
-                              :disabled="isTogglingShare || !props.profile.public_url"
-                              color="primary"
-                              @change="toggleShareProfile"
-                              :label="shareProfile ? 'Enabled' : 'Disabled'"
-                            />
-                          </div>
-                        </div>
-                      </v-card>
-                    </v-col>
-                  </v-row>
-                </div>
+<div class="mb-6">
+  <!-- Section Heading -->
+  <div class="flex items-center mb-6">
+    <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
+    <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">
+      Public Profile Settings
+    </h2>
+  </div>
+
+  <v-row>
+    <v-col cols="12">
+      <v-card variant="outlined" class="pa-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <!-- Left Side -->
+          <div class="flex-1">
+            <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-2' : 'text-lg font-medium text-gray-900 mb-2'">
+              Share Profile Publicly
+            </h3>
+            <p :class="isDark ? 'text-sm text-gray-500' : 'text-sm text-gray-700'">
+              {{ shareProfile 
+                ? 'Your profile is currently shared publicly. Others can view your portfolio at your public URL.' 
+                : 'Enable this to make your profile accessible via your public URL. Your profile will be visible to anyone with the link.' 
+              }}
+            </p>
+
+            <!-- Public URL -->
+            <div v-if="props.profile.public_url" class="mt-2">
+              <p :class="isDark ? 'text-sm text-blue-400' : 'text-sm text-blue-600'">
+                <v-icon icon="mdi-link" size="small" class="mr-1"></v-icon>
+                Your public URL: <strong>{{ props.profile.public_url }}.{{ domainUrl }}</strong>
+              </p>
+            </div>
+
+            <!-- Warning if no public URL -->
+            <div v-else class="mt-2">
+              <p :class="isDark ? 'text-sm text-orange-400' : 'text-sm text-orange-600'">
+                <v-icon icon="mdi-alert" size="small" class="mr-1"></v-icon>
+                You need to set a public URL in the navbar before sharing your profile.
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Side (Switch) -->
+          <div class="sm:ml-4">
+            <v-switch
+              v-model="shareProfile"
+              :loading="isTogglingShare"
+              :disabled="isTogglingShare || !props.profile.public_url"
+              color="primary"
+              @change="toggleShareProfile"
+              :label="shareProfile ? 'Enabled' : 'Disabled'"
+            />
+          </div>
+        </div>
+      </v-card>
+    </v-col>
+  </v-row>
+</div>
+
 
                 <!-- Address Information -->
                 <div class="mb-0">
