@@ -121,7 +121,7 @@
                 append-icon="mdi-open-in-new"
                 :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm py-2 px-2' : '!bg-white text-gray-700 !border-gray-300 border !text-sm py-2 px-2']"
               >
-                <span class="mr-2">Visit Live URL</span>
+                <span class="mr-2">Live URL</span>
               </v-btn>
 
             <!-- Edit Public URL -->
@@ -173,6 +173,30 @@
                 </v-card-actions>
               </v-card>
             </v-menu>
+
+            <!-- Copy Public URL -->
+            <v-btn
+              @click="copyPublicUrl"
+              icon
+              size="x-small"
+              variant="text"
+              :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm px-2 text-blue-400 hover:text-blue-600' : '!bg-white text-gray-700 !border-gray-300 border !text-sm px-2 text-blue-400 hover:text-blue-600']"
+              :title="`Copy public URL to clipboard`"
+            >
+              <v-icon icon="mdi-content-copy" size="small"></v-icon>
+            </v-btn>
+
+            <!-- Share Public URL -->
+            <v-btn
+              @click="sharePublicUrl"
+              icon
+              size="x-small"
+              variant="text"
+              :class="[isDark ? '!bg-black text-white !border-gray-600 border !text-sm px-2 text-green-400 hover:text-green-600' : '!bg-white text-gray-700 !border-gray-300 border !text-sm px-2 text-green-400 hover:text-green-600']"
+              :title="`Share public URL`"
+            >
+              <v-icon icon="mdi-share-variant" size="small"></v-icon>
+            </v-btn>
 
             <!-- Delete Public URL -->
             <v-menu v-model="deleteMenuOpen" offset-y>
@@ -262,6 +286,7 @@
       <ThemeToggle class="mr-4" />
 
       <!-- Mobile Menu Button -->
+       <div class="md:hidden">
       <v-btn
         icon
         @click="mobileMenuOpen = !mobileMenuOpen"
@@ -270,6 +295,7 @@
       >
         <v-icon>{{ mobileMenuOpen ? 'mdi-close' : 'mdi-menu' }}</v-icon>
       </v-btn>
+      </div>
 
       <!-- Avatar dropdown on right -->
       <v-menu offset-y>
@@ -286,7 +312,7 @@
                 cover
                 @error="handleImageError"
               />
-              <span v-else class="text-white font-semibold text-lg">{{ userInitials }}</span>
+              <span v-else :class="isDark ? 'text-white font-semibold text-lg' : 'text-gray-900 font-semibold text-lg'">{{ userInitials }}</span>
             </v-avatar>
           </v-btn>
         </template>
@@ -440,7 +466,7 @@
         prepend-icon="mdi-link"
         :class="[isDark ? 'text-green-400' : 'text-green-600']"
       >
-        <v-list-item-title>Visit Live URL</v-list-item-title>
+        <v-list-item-title>Visit</v-list-item-title>
         <template v-slot:append>
           <v-icon icon="mdi-open-in-new" size="small" :class="isDark ? 'text-gray-400' : 'text-gray-500'"></v-icon>
         </template>
@@ -452,7 +478,25 @@
         prepend-icon="mdi-pencil"
         :class="[isDark ? 'text-blue-400' : 'text-blue-600']"
       >
-        <v-list-item-title>Edit Public URL</v-list-item-title>
+        <v-list-item-title>Edit</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item
+        v-if="currentProfile?.public_url"
+        @click="copyPublicUrl"
+        prepend-icon="mdi-content-copy"
+        :class="[isDark ? 'text-blue-400' : 'text-blue-600']"
+      >
+        <v-list-item-title>Copy</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item
+        v-if="currentProfile?.public_url"
+        @click="sharePublicUrl"
+        prepend-icon="mdi-share-variant"
+        :class="[isDark ? 'text-green-400' : 'text-green-600']"
+      >
+        <v-list-item-title>Share</v-list-item-title>
       </v-list-item>
 
       <v-list-item
@@ -461,7 +505,7 @@
         prepend-icon="mdi-delete"
         class="text-red-600"
       >
-        <v-list-item-title>Delete Public URL</v-list-item-title>
+        <v-list-item-title>Delete</v-list-item-title>
       </v-list-item>
 
       <v-list-item
@@ -495,6 +539,16 @@
 
   <!-- Public URL Setup Modal -->
   
+  <!-- Toast Notification -->
+  <v-snackbar
+    v-model="snackbar"
+    :timeout="3000"
+    :color="snackbarColor"
+    location="bottom"
+    multi-line
+  >
+    {{ snackbarMessage }}
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -519,6 +573,11 @@ const createMenuOpen = ref(false);
 
 // Mobile menu state
 const mobileMenuOpen = ref(false);
+
+// Toast notification state
+const snackbar = ref(false);
+const snackbarMessage = ref('');
+const snackbarColor = ref('success');
 
 const currentUser = computed(() => page.props.auth?.user);
 
@@ -770,6 +829,51 @@ const deletePublicUrl = async () => {
     
   } finally {
     isDeleting.value = false;
+  }
+};
+
+const copyPublicUrl = async () => {
+  const fullUrl = `https://${currentProfile.value?.public_url}.${domainUrl}`;
+  
+  try {
+    await navigator.clipboard.writeText(fullUrl);
+    snackbarMessage.value = 'URL copied to clipboard!';
+    snackbarColor.value = 'success';
+    snackbar.value = true;
+  } catch (error) {
+    console.error('Failed to copy URL to clipboard:', error);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = fullUrl;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    snackbarMessage.value = 'URL copied to clipboard!';
+    snackbarColor.value = 'success';
+    snackbar.value = true;
+  }
+};
+
+const sharePublicUrl = async () => {
+  const fullUrl = `https://${currentProfile.value?.public_url}.${domainUrl}`;
+  
+  // Check if Web Share API is available (mobile devices)
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `${currentProfile.value?.name || 'My Portfolio'}`,
+        text: `Check out my portfolio: ${currentProfile.value?.name || 'My Portfolio'}`,
+        url: fullUrl
+      });
+    } catch (error) {
+      // User cancelled or share failed, fallback to copy
+      copyPublicUrl();
+    }
+  } else {
+    // Fallback to copy for desktop browsers
+    copyPublicUrl();
   }
 };
 
