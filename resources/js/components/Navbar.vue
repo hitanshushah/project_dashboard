@@ -9,7 +9,7 @@
   >
     <!-- Logo on left -->
     <v-app-bar-title :class="[
-      'font-bold text-xl transition-colors duration-300 cursor-pointer hover:opacity-80',
+      'font-bold text-xl transition-colors duration-300 cursor-pointer',
       isDark ? 'text-white' : 'text-gray-900'
     ]" @click="goHome">
       <div class="flex items-center">
@@ -31,7 +31,7 @@
             variant="text"
             :title="`Visit ${linkedinLink.title}`"
           >
-            <v-icon :class="[isDark ? 'text-gray-300 hover:text-gray-700' : 'text-blue-800']" size="small">mdi-linkedin</v-icon>
+            <v-icon :class="[isDark ? 'text-gray-300' : 'text-blue-800']" size="small">mdi-linkedin</v-icon>
           </v-btn>
 
           <!-- GitHub -->
@@ -57,7 +57,7 @@
             variant="text"
             :title="`Visit ${portfolioLink.title}`"
           >
-            <v-icon :class="[isDark ? 'text-gray-300 hover:text-gray-700' : 'text-orange-400']" size="small">mdi-web</v-icon>
+            <v-icon :class="[isDark ? 'text-gray-300' : 'text-orange-400']" size="small">mdi-web</v-icon>
           </v-btn>
         </div>
         
@@ -98,7 +98,6 @@
                 target="_blank"
                 :prepend-icon="getDocumentIcon(document.name || '')"
                 :title="document.name"
-                class="hover:bg-gray-50"
               >
                 <template v-slot:append>
                   <v-icon icon="mdi-open-in-new" size="small" class="text-gray-400"></v-icon>
