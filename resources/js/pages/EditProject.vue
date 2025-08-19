@@ -213,7 +213,16 @@ const previewSettings = computed(() => form.preview_settings);
 // Theme management
 const { isDark } = useAppearance();
 
-// Methods
+const handleCategoryChange = (value: any) => {
+  if (typeof value === 'string') {
+    form.category = value;
+  } else if (value && typeof value === 'object' && value.key) {
+    form.category = value.key;
+  } else {
+    form.category = '';
+  }
+};
+
 const addTag = () => {
   const tag = newTag.value.trim();
   if (tag && !form.tags.includes(tag)) {
@@ -486,24 +495,35 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </v-col>
                       
                 <v-col cols="12" md="4">
-                  <v-select
+                  <v-combobox
                     v-model="form.category"
                     :items="categories"
                     item-title="name"
                     item-value="key"
                     label="Category *"
-                    placeholder="Select category"
+                    placeholder="Select or create a category"
                     variant="outlined"
                     :error-messages="form.errors.category"
                     :color="isDark ? 'gray-300' : 'gray-600'"
                     density="compact"
                     class="select-modern"
+                    :hide-no-data="false"
+                    clearable
                     required
+                    @update:model-value="handleCategoryChange"
                   >
                     <template v-slot:prepend-inner>
                       <v-icon>mdi-folder-star</v-icon>
                     </template>
-                  </v-select>
+                    <template v-slot:no-data>
+                      <v-list-item>
+                        <v-list-item-title>
+                          No results matching
+                          <strong>"{{ form.category || 'your input' }}"</strong>. Press <kbd>enter</kbd> to create a new category.
+                        </v-list-item-title>
+                      </v-list-item>
+                    </template>
+                  </v-combobox>
                 </v-col>
                 </v-row>
 

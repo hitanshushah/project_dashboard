@@ -155,8 +155,9 @@ class ProjectController extends Controller
             ];
         });
 
-        // Fetch categories and statuses for the ProjectCard components
-        $allCategories = Category::all(['id', 'name', 'key']);
+        $allCategories = Category::where('user_id', $user->id)
+            ->orWhereNull('user_id')
+            ->get(['id', 'name', 'key']);
         $allStatuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
 
         // Get all available technologies for filter dropdown
@@ -201,7 +202,9 @@ class ProjectController extends Controller
             return redirect()->route('home');
         }
 
-        $categories = Category::all(['name', 'key']);
+        $categories = Category::where('user_id', $user->id)
+            ->orWhereNull('user_id')
+            ->get(['name', 'key']);
         $statuses = Status::where('is_active', true)->get(['name', 'key']);
         
         // Get user technologies
@@ -242,7 +245,9 @@ class ProjectController extends Controller
         }
 
         // Fetch categories and statuses for the form
-        $categories = Category::all(['id', 'name', 'key']);
+        $categories = Category::where('user_id', $user->id)
+            ->orWhereNull('user_id')
+            ->get(['id', 'name', 'key']);
         $statuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
         $linkTypes = LinkType::all(['id', 'name', 'key']);
         $assetTypes = AssetType::all(['id', 'name', 'key']);
@@ -333,7 +338,7 @@ class ProjectController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'nullable|string|exists:categories,key',
+            'category' => 'nullable|string|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'status' => 'nullable|string|exists:status,key',
@@ -373,6 +378,16 @@ class ProjectController extends Controller
             $category = null;
             if ($request->category) {
                 $category = Category::where('key', $request->category)->first();
+                
+                // If category doesn't exist, create it for the user
+                if (!$category) {
+                    $category = Category::create([
+                        'name' => $request->category,
+                        'key' => strtolower(str_replace(' ', '_', $request->category)),
+                        'is_active' => true,
+                        'user_id' => $user->id,
+                    ]);
+                }
             }
             
             $status = null;
@@ -540,7 +555,7 @@ class ProjectController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'nullable|string|exists:categories,key',
+            'category' => 'nullable|string|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'status' => 'nullable|string|exists:status,key',
@@ -580,6 +595,16 @@ class ProjectController extends Controller
             $category = null;
             if ($request->category) {
                 $category = Category::where('key', $request->category)->first();
+                
+                // If category doesn't exist, create it for the user
+                if (!$category) {
+                    $category = Category::create([
+                        'name' => $request->category,
+                        'key' => strtolower(str_replace(' ', '_', $request->category)),
+                        'is_active' => true,
+                        'user_id' => $user->id,
+                    ]);
+                }
             }
             
             $status = null;
@@ -750,7 +775,7 @@ class ProjectController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'nullable|string|exists:categories,key',
+            'category' => 'nullable|string|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'status' => 'nullable|string|exists:status,key',
@@ -792,6 +817,16 @@ class ProjectController extends Controller
             $category = null;
             if ($request->category) {
                 $category = Category::where('key', $request->category)->first();
+                
+                // If category doesn't exist, create it for the user
+                if (!$category) {
+                    $category = Category::create([
+                        'name' => $request->category,
+                        'key' => strtolower(str_replace(' ', '_', $request->category)),
+                        'is_active' => true,
+                        'user_id' => $user->id,
+                    ]);
+                }
             }
             
             $status = null;
@@ -1048,7 +1083,9 @@ class ProjectController extends Controller
         });
 
         // Fetch categories and statuses for filtering
-        $allCategories = Category::all(['id', 'name', 'key']);
+        $allCategories = Category::where('user_id', $user->id)
+            ->orWhereNull('user_id') // Include global categories
+            ->get(['id', 'name', 'key']);
         $allStatuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
 
         // Get all available technologies for filter dropdown

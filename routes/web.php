@@ -45,7 +45,15 @@ if ($domainUrl) {
             Route::patch('/api/profile/toggle-share', [ProfileController::class, 'toggleShareProfile'])->name('profile.toggle-share');
 
             // API routes for project data
-            Route::get('/api/categories', fn() => response()->json(\App\Models\Category::all(['id', 'name', 'key'])));
+            Route::get('/api/categories', function () {
+                $user = request()->attributes->get('user');
+                if (!$user) {
+                    return response()->json([]);
+                }
+                return response()->json(\App\Models\Category::where('user_id', $user->id)
+                    ->orWhereNull('user_id')
+                    ->get(['id', 'name', 'key']));
+            });
             Route::get('/api/statuses', fn() => response()->json(\App\Models\Status::where('is_active', true)->get(['id', 'name', 'key'])));
             Route::get('/api/link-types', fn() => response()->json(\App\Models\LinkType::all(['id', 'name', 'key'])));
             Route::get('/api/asset-types', fn() => response()->json(\App\Models\AssetType::all(['id', 'name', 'key'])));

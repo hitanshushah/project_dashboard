@@ -55,8 +55,10 @@ export interface Profile {
 }
 
 export interface Category {
+    id?: number;
     name: string;
     key: string;
+    user_id?: number | null;
 }
 
 export interface Status {

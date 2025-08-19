@@ -53,4 +53,9 @@ class User extends Model
     {
         return $this->hasMany(ProjectSetting::class);
     }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
 }
