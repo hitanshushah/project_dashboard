@@ -161,8 +161,8 @@ const getLinkIcon = (linkType: string): string => {
                 @error="handleImageError"
               />
             </div>
-            <div v-else class="w-24 h-24 bg-primary rounded-full flex items-center justify-center">
-              <span :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">{{ userInitials }}</span>
+            <div v-else :class="isDark ? 'w-24 h-24 bg-primary rounded-full flex items-center justify-center text-2xl font-bold text-gray-300' : 'w-24 h-24 bg-white border-2 border-gray-950 rounded-full flex items-center justify-center text-2xl font-bold text-gray-300'">
+              <span>{{ userInitials }}</span>
             </div>
           </div>
           
