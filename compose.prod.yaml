@@ -21,7 +21,7 @@ services:
       # This allows external access to the Nginx web server running inside the container.
       # For example, if 'NGINX_PORT' is set to '8080', accessing 'http://localhost:8080' will reach the application.
       # -----------------------------------------------------------
-      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_PORT:-8080}:80"
     depends_on:
       php-fpm:
         condition: service_healthy  # Wait for php-fpm health check
@@ -48,9 +48,9 @@ services:
     # The 'depends_on' attribute with 'condition: service_healthy' ensures that
     # this service will not start until the 'postgres' service passes its health check.
     # This prevents the application from trying to connect to the database before it's ready.
-    depends_on:
-      postgres:
-        condition: service_healthy
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
 
   # postgres:
   #   image: postgres:16
@@ -103,6 +103,6 @@ networks:
   laravel-production:
 
 volumes:
-  postgres-data-production:
+  # postgres-data-production:
   laravel-storage-production:
   laravel-public-assets:
