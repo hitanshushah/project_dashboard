@@ -450,7 +450,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
             <v-btn
               variant="outlined"
               @click="cancelEdit"
-              class="w-full md:w-auto py-3 md:py-0"
+              class="w-full md:w-auto py-3 md:py-0 content-center"
             >
               Cancel
             </v-btn>
@@ -458,7 +458,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               color="primary"
               @click="updateProject"
               :loading="form.processing"
-              class="w-full md:w-auto py-3 md:py-0"
+              class="w-full md:w-auto py-3 md:py-0 content-center"
             >
               Update Project
             </v-btn>

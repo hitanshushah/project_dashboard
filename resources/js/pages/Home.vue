@@ -17,6 +17,23 @@ const projects = computed(() => page.props.projects as Project[] || []);
 const categories = computed(() => page.props.categories as Array<{ name: string; key: string }> || []);
 const statuses = computed(() => page.props.statuses as Array<{ name: string; key: string }> || []);
 const technologies = computed(() => page.props.technologies as string[] || []);
+
+// Profile data from global auth
+const profile = computed(() => page.props.auth?.profile);
+
+// Check if profile is incomplete
+const isProfileIncomplete = computed(() => {
+  if (!profile.value) return true;
+  
+  const hasLinks = profile.value.links && profile.value.links.length > 0;
+  const hasDocuments = profile.value.documents && profile.value.documents.length > 0;
+  
+  // Only show banner if user has NO profile data at all
+  return !hasLinks && !hasDocuments;
+});
+
+// Banner visibility state
+const showIncompleteProfileBanner = ref(true);
 const currentFilters = computed(() => page.props.filters as {
   search: string;
   categories: string[];
@@ -181,11 +198,42 @@ const clearFilters = () => {
           {{ flash.success }}
         </v-alert>
 
+        <!-- Profile Incomplete Banner -->
+        <v-alert
+          v-if="isProfileIncomplete && showIncompleteProfileBanner"
+          type="warning"
+          variant="tonal"
+          class="mb-6"
+          closable
+          @click:close="showIncompleteProfileBanner = false"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div>
+                <div class="font-semibold text-base">Profile is not complete</div>
+                <div class="text-sm opacity-90">
+                  Add your resume, LinkedIn, and other links from the edit profile page to complete your profile.
+                </div>
+              </div>
+            </div>
+            <v-btn
+              :color="isDark ? 'default' : 'default'"
+              variant="outlined"
+              size="small"
+              prepend-icon="mdi-pencil"
+              @click="router.visit('/profile/edit')"
+              class="ml-4"
+            >
+              Edit Profile
+            </v-btn>
+          </div>
+        </v-alert>
+
         <!-- Header with Action Buttons -->
         <div class="mb-6">
           <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 md:gap-0">
             <h1 :class="['text-2xl md:text-3xl font-bold',  isDark ? 'text-white' : 'text-gray-900']">
-              My Projects
+              Manage Projects
             </h1>
             <div class="flex flex-col md:flex-row gap-3">
               <v-btn
@@ -199,12 +247,25 @@ const clearFilters = () => {
                     isDark ? 'text-white !bg-black !border-gray-600' : 'text-gray-900 !bg-gray-100 !border-gray-600'
                   ]"
               >
-                Preview Public
+                Preview Public URL
                 <v-badge
                   :content="publicProjects.length"
                   inline
                   class="ml-2"
                 ></v-badge>
+              </v-btn>
+              <v-btn
+                v-else
+                prepend-icon="mdi-alert-circle-outline"
+                variant="text"
+                disabled
+                :title="'Make projects public to preview'"
+                :class="[
+                  'border rounded-lg !text-sm py-3 md:py-2 px-4 content-center',
+                  isDark ? 'text-gray-400 !bg-black !border-gray-600' : 'text-gray-400 !bg-gray-100 !border-gray-600'
+                ]"
+              >
+                Make projects public to preview
               </v-btn>
               <v-btn
                 color="primary"

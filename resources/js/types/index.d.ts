@@ -68,6 +68,7 @@ export interface Status {
 }
 
 export interface ProjectLink {
+    id?: number;
     title: string;
     url: string;
     type?: string;

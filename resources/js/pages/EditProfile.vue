@@ -27,7 +27,11 @@ const newLinkUrl = ref('');
 const linkedinUrl = ref('');
 const githubUrl = ref('');
 const portfolioUrl = ref('');
-const links = ref<ProjectLink[]>(props.profile.links || []);
+const existingLinks = ref<ProjectLink[]>(props.profile.links || []);
+const newLinks = ref<ProjectLink[]>([]);
+
+// Computed property to combine existing and new links
+const links = computed(() => [...existingLinks.value, ...newLinks.value]);
 
 // Local state for assets
 interface AssetWithMeta {
@@ -88,7 +92,7 @@ const addLink = () => {
     validUrl = 'https://' + url;
   }
   
-  links.value.push({
+  newLinks.value.push({
     title: title,
     url: validUrl
   });
@@ -98,8 +102,45 @@ const addLink = () => {
   newLinkUrl.value = '';
 };
 
-const removeLink = (index: number) => {
-  links.value.splice(index, 1);
+const removeLink = async (index: number) => {
+  // Check if this is an existing link (has an id) or a new link
+  const link = links.value[index];
+  
+  if (link.id) {
+    // This is an existing link, delete it from the server
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+      
+      const response = await fetch(`/profile/links/${link.id}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Remove from existing links
+        const existingIndex = existingLinks.value.findIndex(l => l.id === link.id);
+        if (existingIndex !== -1) {
+          existingLinks.value.splice(existingIndex, 1);
+        }
+        showToastNotification('Link removed successfully', 'success');
+      } else {
+        showToastNotification(result.message || 'Failed to remove link', 'error');
+      }
+    } catch (error) {
+      showToastNotification('Failed to remove link', 'error');
+    }
+  } else {
+    // This is a new link, just remove from the new links array
+    const newIndex = newLinks.value.findIndex(l => l.title === link.title && l.url === link.url);
+    if (newIndex !== -1) {
+      newLinks.value.splice(newIndex, 1);
+    }
+  }
 };
 
 const addLinkedinLink = () => {
@@ -113,7 +154,7 @@ const addLinkedinLink = () => {
     validUrl = 'https://' + validUrl;
   }
   
-  links.value.push({
+  newLinks.value.push({
     title: 'LinkedIn',
     url: validUrl
   });
@@ -133,7 +174,7 @@ const addGithubLink = () => {
     validUrl = 'https://' + validUrl;
   }
   
-  links.value.push({
+  newLinks.value.push({
     title: 'Github',
     url: validUrl
   });
@@ -153,7 +194,7 @@ const addPortfolioLink = () => {
     validUrl = 'https://' + validUrl;
   }
   
-  links.value.push({
+  newLinks.value.push({
     title: 'Portfolio',
     url: validUrl
   });
@@ -415,8 +456,8 @@ const submit = () => {
   formData.append('province', form.province);
   formData.append('country', form.country);
   
-  // Add links
-  links.value.forEach((link, index) => {
+  // Add only new links (existing links are handled separately)
+  newLinks.value.forEach((link, index) => {
     formData.append(`links[${index}][title]`, link.title);
     formData.append(`links[${index}][url]`, link.url);
   });
@@ -1014,7 +1055,7 @@ onMounted(() => {
                         :key="`new-${index}`"
                         variant="outlined"
                         density="compact"
-                        class="max-w-full text-sm !py-3 !px-4"
+                        class="max-w-full text-sm !py-6 !px-4"
                       >
                         <div class="flex grow items-center gap-2 w-full">
                           <v-icon 

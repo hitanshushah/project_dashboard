@@ -14,7 +14,7 @@
     ]" @click="goHome">
       <div class="flex items-center">
         <img 
-          src="/images/logo.png" 
+          :src="isDark ? '/images/logos/dark_mode.png' : '/images/logos/light_mode.png'" 
           alt="LogoApp" 
           class="w-24 h-12 rounded mr-2 object-cover"
         >

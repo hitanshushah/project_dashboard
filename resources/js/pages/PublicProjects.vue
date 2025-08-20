@@ -132,8 +132,11 @@ const getLinkIcon = (linkType: string): string => {
       <div class="px-8 pt-8 pb-4">
         <div class="flex flex-row justify-between">
         <div class="flex items-center gap-3 mb-4">
-          <v-icon icon="mdi-periodic-table" :color="isDark ? 'blue' : 'black'" size="large"></v-icon>
-          <h1 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Projects Dashboard</h1>
+          <img 
+          :src="isDark ? '/images/logos/dark_mode.png' : '/images/logos/light_mode.png'" 
+          alt="LogoApp" 
+          class="w-32 h-12 rounded mr-2 object-cover"
+        >
         </div>
         <div class="flex justify-end mb-4">
           <ThemeToggle class="mr-4" />

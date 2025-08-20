@@ -22,7 +22,7 @@ class ProfileController extends Controller
         $user = $request->attributes->get('user');
         
         if (!$user) {
-            return redirect()->route('home')->with('error', 'User not found');
+            return redirect()->route('admin.home')->with('error', 'User not found');
         }
 
         // Get or create profile for the user
@@ -36,6 +36,7 @@ class ProfileController extends Controller
         $existingLinks = $profile->id ? $profile->links()->with('linkType')->get() : collect();
         $links = $existingLinks->map(function ($link) {
             return [
+                'id' => $link->id,
                 'title' => $link->name,
                 'url' => $link->url,
                 'type' => $link->linkType->key ?? 'portfolio',
@@ -88,7 +89,7 @@ class ProfileController extends Controller
         $user = $request->attributes->get('user');
         
         if (!$user) {
-            return redirect()->route('home')->with('error', 'User not found');
+            return redirect()->route('admin.home')->with('error', 'User not found');
         }
 
                 $validatedData = $request->validate([
@@ -393,6 +394,41 @@ class ProfileController extends Controller
             
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to remove asset'], 500);
+        }
+    }
+
+    /**
+     * Remove a specific link from the user's profile.
+     */
+    public function removeLink(Request $request, $linkId)
+    {
+        $user = $request->attributes->get('user');
+        
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        // Get the user's profile
+        $profile = $user->profile;
+        if (!$profile) {
+            return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
+        }
+
+        // Find the specific link
+        $link = $profile->links()->find($linkId);
+        
+        if (!$link) {
+            return response()->json(['success' => false, 'message' => 'Link not found'], 404);
+        }
+
+        try {
+            // Delete the link from database
+            $link->delete();
+            
+            return response()->json(['success' => true, 'message' => 'Link removed successfully']);
+            
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to remove link'], 500);
         }
     }
 

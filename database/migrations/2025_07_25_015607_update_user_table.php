@@ -38,26 +38,15 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('key');
-            $table->boolean('is_active');
+            $table->boolean('is_active')->nullable();
         });
-
-        DB::table('categories')->insert([
-            ['name' => 'IT/CS', 'key' => 'itcs'],
-            ['name' => 'Marketing', 'key' => 'marketing'],
-            ['name' => 'Design', 'key' => 'design'],
-            ['name' => 'Finance', 'key' => 'finance'],
-            ['name' => 'Healthcare', 'key' => 'healthcare'],
-            ['name' => 'Education', 'key' => 'education'],
-            ['name' => 'Engineering', 'key' => 'engineering'],
-            ['name' => 'Product Management', 'key' => 'product_mgmt'],
-        ]);
 
         // Status
         Schema::create('status', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('key');
-            $table->boolean('is_active');
+            $table->boolean('is_active')->nullable();;
         });
 
         DB::table('status')->insert([

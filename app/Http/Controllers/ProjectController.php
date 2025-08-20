@@ -26,7 +26,7 @@ class ProjectController extends Controller
     {
         $user = request()->attributes->get('user');
         if (!$user) {
-            return redirect()->route('home');
+            return redirect()->route('admin.home');
         }
 
         // Get search, filter, and sort parameters
@@ -199,7 +199,7 @@ class ProjectController extends Controller
 
         $user = request()->attributes->get('user');
         if (!$user) {
-            return redirect()->route('home');
+            return redirect()->route('admin.home');
         }
 
         $categories = Category::where('user_id', $user->id)
@@ -241,7 +241,7 @@ class ProjectController extends Controller
     {
         $user = request()->attributes->get('user');
         if (!$user || $project->user_id !== $user->id) {
-            return redirect()->route('home');
+            return redirect()->route('admin.home');
         }
 
         // Fetch categories and statuses for the form
@@ -700,7 +700,7 @@ class ProjectController extends Controller
 
             DB::commit();
 
-            return redirect()->route('home')->with('success', 'Project created successfully!');
+            return redirect()->route('admin.home')->with('success', 'Project created successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -923,7 +923,7 @@ class ProjectController extends Controller
 
             DB::commit();
 
-            return redirect()->route('home')->with('success', 'Project created successfully!');
+            return redirect()->route('admin.home')->with('success', 'Project created successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -37,6 +37,7 @@ if ($domainUrl) {
             Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
             Route::delete('/profile/photo', [ProfileController::class, 'removePhoto'])->name('profile.remove-photo');
             Route::delete('/profile/assets/{asset}', [ProfileController::class, 'removeAsset'])->name('profile.remove-asset');
+            Route::delete('/profile/links/{link}', [ProfileController::class, 'removeLink'])->name('profile.remove-link');
 
             // API route for setting public URL
             Route::post('/api/profile/public-url', [ProfileController::class, 'setPublicUrl'])->name('profile.set-public-url');

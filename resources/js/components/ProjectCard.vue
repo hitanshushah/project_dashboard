@@ -187,61 +187,65 @@
 
     <!-- Action Buttons -->
     <div  v-if="githubLink || demoLink || additionalLinks.length" class="md:px-6 px-0 md:py-6 py-2 md:pb-0 pb-2 border-t border-gray-400">
-      <div class="flex flex-col md:flex-row gap-2 md:gap-3">
-        <!-- Code Button -->
-        <v-btn
-          v-if="githubLink"
-          variant="elevated"
-          size="small"
-          :class="[
-            'w-full md:flex-1 border rounded-lg !text-sm py-2 md:py-0 content-center',
-            isDarkMode 
-              ? '!bg-blue-950 text-white' 
-              : 'text-gray-900 !bg-gray-100 !border-gray-600'
-          ]"
-          :href="githubLink.url"
-          target="_blank"
-          prepend-icon="mdi-github"
-        >
-          {{ githubLink.title }}
-        </v-btn>
-        
-        <!-- Demo Button -->
-        <v-btn
-          v-if="demoLink"
-          variant="elevated"
-          size="small"
-          :class="[
-            'w-full md:flex-1 rounded-lg !text-sm py-2 md:py-0 content-center',
-            isDarkMode 
-              ? '!bg-blue-950 text-white' 
-              : 'text-gray-900 !bg-gray-100 !border-gray-600'
-          ]"
-          :href="demoLink.url"
-          target="_blank"
-          prepend-icon="mdi-open-in-new"
-        >
-          {{ demoLink.title }}
-        </v-btn>
+      <div class="flex flex-col gap-2 md:gap-3">
+        <div class="flex flex-col md:flex-row gap-2 md:gap-3">
+          <!-- Code Button -->
+          <v-btn
+            v-if="githubLink"
+            variant="elevated"
+            size="small"
+            :class="[
+              'w-full md:flex-1 border rounded-lg !text-sm py-2 md:py-0 content-center',
+              isDarkMode 
+                ? '!bg-blue-950 text-white' 
+                : 'text-gray-900 !bg-gray-100 !border-gray-600'
+            ]"
+            :href="githubLink.url"
+            target="_blank"
+            prepend-icon="mdi-github"
+          >
+            {{ githubLink.title }}
+          </v-btn>
+          
+          <!-- Demo Button -->
+          <v-btn
+            v-if="demoLink"
+            variant="elevated"
+            size="small"
+            :class="[
+              'w-full md:flex-1 rounded-lg !text-sm py-2 md:py-0 content-center',
+              isDarkMode 
+                ? '!bg-blue-950 text-white' 
+                : 'text-gray-900 !bg-gray-100 !border-gray-600'
+            ]"
+            :href="demoLink.url"
+            target="_blank"
+            prepend-icon="mdi-open-in-new"
+          >
+            {{ demoLink.title }}
+          </v-btn>
+        </div>
 
-        <!-- Additional Links -->
-        <v-btn
-          v-for="link in additionalLinks"
-          :key="link.url"
-          variant="elevated"
-          size="small"
-          :class="[
-            'w-full md:flex-1 rounded-lg py-2 md:py-0 content-center',
-            isDarkMode 
-              ? '!bg-blue-950 text-white' 
-              : 'text-gray-900 !bg-gray-100 !border-gray-600'
-          ]"
-          :href="link.url"
-          target="_blank"
-          prepend-icon="mdi-open-in-new"
-        >
-          {{ link.title }}
-        </v-btn>
+        <!-- Second row: Additional Links (full width) -->
+        <div v-if="additionalLinks.length" class="flex flex-col gap-2">
+          <v-btn
+            v-for="link in additionalLinks"
+            :key="link.url"
+            variant="elevated"
+            size="small"
+            :class="[
+              'w-full rounded-lg py-2 md:py-0 content-center',
+              isDarkMode 
+                ? '!bg-blue-950 text-white' 
+                : 'text-gray-900 !bg-gray-100 !border-gray-600'
+            ]"
+            :href="link.url"
+            target="_blank"
+            prepend-icon="mdi-open-in-new"
+          >
+            {{ link.title }}
+          </v-btn>
+        </div>
       </div>
     </div>
   </v-card>
