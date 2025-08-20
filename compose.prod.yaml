@@ -25,6 +25,8 @@ services:
     depends_on:
       php-fpm:
         condition: service_healthy  # Wait for php-fpm health check
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   php-fpm:
     # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
@@ -40,6 +42,8 @@ services:
       - .env
     networks:
       - laravel-production
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"]
       interval: 10s
@@ -83,6 +87,8 @@ services:
     restart: unless-stopped  # Automatically restart unless the service is explicitly stopped
     networks:
       - laravel-production
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     # Health check for Redis
     # -----------------------------------------------------------
     # Checks if Redis is responding to the 'PING' command.
