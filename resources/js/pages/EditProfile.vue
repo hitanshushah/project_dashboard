@@ -72,7 +72,7 @@ const shareProfile = ref(props.profile.share_profile || false);
 const isTogglingShare = ref(false);
 
 // Domain URL for display
-const domainUrl = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
+const import.meta.env.VITE_DOMAIN_URL = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
 
 // Theme management
 const { isDark } = useAppearance();
@@ -745,7 +745,7 @@ onMounted(() => {
             <div v-if="props.profile.public_url" class="mt-2">
               <p :class="isDark ? 'text-sm text-blue-400' : 'text-sm text-blue-600'">
                 <v-icon icon="mdi-link" size="small" class="mr-1"></v-icon>
-                Your public URL: <strong>{{ props.profile.public_url }}.{{ domainUrl }}</strong>
+                Your public URL: <strong>{{ props.profile.public_url }}.{{ import.meta.env.VITE_DOMAIN_URL }}</strong>
               </p>
             </div>
 

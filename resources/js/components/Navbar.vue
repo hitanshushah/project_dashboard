@@ -146,7 +146,7 @@
             <v-btn-group>
               <!-- Visit Live URL -->
               <v-btn
-                :href="`https://${currentProfile.public_url}.${domainUrl}`"
+                :href="`https://${currentProfile.public_url}.${import.meta.env.VITE_DOMAIN_URL}`"
                 target="_blank"
                 size="medium"
                 variant="text"
@@ -193,7 +193,7 @@
                       @input="validatePublicUrl"
                     >
                       <template v-slot:append>
-                        <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.{{ domainUrl }}</span>
+                        <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.{{ import.meta.env.VITE_DOMAIN_URL }}</span>
                       </template>
                     </v-text-field>
                   </v-form>
@@ -300,7 +300,7 @@
                   @click.stop
                 >
                   <template v-slot:append>
-                    <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.{{ domainUrl }}</span>
+                    <span :class="[isDark ? 'text-gray-400 text-sm' : 'text-gray-700 text-sm']">.{{ import.meta.env.VITE_DOMAIN_URL }}</span>
                   </template>
                 </v-text-field>
               </v-form>
@@ -492,7 +492,7 @@
       
       <v-list-item
         v-if="currentProfile?.public_url"
-        :href="`https://${currentProfile.public_url}.${domainUrl}`"
+        :href="`https://${currentProfile.public_url}.${import.meta.env.VITE_DOMAIN_URL}`"
         target="_blank"
         prepend-icon="mdi-link"
         :class="[isDark ? 'text-green-400' : 'text-green-600']"
@@ -577,7 +577,7 @@ const page = usePage();
 const { isDark } = useAppearance();
 
 const publicUrl = import.meta.env.VITE_PUBLIC_URL;
-const domainUrl = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
+const import.meta.env.VITE_DOMAIN_URL = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
 // Public URL dropdown state
 const publicUrlInput = ref('');
 const urlError = ref('');
@@ -675,7 +675,7 @@ const editProfile = () => {
 // Computed property for full public URL
 const fullPublicUrl = computed(() => {
   if (!publicUrlInput.value.trim()) return '';
-  return `${publicUrlInput.value.trim()}.${domainUrl}`;
+  return `${publicUrlInput.value.trim()}.${import.meta.env.VITE_DOMAIN_URL}`;
 });
 
 const setupPublicUrl = () => {
@@ -849,7 +849,7 @@ const deletePublicUrl = async () => {
 };
 
 const copyPublicUrl = async () => {
-  const fullUrl = `https://${currentProfile.value?.public_url}.${domainUrl}`;
+  const fullUrl = `https://${currentProfile.value?.public_url}.${import.meta.env.VITE_DOMAIN_URL}`;
   
   try {
     await navigator.clipboard.writeText(fullUrl);
@@ -873,7 +873,7 @@ const copyPublicUrl = async () => {
 };
 
 const sharePublicUrl = async () => {
-  const fullUrl = `https://${currentProfile.value?.public_url}.${domainUrl}`;
+  const fullUrl = `https://${currentProfile.value?.public_url}.${import.meta.env.VITE_DOMAIN_URL}`;
   
   // Check if Web Share API is available (mobile devices)
   if (navigator.share) {
