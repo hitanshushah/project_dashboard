@@ -9,6 +9,10 @@ export default defineConfigWithVueTs(
     {
         ignores: ['vendor', 'node_modules', 'public', 'bootstrap/ssr', 'tailwind.config.js', 'resources/js/components/ui/*'],
     },
+    {languageOptions:{
+        ecmaVersion: 'latest',
+        sourceType: 'module'
+    }},
     {
         rules: {
             'vue/multi-word-component-names': 'off',
