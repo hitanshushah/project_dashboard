@@ -14,9 +14,6 @@ use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
-    /**
-     * Show the form for editing the user's profile.
-     */
     public function edit(Request $request)
     {
         $user = $request->attributes->get('user');
@@ -25,14 +22,12 @@ class ProfileController extends Controller
             return redirect()->route('admin.home')->with('error', 'User not found');
         }
 
-        // Get or create profile for the user
         $profile = $user->profile;
         if (!$profile) {
             $profile = new Profile();
             $profile->user_id = $user->id;
         }
 
-        // Get existing links
         $existingLinks = $profile->id ? $profile->links()->with('linkType')->get() : collect();
         $links = $existingLinks->map(function ($link) {
             return [
@@ -43,14 +38,13 @@ class ProfileController extends Controller
             ];
         })->toArray();
 
-        // Get existing assets
         $existingAssets = $profile->id ? $profile->assets()->with('assetType')->get() : collect();
         $assets = $existingAssets->map(function ($asset) {
             return [
                 'id' => $asset->id,
                 'name' => $asset->display_name,
                 'filename' => $asset->filename,
-                'url' => $asset->filename, // MinIO URL
+                'url' => $asset->filename,
                 'display_name' => $asset->display_name,
                 'asset_type' => $asset->assetType ? [
                     'key' => $asset->assetType->key,
@@ -81,9 +75,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile in storage.
-     */
     public function update(Request $request)
     {
         $user = $request->attributes->get('user');
@@ -104,16 +95,14 @@ class ProfileController extends Controller
             'links.*.title' => 'nullable|string|max:255',
             'links.*.url' => 'nullable|string',
             'assets' => 'nullable|array',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
-        // Get or create profile for the user
         $profile = $user->profile;
         if (!$profile) {
             $profile = new Profile();
             $profile->user_id = $user->id;
         }
 
-        // Update profile with validated data (excluding links, assets, and profile_photo)
         $profileData = array_diff_key($validatedData, array_flip(['links', 'assets', 'profile_photo']));
         
 
@@ -121,7 +110,6 @@ class ProfileController extends Controller
         $profile->fill($profileData);
         $profile->save();
 
-        // Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
             $minioService = new MinIOService();
             $bucketName = $user->username;
@@ -130,7 +118,6 @@ class ProfileController extends Controller
             $filename = time() . '_profile_photo.' . $file->getClientOriginalExtension();
             $filePath = 'profile/' . $filename;
             
-            // Delete existing profile photo if any
             $existingProfilePhoto = $profile->assets()
                 ->where('display_name', 'Profile Photo')
                 ->whereHas('assetType', function($query) {
@@ -139,16 +126,13 @@ class ProfileController extends Controller
                 ->first();
             
             if ($existingProfilePhoto) {
-                // Delete from MinIO - extract filename from the stored URL
-                // The URL format is: http://localhost:4811/projectsdashboard/username/images/filename.jpg
                 $urlParts = explode('/', $existingProfilePhoto->filename);
-                $existingFilename = end($urlParts); // Get the last part which is the actual filename
+                $existingFilename = end($urlParts);
                 $minioService->deleteFile($bucketName, 'images', $existingFilename);
-                // Delete from database
+ 
                 $existingProfilePhoto->delete();
             }
             
-            // Upload new profile photo
             $uploadResult = $minioService->uploadFile($file, $bucketName, 'images', $filename);
             
             if ($uploadResult['success']) {
@@ -169,24 +153,17 @@ class ProfileController extends Controller
             }
         }
 
-
-
-        // Handle links
         if ($request->has('links') && is_array($request->links)) {
             
-            // Get existing links
             $existingLinks = $profile->links()->get()->keyBy('name');
             $submittedLinks = collect($request->links)->keyBy('title');
             
-            // Delete links that are no longer in the submitted list
             $linksToDelete = $existingLinks->keys()->diff($submittedLinks->keys());
             if ($linksToDelete->isNotEmpty()) {
                 $profile->links()->whereIn('name', $linksToDelete)->delete();
             }
             
-            // Update or create links
             foreach ($request->links as $linkData) {
-                // Determine link type based on title
                 $linkTypeKey = $this->determineLinkType($linkData['title']);
                 $linkType = LinkType::where('key', $linkTypeKey)->first();
                 
@@ -194,7 +171,6 @@ class ProfileController extends Controller
                     $existingLink = $existingLinks->get($linkData['title']);
                     
                     if ($existingLink) {
-                        // Update existing link if changed
                         if ($existingLink->url !== $linkData['url'] || $existingLink->link_type_id !== $linkType->id) {
                             $existingLink->update([
                                 'url' => $linkData['url'],
@@ -203,7 +179,6 @@ class ProfileController extends Controller
                             ]);
                         }
                     } else {
-                        // Create new link
                         $link = Link::create([
                             'key' => $linkType->key,
                             'name' => $linkData['title'],
@@ -219,13 +194,10 @@ class ProfileController extends Controller
             }
         }
 
-        // Handle assets
-        
         if ($request->hasFile('assets')) {
             $minioService = new MinIOService();
             $bucketName = $user->username;
             
-            // Create profile folder inside user bucket
             $profileFolder = 'profile/';
             
             $assets = $request->file('assets');
@@ -234,33 +206,17 @@ class ProfileController extends Controller
             
             foreach ($assets as $index => $file) {
 
-                
-                // Get display name and doc type
                 $displayName = $displayNames[$index] ?? $file->getClientOriginalName();
                 $docType = $docTypes[$index] ?? 'other';
-                
-
-                
-                // Determine asset type based on doc type
                 $assetTypeKey = $this->determineAssetTypeForProfile($file, $docType);
-                
-
                 
                 $assetType = AssetType::where('key', $assetTypeKey)->first();
                 
-
-                
                 if ($assetType) {
-                    // Generate unique filename
                     $filename = time() . '_' . $file->getClientOriginalName();
                     $filePath = $profileFolder . $filename;
                     
-
-                    
-                    // Upload to MinIO
                     $uploadResult = $minioService->uploadFile($file, $bucketName, $assetTypeKey, $filename);
-                    
-
                     
                     if ($uploadResult['success']) {
                         $asset = Asset::create([
@@ -281,9 +237,6 @@ class ProfileController extends Controller
         return redirect()->route('profile.edit')->with('success', 'Profile updated successfully!');
     }
 
-    /**
-     * Remove the user's profile photo.
-     */
     public function removePhoto(Request $request)
     {
         $user = $request->attributes->get('user');
@@ -292,13 +245,11 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
 
-        // Get the user's profile
         $profile = $user->profile;
         if (!$profile) {
             return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
         }
 
-        // Find the existing profile photo
         $existingProfilePhoto = $profile->assets()
             ->where('display_name', 'Profile Photo')
             ->whereHas('assetType', function($query) {
@@ -313,25 +264,16 @@ class ProfileController extends Controller
         try {
             $minioService = new MinIOService();
             $bucketName = $user->username;
-            
-            // Extract filename from the stored URL
-            // The URL format is: http://localhost:4811/projectsdashboard/username/images/filename.jpg
             $urlParts = explode('/', $existingProfilePhoto->filename);
-            $filename = end($urlParts); // Get the last part which is the actual filename
+            $filename = end($urlParts);
             
-
-            
-            // Delete from MinIO
             $deleteResult = $minioService->deleteFile($bucketName, 'images', $filename);
             
             if (!$deleteResult) {
                 return response()->json(['success' => false, 'message' => 'Failed to delete file from storage'], 500);
             }
             
-            // Soft delete from database
             $existingProfilePhoto->delete();
-            
-
             
             return response()->json(['success' => true, 'message' => 'Profile photo removed successfully']);
             
@@ -340,9 +282,6 @@ class ProfileController extends Controller
         }
     }
 
-    /**
-     * Remove a specific asset from the user's profile.
-     */
     public function removeAsset(Request $request, $assetId)
     {
         $user = $request->attributes->get('user');
@@ -351,13 +290,11 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
 
-        // Get the user's profile
         $profile = $user->profile;
         if (!$profile) {
             return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
         }
 
-        // Find the specific asset
         $asset = $profile->assets()->find($assetId);
         
         if (!$asset) {
@@ -368,27 +305,17 @@ class ProfileController extends Controller
             $minioService = new MinIOService();
             $bucketName = $user->username;
             
-            // Extract filename from the stored URL
-            // The URL format is: http://localhost:4811/projectsdashboard/username/assettype/filename.jpg
             $urlParts = explode('/', $asset->filename);
-            $filename = end($urlParts); // Get the last part which is the actual filename
-            
-            // Get asset type for MinIO deletion
+            $filename = end($urlParts);
             $assetType = $asset->assetType ? $asset->assetType->key : 'documents';
             
-
-            
-            // Delete from MinIO
             $deleteResult = $minioService->deleteFile($bucketName, $assetType, $filename);
             
             if (!$deleteResult) {
                 return response()->json(['success' => false, 'message' => 'Failed to delete file from storage'], 500);
             }
             
-            // Soft delete from database
             $asset->delete();
-            
-
             
             return response()->json(['success' => true, 'message' => 'Asset removed successfully']);
             
@@ -397,9 +324,6 @@ class ProfileController extends Controller
         }
     }
 
-    /**
-     * Remove a specific link from the user's profile.
-     */
     public function removeLink(Request $request, $linkId)
     {
         $user = $request->attributes->get('user');
@@ -408,13 +332,11 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
 
-        // Get the user's profile
         $profile = $user->profile;
         if (!$profile) {
             return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
         }
 
-        // Find the specific link
         $link = $profile->links()->find($linkId);
         
         if (!$link) {
@@ -422,7 +344,6 @@ class ProfileController extends Controller
         }
 
         try {
-            // Delete the link from database
             $link->delete();
             
             return response()->json(['success' => true, 'message' => 'Link removed successfully']);
@@ -432,9 +353,6 @@ class ProfileController extends Controller
         }
     }
 
-    /**
-     * Set public URL for the user's profile
-     */
     public function setPublicUrl(Request $request)
     {
         $user = $request->attributes->get('user');
@@ -453,7 +371,6 @@ class ProfileController extends Controller
 
         $publicUrl = strtolower($request->input('public_url'));
         
-        // Check if this public URL already exists
         $existingProfile = Profile::where('public_url', $publicUrl)
             ->where('user_id', '!=', $user->id)
             ->first();
@@ -465,7 +382,6 @@ class ProfileController extends Controller
             ], 422);
         }
 
-        // Get or create profile for the user
         $profile = $user->profile;
         if (!$profile) {
             $profile = new Profile();
@@ -473,7 +389,7 @@ class ProfileController extends Controller
         }
 
         $profile->public_url = $publicUrl;
-        $profile->share_profile = true; // Automatically enable sharing when URL is set
+        $profile->share_profile = true;
         $profile->save();
 
         return response()->json([
@@ -484,9 +400,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update public URL for the user's profile
-     */
     public function updatePublicUrl(Request $request)
     {
         $user = $request->attributes->get('user');
@@ -505,13 +418,11 @@ class ProfileController extends Controller
 
         $publicUrl = strtolower($request->input('public_url'));
         
-        // Get the user's profile
         $profile = $user->profile;
         if (!$profile) {
             return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
         }
 
-        // Check if the new URL is the same as the current one
         if ($profile->public_url === $publicUrl) {
             return response()->json([
                 'success' => false, 
@@ -519,7 +430,6 @@ class ProfileController extends Controller
             ], 422);
         }
         
-        // Check if this public URL already exists for another user
         $existingProfile = Profile::where('public_url', $publicUrl)
             ->where('user_id', '!=', $user->id)
             ->first();
@@ -531,9 +441,8 @@ class ProfileController extends Controller
             ], 422);
         }
 
-        // Update the profile
         $profile->public_url = $publicUrl;
-        $profile->share_profile = true; // Automatically enable sharing when URL is updated
+        $profile->share_profile = true;
         $profile->save();
 
         return response()->json([
@@ -544,9 +453,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Toggle share profile setting
-     */
     public function toggleShareProfile(Request $request)
     {
         $user = $request->attributes->get('user');
@@ -555,13 +461,11 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
 
-        // Get the user's profile
         $profile = $user->profile;
         if (!$profile) {
             return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
         }
 
-        // Check if profile has a public URL
         if (!$profile->public_url) {
             return response()->json([
                 'success' => false, 
@@ -569,7 +473,6 @@ class ProfileController extends Controller
             ], 422);
         }
 
-        // Toggle the share_profile setting
         $profile->share_profile = !$profile->share_profile;
         $profile->save();
 
@@ -580,9 +483,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Delete public URL for the user's profile
-     */
     public function deletePublicUrl(Request $request)
     {
         $user = $request->attributes->get('user');
@@ -591,13 +491,11 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         }
 
-        // Get the user's profile
         $profile = $user->profile;
         if (!$profile) {
             return response()->json(['success' => false, 'message' => 'Profile not found'], 404);
         }
 
-        // Check if profile has a public URL to delete
         if (!$profile->public_url) {
             return response()->json([
                 'success' => false, 
@@ -605,7 +503,6 @@ class ProfileController extends Controller
             ], 422);
         }
 
-        // Set public_url to null and disable sharing
         $profile->public_url = null;
         $profile->share_profile = false;
         $profile->save();
@@ -616,9 +513,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Determine the appropriate link type based on the title
-     */
     private function determineLinkType($title)
     {
         $title = strtolower($title);
@@ -637,24 +531,20 @@ class ProfileController extends Controller
         $extension = strtolower($file->getClientOriginalExtension());
         $mimeType = strtolower($file->getMimeType());
         
-        // For resume and cover letter, always use document type
         if ($docType === 'resume' || $docType === 'cover-letter') {
             return 'documents';
         }
         
-        // Image files
         if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'tiff']) || 
             str_starts_with($mimeType, 'image/')) {
             return 'images';
         }
         
-        // Video files
         if (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'm4v']) || 
             str_starts_with($mimeType, 'video/')) {
             return 'videos';
         }
         
-        // Document files (PDFs, Word docs, Excel, etc.)
         if (in_array($extension, ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'md', 'rtf']) || 
             str_starts_with($mimeType, 'application/pdf') ||
             str_starts_with($mimeType, 'application/msword') ||
@@ -662,7 +552,6 @@ class ProfileController extends Controller
             return 'documents';
         }
         
-        // Default to others for everything else
         return 'others';
     }
 
@@ -672,26 +561,22 @@ class ProfileController extends Controller
         $mimeType = strtolower($file->getMimeType());
         $filename = strtolower($file->getClientOriginalName());
         
-        // Check for specific document types
         if (str_contains($filename, 'resume') || str_contains($filename, 'cv')) {
             return 'document';
         } elseif (str_contains($filename, 'cover') || str_contains($filename, 'letter')) {
             return 'document';
         }
         
-        // Image files
         if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'tiff']) || 
             str_starts_with($mimeType, 'image/')) {
             return 'image';
         }
         
-        // Video files
         if (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'm4v']) || 
             str_starts_with($mimeType, 'video/')) {
             return 'video';
         }
         
-        // Document files (PDFs, Word docs, Excel, etc.)
         if (in_array($extension, ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'md', 'rtf']) || 
             str_starts_with($mimeType, 'application/pdf') ||
             str_starts_with($mimeType, 'application/msword') ||
@@ -699,7 +584,6 @@ class ProfileController extends Controller
             return 'document';
         }
         
-        // Default to others for everything else
         return 'others';
     }
 }

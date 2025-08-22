@@ -18,21 +18,21 @@ const categories = computed(() => page.props.categories as Array<{ name: string;
 const statuses = computed(() => page.props.statuses as Array<{ name: string; key: string }> || []);
 const technologies = computed(() => page.props.technologies as string[] || []);
 
-// Profile data from global auth
+
 const profile = computed(() => page.props.auth?.profile);
 
-// Check if profile is incomplete
+
 const isProfileIncomplete = computed(() => {
   if (!profile.value) return true;
   
   const hasLinks = profile.value.links && profile.value.links.length > 0;
   const hasDocuments = profile.value.documents && profile.value.documents.length > 0;
   
-  // Only show banner if user has NO profile data at all
+  
   return !hasLinks && !hasDocuments;
 });
 
-// Banner visibility state
+
 const showIncompleteProfileBanner = ref(true);
 const currentFilters = computed(() => page.props.filters as {
   search: string;
@@ -50,10 +50,10 @@ const currentFilters = computed(() => page.props.filters as {
   sort_direction: 'desc'
 });
 
-// Reference to SearchFilters component
+
 const searchFiltersRef = ref<InstanceType<typeof SearchFilters>>();
 
-// Computed property for checking if filters are active (based on current filters prop)
+
 const hasActiveFilters = computed(() => {
   return currentFilters.value.search ||
          currentFilters.value.categories.length > 0 ||
@@ -63,26 +63,26 @@ const hasActiveFilters = computed(() => {
          currentFilters.value.sort_direction !== 'desc';
 });
 
-// Toggle state for showing public/hidden projects
-const selectedView = ref('hidden'); // 'hidden' or 'public'
 
-// Group projects by public status
+const selectedView = ref('hidden'); 
+
+
 const publicProjects = computed(() => projects.value.filter(project => project.is_public));
 const privateProjects = computed(() => projects.value.filter(project => !project.is_public));
 
-// Confirmation modal state
+
 const showConfirmationModal = ref(false);
 const projectToToggle = ref<Project | null>(null);
 const toggleAction = ref<'public' | 'hidden'>('public');
 
-// Delete confirmation modal state
+
 const showDeleteModal = ref(false);
 const projectToDelete = ref<Project | null>(null);
 
-// Reorder modal state
+
 const showReorderModal = ref(false);
 
-// Theme management
+
 const { isDark } = useAppearance();
 
 const createProject = () => {
@@ -94,7 +94,7 @@ const editProject = (projectId: number) => {
 };
 
 const openPublicPreview = () => {
-      // Open the public projects page in a new tab
+      
     window.open('/public-projects', '_blank');
 };
 
@@ -116,7 +116,7 @@ const confirmToggle = () => {
     onSuccess: () => {
       showConfirmationModal.value = false;
       projectToToggle.value = null;
-      // Refresh the page to get updated project data
+      
       router.reload();
     },
     onError: (errors) => {
@@ -146,7 +146,7 @@ const confirmDelete = () => {
     onSuccess: () => {
       showDeleteModal.value = false;
       projectToDelete.value = null;
-      // Refresh the page to get updated project data
+      
       router.reload();
     },
     onError: (errors) => {
@@ -160,7 +160,7 @@ const cancelDelete = () => {
   projectToDelete.value = null;
 };
 
-// Reorder methods
+
 const openReorderModal = () => {
   showReorderModal.value = true;
 };
@@ -170,11 +170,11 @@ const closeReorderModal = () => {
 };
 
 const handleReorderSaved = (reorderedProjects: Project[]) => {
-  // Refresh the page to get updated project data
+  
   router.reload();
 };
 
-// Clear filters function for accessing from SearchFilters component
+
 const clearFilters = () => {
   if (searchFiltersRef.value) {
     searchFiltersRef.value.clearFilters();
@@ -198,7 +198,7 @@ const clearFilters = () => {
           {{ flash.success }}
         </v-alert>
 
-        <!-- Profile Incomplete Banner -->
+        
         <v-alert
           v-if="isProfileIncomplete && showIncompleteProfileBanner"
           type="warning"
@@ -229,7 +229,7 @@ const clearFilters = () => {
           </div>
         </v-alert>
 
-        <!-- Header with Action Buttons -->
+        
         <div class="mb-6">
           <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 md:gap-0">
             <h1 :class="['text-2xl md:text-3xl font-bold',  isDark ? 'text-white' : 'text-gray-900']">
@@ -279,7 +279,7 @@ const clearFilters = () => {
           </div>
         </div>
 
-        <!-- Search and Filter Controls -->
+        
         <SearchFilters
           ref="searchFiltersRef"
           :categories="categories"
@@ -290,7 +290,7 @@ const clearFilters = () => {
           class="mb-6"
         />
 
-        <!-- Project Type Toggle -->
+        
         <div v-if="projects.length > 0" class="mb-6">
           <div class="flex flex-col md:flex-row gap-2 md:gap-0 mb-4">
             <v-btn
@@ -314,9 +314,9 @@ const clearFilters = () => {
           </div>
         </div>
 
-        <!-- Projects Grid -->
+        
         <div v-if="projects.length > 0">
-          <!-- Hidden Projects -->
+          
           <div v-if="selectedView === 'hidden' && privateProjects.length > 0" class="mb-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div v-for="project in privateProjects" :key="project.id" class="relative">
@@ -361,9 +361,9 @@ const clearFilters = () => {
             </div>
           </div>
 
-          <!-- Public Projects -->
+          
           <div v-if="selectedView === 'public' && publicProjects.length > 0" class="mb-8">
-            <!-- Public Projects Header with Reorder Button -->
+            
             <div class="flex items-center justify-between mb-4">
               <v-btn
                 prepend-icon="mdi-drag"
@@ -418,7 +418,7 @@ const clearFilters = () => {
             </div>
           </div>
 
-          <!-- No Projects Message -->
+          
           <div v-if="(selectedView === 'hidden' && privateProjects.length === 0) || (selectedView === 'public' && publicProjects.length === 0)" class="text-center py-16">
             <v-icon 
               :icon="hasActiveFilters ? 'mdi-filter-off' : 'mdi-folder-open'" 
@@ -453,7 +453,7 @@ const clearFilters = () => {
           </div>
         </div>
 
-        <!-- No Projects State -->
+        
         <div v-else class="text-center py-16">
           <v-icon 
             :icon="hasActiveFilters ? 'mdi-filter-off' : 'mdi-folder-plus'" 
@@ -500,7 +500,7 @@ const clearFilters = () => {
           </div>
         </div>
 
-        <!-- Reorder Modal -->
+        
         <v-dialog v-model="showReorderModal" class="!max-w-4xl" persistent>
           <v-card class="!p-6">
             <ProjectReorder
@@ -514,7 +514,7 @@ const clearFilters = () => {
           </v-card>
         </v-dialog>
 
-        <!-- Confirmation Modal -->
+        
         <v-dialog v-model="showConfirmationModal" class="!max-w-xl">
           <v-card class="!p-2">
             <v-card-title class="text-h6">
@@ -557,7 +557,7 @@ const clearFilters = () => {
           </v-card>
         </v-dialog>
 
-        <!-- Delete Confirmation Modal -->
+        
         <v-dialog v-model="showDeleteModal" class="!max-w-xl">
           <v-card class="!p-2">
             <v-card-title class="text-h6">

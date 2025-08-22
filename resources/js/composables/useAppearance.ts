@@ -16,10 +16,10 @@ export function updateTheme(value: Appearance) {
         isDark = value === 'dark';
     }
 
-    // Update document class for Tailwind CSS
+    
     document.documentElement.classList.toggle('dark', isDark);
     
-    // Update Vuetify theme
+    
     if (window.__VUETIFY__) {
         window.__VUETIFY__.theme.global.name.value = isDark ? 'dark' : 'light';
     }
@@ -61,11 +61,11 @@ export function initializeTheme() {
         return;
     }
 
-    // Initialize theme from saved preference or default to system
+    
     const savedAppearance = getStoredAppearance();
     updateTheme(savedAppearance || 'system');
 
-    // Set up system theme change listener
+    
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
@@ -80,7 +80,7 @@ export function useAppearance() {
             appearance.value = savedAppearance;
         }
 
-        // Initialize isDark based on current theme
+        
         updateIsDark();
     });
 
@@ -96,17 +96,17 @@ export function useAppearance() {
     function updateAppearance(value: Appearance) {
         appearance.value = value;
 
-        // Store in localStorage for client-side persistence
+        
         localStorage.setItem('appearance', value);
 
-        // Store in cookie for SSR
+        
         setCookie('appearance', value);
 
         updateTheme(value);
         updateIsDark();
     }
 
-    // Watch for system theme changes
+    
     watch(appearance, () => {
         updateIsDark();
     });

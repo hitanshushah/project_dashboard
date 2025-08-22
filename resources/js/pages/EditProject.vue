@@ -19,7 +19,7 @@ const page = usePage();
 
 const currentUser = computed(() => page.props.auth?.user);
 
-// Get data from backend
+
 const project = computed(() => page.props.project || {} as any);
 const categories = computed(() => page.props.categories || []);
 const statuses = computed(() => page.props.statuses || []);
@@ -29,14 +29,14 @@ const snackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('success')
 
-// Form data - prefill with existing project data
+
 const form = useForm({
   name: project.value.name || '',
   description: project.value.description || '',
   category: project.value.category || '',
   tags: project.value.tags || [] as string[],
-  assets: [] as File[], // New assets only
-  existingAssets: project.value.assets || [] as any[], // Existing assets
+  assets: [] as File[], 
+  existingAssets: project.value.assets || [] as any[], 
   links: project.value.links || [] as Array<{ title: string; url: string }>,
   start_date: project.value.start_date || '',
   end_date: project.value.end_date || '',
@@ -55,15 +55,15 @@ const form = useForm({
   },
 });
 
-// Update user_id when currentUser changes
+
 const updateUserId = () => {
   form.user_id = currentUser.value?.id || null;
 };
 
-// Watch for changes in currentUser
+
 watch(currentUser, updateUserId, { immediate: true });
 
-// Available options
+
 const statusOptions = computed(() => 
   statuses.value?.map((status: any) => ({
     value: status.key,
@@ -71,7 +71,7 @@ const statusOptions = computed(() =>
   })) || []
 );
 
-// Date formatting
+
 const formattedStartDate = computed(() => {
   if (!form.start_date) return '';
   return new Date(form.start_date).toLocaleDateString();
@@ -82,23 +82,23 @@ const formattedEndDate = computed(() => {
   return new Date(form.end_date).toLocaleDateString();
 });
 
-// Date update methods
+
 const updateStartDate = () => {
-  // This will be handled by the date picker
+  
 };
 
 const updateEndDate = () => {
-  // This will be handled by the date picker
+  
 };
 
-// Link helper methods
+
 const hasLinkWithTitle = (title: string) => {
   return form.links.some((link: any) => link.title.toLowerCase().includes(title.toLowerCase()));
 };
 
 const addGithubLink = () => {
   if (githubUrl.value.trim()) {
-    // Basic URL validation
+    
     let validUrl = githubUrl.value.trim();
     if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
       validUrl = 'https://' + validUrl;
@@ -114,7 +114,7 @@ const addGithubLink = () => {
 
 const addProjectDemoLink = () => {
   if (projectDemo.value.trim()) {
-    // Basic URL validation
+    
     let validUrl = projectDemo.value.trim();
     if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
       validUrl = 'https://' + validUrl;
@@ -128,10 +128,10 @@ const addProjectDemoLink = () => {
   }
 };
 
-// File handling methods
-// Helper function to validate file size
+
+
 const validateFileSize = (file: File): boolean => {
-  const maxFileSize = 100 * 1024 * 1024; // 100MB in bytes
+  const maxFileSize = 100 * 1024 * 1024; 
   if (file.size > maxFileSize) {
     snackbarMessage.value = `File "${file.name}" is too large. Maximum size is 100MB.`;
     snackbarColor.value = 'error';
@@ -150,10 +150,10 @@ const handleFileUpload = (event: Event) => {
   if (target.files) {
     const files = Array.from(target.files);
     
-    // Check file sizes before adding
+    
     for (const file of files) {
       if (!validateFileSize(file)) {
-        return; // Don't add any files if one is too large
+        return; 
       }
     }
     
@@ -166,10 +166,10 @@ const handleFileDrop = (event: DragEvent) => {
   if (event.dataTransfer?.files) {
     const files = Array.from(event.dataTransfer.files);
     
-    // Check file sizes before adding
+    
     for (const file of files) {
       if (!validateFileSize(file)) {
-        return; // Don't add any files if one is too large
+        return; 
       }
     }
     
@@ -184,18 +184,18 @@ const previewFile = (file: File) => {
   }
 };
 
-// Normalize technology name for comparison (lowercase and remove spaces)
+
 const normalizeTechnologyName = (name: string): string => {
   return name.toLowerCase().replace(/\s+/g, '');
 };
 
-// Check if technology already exists (case-insensitive and space-insensitive)
+
 const isTechnologyDuplicate = (newTech: string, existingTechs: string[]): boolean => {
   const normalizedNewTech = normalizeTechnologyName(newTech);
   return existingTechs.some(tech => normalizeTechnologyName(tech) === normalizedNewTech);
 };
 
-// Local state
+
 const newTag = ref('');
 const newLinkTitle = ref('');
 const newLinkUrl = ref('');
@@ -206,11 +206,11 @@ const fileInputRef = ref<HTMLInputElement>();
 const githubUrl = ref('');
 const projectDemo = ref('');
 
-// Preview settings
+
 const showPreviewSettings = ref(false);
 const previewSettings = computed(() => form.preview_settings);
 
-// Theme management
+
 const { isDark } = useAppearance();
 
 const handleCategoryChange = (value: any) => {
@@ -255,7 +255,7 @@ const addLink = () => {
     return;
   }
   
-  // Basic URL validation
+  
   let validUrl = url;
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     validUrl = 'https://' + url;
@@ -266,7 +266,7 @@ const addLink = () => {
     url: validUrl
   });
   
-  // Clear the input fields
+  
   newLinkTitle.value = '';
   newLinkUrl.value = '';
 };
@@ -280,10 +280,10 @@ const handleFileSelect = (event: Event) => {
   if (target.files) {
     const files = Array.from(target.files);
     
-    // Check file sizes before adding
+    
     for (const file of files) {
       if (!validateFileSize(file)) {
-        return; // Don't add any files if one is too large
+        return; 
       }
     }
     
@@ -300,16 +300,16 @@ const removeExistingAsset = (index: number) => {
 };
 
 const updateProject = async () => {
-  // Clear previous errors
+  
   form.clearErrors();
   
-  // Validate required fields
+  
   if (!form.name.trim()) {
     form.setError('name', 'Project name is required');
     return false;
   }
 
-  // Validate file sizes (100MB limit)
+  
   for (let i = 0; i < form.assets.length; i++) {
     const file = form.assets[i];
     if (!validateFileSize(file)) {
@@ -319,11 +319,11 @@ const updateProject = async () => {
   }
 
   try {
-    // Check if there are any file uploads
+    
     const hasFiles = form.assets && form.assets.length > 0;
     
     if (hasFiles) {
-      // Use post method with _method: PUT for file uploads
+      
       await form.post(`/projects/${project.value.id}`, {
         data: {
           _method: 'PUT'
@@ -340,7 +340,7 @@ const updateProject = async () => {
         }
       } as any);
     } else {
-      // Use put method for forms without file uploads
+      
       await form.put(`/projects/${project.value.id}`, {
         onSuccess: () => {
           snackbarMessage.value = 'Project updated successfully!';
@@ -365,7 +365,7 @@ const cancelEdit = () => {
   router.visit('/');
 };
 
-// Computed properties for assets
+
 const allAssets = computed(() => {
   const existingAssets = form.existingAssets.map((asset: any) => ({
     ...asset,
@@ -374,8 +374,8 @@ const allAssets = computed(() => {
   const newAssets = form.assets.map(file => ({
     id: `new-${file.name}-${file.size}`,
     name: file.name,
-    filename: file.name, // For ProjectCard compatibility
-    display_name: file.name, // For ProjectCard compatibility
+    filename: file.name, 
+    display_name: file.name, 
     size: file.size,
     type: file.type,
     isExisting: false,
@@ -431,7 +431,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
   <AppLayout>
     <v-main>
       <v-container class="py-8 !max-w-none !px-8">
-        <!-- Header -->
+        
         <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-6 md:gap-0 mb-6">
           <div>
           <v-btn
@@ -466,9 +466,9 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
         </div>
 
         <v-row>
-          <!-- Form Section -->
+          
           <v-col cols="12" lg="7" :class="[isDark ? 'bg-[#212121]' : '!bg-[#DBDBDB]', 'rounded-lg !p-6']">
-              <!-- Project Information Section -->
+              
               <div class="mb-8">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
@@ -544,7 +544,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </v-textarea>
               </div>
 
-              <!-- Project Timeline Section -->
+              
               <div class="mb-2">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
@@ -633,7 +633,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </v-row>
               </div>
 
-              <!-- Tags and Technologies -->
+              
               <div class="mb-2">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-4"></div>
@@ -641,7 +641,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </div>
                 
                 <v-row>
-                  <!-- Tags -->
+                  
                   <v-col cols="12" md="6">
                     <v-combobox
                       v-model="form.tags"
@@ -676,7 +676,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     </v-combobox>
                   </v-col>
 
-                  <!-- Technologies -->
+                  
                   <v-col cols="12" md="6">
                     <v-combobox
                       v-model="form.technologies"
@@ -714,7 +714,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </v-row>
               </div>
 
-              <!-- Links -->
+              
               <div class="mb-8">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full mr-4"></div>
@@ -722,7 +722,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </div>
                 
                 <div>
-                  <!-- Github Link -->
+                  
                   <div v-if="!hasLinkWithTitle('Github')">
                     <v-row>
                       <v-col cols="12" md="10">
@@ -757,7 +757,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     </v-row>
                   </div>
 
-                  <!-- Project Demo Link -->
+                  
                   <div v-if="!hasLinkWithTitle('Project Demo')">
                     <v-row>
                       <v-col cols="12" md="10">
@@ -854,7 +854,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                       class="max-w-full text-sm !py-3 !px-4"
                     >
                       <div class="flex grow items-center gap-2 w-full">
-                        <!-- Left: icon, title and URL -->
+                        
                         <div class="flex items-center flex-1 min-w-0 gap-2">
                           <v-icon 
                             :icon="getLinkIcon(link.title)" 
@@ -874,7 +874,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           </div>
                         </div>
 
-                        <!-- Right: buttons -->
+                        
                         <div class="flex-none items-center shrink-0">
                           <v-btn
                             icon="mdi-open-in-new"
@@ -899,14 +899,14 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </div>
               </div>
 
-              <!-- File Upload -->
+              
               <div class="mb-8">
                 <div class="flex items-center mb-8">
                   <div class="w-1 h-8 bg-gradient-to-b from-gray-500 to-orange-500 rounded-full mr-4"></div>
                   <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Assets</h2>
                 </div>
                 
-                <!-- Existing Assets -->
+                
                 <div v-if="form.existingAssets.length > 0" class="mb-4">
                   <h4 :class="isDark ? 'text-lg font-medium mb-4' : 'text-lg font-medium mb-4'">Existing Assets</h4>
                   <div class="flex flex-wrap gap-2 mb-4">
@@ -918,7 +918,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                       class="max-w-full !p-6"
                     >
                       <div class="flex items-center gap-3 w-full">
-                        <!-- Left: icon and file info -->
+                        
                         <div class="flex items-center flex-1 min-w-0">
                           <v-icon
                             :icon="getFileIcon(asset.type || asset.name)"
@@ -936,7 +936,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                           </div>
                         </div>
 
-                        <!-- Right: buttons -->
+                        
                         <div class="flex items-center gap-2">
                           <v-btn
                             icon="mdi-eye"
@@ -1009,7 +1009,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     class="max-w-full !p-6"
                   >
                     <div class="flex items-center gap-3 w-full">
-                      <!-- Left: icon and file info -->
+                      
                       <div class="flex items-center flex-1 min-w-0">
                         <v-icon
                           :icon="getFileIcon(file.type || file.name)"
@@ -1027,7 +1027,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         </div>
                       </div>
 
-                      <!-- Right: buttons -->
+                      
                       <div class="flex items-center gap-2">
                         <v-btn
                           icon="mdi-eye"
@@ -1066,7 +1066,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               </div>
           </v-col>
 
-          <!-- Preview Section -->
+          
           <v-col cols="12" lg="5" class="!mt-[-26px]">
             <v-card :class="[isDark ? 'bg-[#212121]' : '!bg-[#DBDBDB]', 'pa-6 h-fit sticky top-4']">
               <div class="mb-6">
@@ -1104,13 +1104,13 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
           </v-col>
         </v-row>
 
-        <!-- Preview Settings Modal -->
+        
         <PreviewSettings
           v-model="showPreviewSettings"
           :settings="form.preview_settings"
         />
 
-        <!-- Snackbar -->
+        
         <v-snackbar
           v-model="snackbar"
           :color="snackbarColor"

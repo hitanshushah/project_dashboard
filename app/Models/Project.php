@@ -119,10 +119,10 @@ class Project extends Model
 
     public function syncProjectTags(array $tags)
     {
-        // Detach existing tags of type 'tag'
+        
         $this->tags()->where('type', 'tag')->detach();
         
-        // Attach new tags
+        
         foreach ($tags as $tagName) {
             $this->attachTag($tagName, 'tag');
         }
@@ -130,10 +130,10 @@ class Project extends Model
 
     public function syncProjectTechnologies(array $technologies)
     {
-        // Detach existing tags of type 'technology'
+        
         $this->tags()->where('type', 'technology')->detach();
         
-        // Attach new technologies
+        
         foreach ($technologies as $technologyName) {
             $this->attachTag($technologyName, 'technology');
         }
@@ -141,16 +141,16 @@ class Project extends Model
 
     public function syncProjectTagsWithUser(array $tags, int $userId)
     {
-        // Get existing tag IDs of type 'tag' that are attached to this project
+        
         $existingTagIds = $this->tags()->where('type', 'tag')->pluck('tags.id')->toArray();
         
-        // Detach existing tags of type 'tag'
+        
         if (!empty($existingTagIds)) {
             $this->tags()->detach($existingTagIds);
         }
         
         if (!empty($tags)) {
-            // Create single tag row with all tags as JSON array
+            
             $tag = Tag::create([
                 'name' => json_encode($tags),
                 'slug' => json_encode(array_map('strtolower', $tags)),
@@ -159,23 +159,23 @@ class Project extends Model
                 'project_id' => $this->id,
             ]);
             
-            // Attach to project
+            
             $this->tags()->attach($tag->id);
         }
     }
 
     public function syncProjectTechnologiesWithUser(array $technologies, int $userId)
     {
-        // Get existing tag IDs of type 'technology' that are attached to this project
+        
         $existingTagIds = $this->tags()->where('type', 'technology')->pluck('tags.id')->toArray();
         
-        // Detach existing tags of type 'technology'
+        
         if (!empty($existingTagIds)) {
             $this->tags()->detach($existingTagIds);
         }
         
         if (!empty($technologies)) {
-            // Create single technology row with all technologies as JSON array
+            
             $tag = Tag::create([
                 'name' => json_encode($technologies),
                 'slug' => json_encode(array_map('strtolower', $technologies)),
@@ -184,7 +184,7 @@ class Project extends Model
                 'project_id' => $this->id,
             ]);
             
-            // Attach to project
+            
             $this->tags()->attach($tag->id);
         }
     }
@@ -196,7 +196,7 @@ class Project extends Model
 
     private function attachTagWithUser(string $name, string $type, int $userId)
     {
-        // For technologies, always create new tags (allow duplicates)
+        
         if ($type === 'technology') {
             $tag = Tag::create([
                 'name' => $name,
@@ -206,13 +206,13 @@ class Project extends Model
                 'project_id' => $this->id,
             ]);
         } else {
-            // For non-technology tags, use the original logic
+            
             $tag = Tag::where('type', $type)
                 ->where('name', $name)
                 ->first();
 
             if (!$tag) {
-                            // Create new tag
+                            
             $tag = Tag::create([
                 'name' => $name,
                 'slug' => Str::slug($name),
@@ -221,7 +221,7 @@ class Project extends Model
                 'project_id' => $this->id,
             ]);
             } else {
-                // Update user_id and project_id if tag exists but doesn't have them
+                
                 $updates = [];
                 if ($tag->user_id === null) {
                     $updates['user_id'] = $userId;
@@ -235,7 +235,7 @@ class Project extends Model
             }
         }
 
-        // Attach to project if not already attached
+        
         if (!$this->tags()->where('tag_id', $tag->id)->exists()) {
             $this->tags()->attach($tag->id);
         }
@@ -243,13 +243,13 @@ class Project extends Model
 
     private function attachTag(string $name, string $type)
     {
-        // First try to find existing tag by name and type
+        
         $tag = Tag::where('type', $type)
             ->where('name', $name)
             ->first();
 
         if (!$tag) {
-            // Create new tag
+            
             $tag = Tag::create([
                 'name' => $name,
                 'slug' => Str::slug($name),
@@ -258,7 +258,7 @@ class Project extends Model
                 'project_id' => $this->id,
             ]);
         } else {
-            // Update user_id and project_id if tag exists but doesn't have them
+            
             $updates = [];
             if ($tag->user_id === null) {
                 $updates['user_id'] = $this->user_id;
@@ -271,15 +271,12 @@ class Project extends Model
             }
         }
 
-        // Attach to project if not already attached
+        
         if (!$this->tags()->where('tag_id', $tag->id)->exists()) {
             $this->tags()->attach($tag->id);
         }
     }
 
-    /**
-     * Get the next sorting order for public projects
-     */
     public static function getNextSortingOrder(int $userId): int
     {
         $maxOrder = self::where('user_id', $userId)
@@ -289,9 +286,6 @@ class Project extends Model
         return ($maxOrder ?? 0) + 1;
     }
 
-    /**
-     * Recalculate sorting orders for all public projects of a user
-     */
     public static function recalculateSortingOrders(int $userId): void
     {
         $publicProjects = self::where('user_id', $userId)
@@ -305,9 +299,6 @@ class Project extends Model
         }
     }
 
-    /**
-     * Update sorting orders for multiple projects
-     */
     public static function updateSortingOrders(int $userId, array $projectIds): void
     {
         foreach ($projectIds as $index => $projectId) {
@@ -318,21 +309,18 @@ class Project extends Model
         }
     }
 
-    /**
-     * Boot method to handle automatic sorting order assignment
-     */
     protected static function boot()
     {
         parent::boot();
 
-        // When a project is made public, assign it the next sorting order
+        
         static::updating(function ($project) {
             if ($project->isDirty('is_public') && $project->is_public && $project->sorting_order === null) {
                 $project->sorting_order = self::getNextSortingOrder($project->user_id);
             }
         });
 
-        // When a project is made private, recalculate sorting orders
+        
         static::updated(function ($project) {
             if ($project->wasChanged('is_public') && !$project->is_public) {
                 self::recalculateSortingOrders($project->user_id);

@@ -1,10 +1,4 @@
-/**
- * Shared utility functions for project-related components
- */
 
-/**
- * Get the appropriate icon for a link based on its title
- */
 export const getLinkIcon = (title: string): string => {
   const titleLower = title.toLowerCase();
   if (titleLower.includes('github')) {
@@ -16,9 +10,6 @@ export const getLinkIcon = (title: string): string => {
   }
 };
 
-/**
- * Get the appropriate color for a link icon based on its title
- */
 export const getLinkIconColor = (title: string): string => {
   const titleLower = title.toLowerCase();
   if (titleLower.includes('github')) {
@@ -30,9 +21,6 @@ export const getLinkIconColor = (title: string): string => {
   }
 };
 
-/**
- * Get the appropriate color for a status
- */
 export const getStatusColor = (status: string): string => {
   const colorMap: Record<string, string> = {
     'planning': 'blue',
@@ -45,27 +33,18 @@ export const getStatusColor = (status: string): string => {
   return colorMap[status] || 'grey';
 };
 
-/**
- * Get the status name from status key
- */
 export const getStatusName = (statusKey: string, statuses?: Array<{ name: string; key: string }>): string => {
   if (!statuses) return statusKey;
   const status = statuses.find(s => s.key === statusKey);
   return status?.name || statusKey;
 };
 
-/**
- * Get the category name from category key
- */
 export const getCategoryName = (categoryKey: string, categories?: Array<{ name: string; key: string }>): string => {
   if (!categories) return categoryKey;
   const category = categories.find(c => c.key === categoryKey);
   return category?.name || categoryKey;
 };
 
-/**
- * Format a date string to month and year format (e.g., "Jan 2025")
- */
 export const formatDate = (dateString: string): string => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -75,17 +54,11 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
-/**
- * Format a date string to locale date and time format
- */
 export const formatDateTime = (dateString: string): string => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleString();
 };
 
-/**
- * Get file icon based on file type
- */
 export const getFileIcon = (fileType: string): string => {
   if (fileType.startsWith('image/')) return 'mdi-image';
   if (fileType.includes('pdf')) return 'mdi-file-pdf-box';
@@ -96,9 +69,6 @@ export const getFileIcon = (fileType: string): string => {
   return 'mdi-file';
 };
 
-/**
- * Get file color based on file type
- */
 export const getFileColor = (fileType: string): string => {
   if (fileType.startsWith('image/')) return 'green';
   if (fileType.includes('pdf')) return 'red';
@@ -108,9 +78,6 @@ export const getFileColor = (fileType: string): string => {
   return 'grey';
 };
 
-/**
- * Get file type description based on file type
- */
 export const getFileType = (fileType: string): string => {
   if (fileType.startsWith('image/')) return 'Image';
   if (fileType.includes('pdf')) return 'PDF';
@@ -121,9 +88,6 @@ export const getFileType = (fileType: string): string => {
   return 'File';
 };
 
-/**
- * Format file size in bytes to human readable format
- */
 export const formatFileSize = (bytes: number): string => {
   if (!bytes) return '0 B';
   const k = 1024;
@@ -132,40 +96,31 @@ export const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 
-/**
- * Check if a file is previewable
- */
 export const isPreviewable = (fileType: string): boolean => {
   return fileType.startsWith('image/') || fileType.includes('pdf') || fileType.includes('text');
 };
 
-/**
- * Get file URL for display
- */
 export const getFileUrl = (file: any): string => {
-  // For File objects (from form), create object URL
+  
   if (file instanceof File) {
     return URL.createObjectURL(file);
   }
-  // For saved files, use the url property if available (MinIO URLs)
+  
   if (file.url) {
     return file.url;
   }
-  // For saved files, use the path
+  
   if (file.path) {
     return file.path;
   }
-  // For MinIO files stored in filename field
+  
   if (file.filename) {
     return file.filename;
   }
-  // Fallback
+  
   return '';
 };
 
-/**
- * Get the current user's ID for public projects
- */
 export const getUserForPublicProjects = async (): Promise<number> => {
   const response = await fetch('/api/public-projects/user');
   if (!response.ok) {
@@ -176,9 +131,6 @@ export const getUserForPublicProjects = async (): Promise<number> => {
   return data.user_id;
 };
 
-/**
- * Get public projects data for a specific user by user_id
- */
 export const getPublicProjectsByUserId = async (userId: number, filters?: {
   search?: string;
   categories?: string[];
@@ -208,16 +160,10 @@ export const getPublicProjectsByUserId = async (userId: number, filters?: {
   return await response.json();
 };
 
-/**
- * Open public projects page for a specific user
- */
 export const openPublicProjectsPage = (userId: number): void => {
   window.open(`/public-projects/${userId}`, '_blank');
 };
 
-/**
- * Get current user's public projects page URL
- */
 export const getCurrentUserPublicProjectsUrl = async (): Promise<string> => {
   const userId = await getUserForPublicProjects();
   return `/public-projects/${userId}`;

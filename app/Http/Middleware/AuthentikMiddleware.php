@@ -66,9 +66,6 @@ class AuthentikMiddleware
         return $next($request);
     }
 
-    /**
-     * Extract subdomain from host
-     */
     private function extractSubdomain(string $host): string
     {
         $parts = explode('.', $host);

@@ -29,7 +29,7 @@ class ProjectController extends Controller
             return redirect()->route('admin.home');
         }
 
-        // Get search, filter, and sort parameters
+        
         $search = $request->get('search', '');
         $categories = $request->get('categories', []);
         $statuses = $request->get('statuses', []);
@@ -37,7 +37,7 @@ class ProjectController extends Controller
         $sortBy = $request->get('sort_by', 'created_at');
         $sortDirection = $request->get('sort_direction', 'desc');
 
-        // Build the query with filters
+        
         $query = Project::with([
             'category',
             'status', 
@@ -47,7 +47,7 @@ class ProjectController extends Controller
             'tags'
         ])->where('user_id', $user->id);
 
-        // Apply search filter (search in name, description, and all project data regardless of settings)
+        
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
@@ -56,21 +56,21 @@ class ProjectController extends Controller
             });
         }
 
-        // Apply category filter
+        
         if (!empty($categories) && is_array($categories)) {
             $query->whereHas('category', function($q) use ($categories) {
                 $q->whereIn('key', $categories);
             });
         }
 
-        // Apply status filter
+        
         if (!empty($statuses) && is_array($statuses)) {
             $query->whereHas('status', function($q) use ($statuses) {
                 $q->whereIn('key', $statuses);
             });
         }
 
-        // Apply technology filter
+        
         if (!empty($technologies) && is_array($technologies)) {
             $query->whereHas('tags', function($q) use ($technologies) {
                 $q->where('type', 'technology');
@@ -80,21 +80,21 @@ class ProjectController extends Controller
             });
         }
 
-        // Apply sorting
+        
         $validSortFields = ['created_at', 'updated_at', 'name'];
         $validSortDirections = ['asc', 'desc'];
         
         if (in_array($sortBy, $validSortFields) && in_array($sortDirection, $validSortDirections)) {
-            // For public projects, always order by sorting_order first, then by the selected field
+            
             $query->orderBy('sorting_order', 'asc');
             $query->orderBy($sortBy, $sortDirection);
         } else {
-            // Default sorting: sorting_order first, then created_at
+            
             $query->orderBy('sorting_order', 'asc');
             $query->orderBy('created_at', 'desc');
         }
 
-        // Execute query and transform data
+        
         $projects = $query->get()->map(function($project) {
             return [
                 'id' => $project->id,
@@ -109,8 +109,8 @@ class ProjectController extends Controller
                 'updated_at' => $project->updated_at,
                 'category' => $project->category ? $project->category->key : null,
                 'status' => $project->status ? $project->status->key : null,
-                'tags' => $project->tags, // This uses the accessor method getTagsAttribute()
-                'technologies' => $project->technologies, // This uses the accessor method getTechnologiesAttribute()
+                'tags' => $project->tags, 
+                'technologies' => $project->technologies, 
                 'links' => $project->links->map(function($link) {
                     return [
                         'title' => $link->name,
@@ -124,9 +124,9 @@ class ProjectController extends Controller
                         'name' => $asset->display_name,
                         'path' => $asset->filename,
                         'type' => $asset->assetType ? $asset->assetType->key : null,
-                        'url' => $asset->filename, // Use MinIO URL directly
-                        'filename' => $asset->filename, // MinIO URL
-                        'display_name' => $asset->display_name, // Original filename
+                        'url' => $asset->filename, 
+                        'filename' => $asset->filename, 
+                        'display_name' => $asset->display_name, 
                         'asset_type' => $asset->assetType ? [
                             'key' => $asset->assetType->key,
                             'name' => $asset->assetType->name
@@ -160,14 +160,14 @@ class ProjectController extends Controller
             ->get(['id', 'name', 'key']);
         $allStatuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
 
-        // Get all available technologies for filter dropdown
+        
         $allTechnologies = Tag::where('type', 'technology')
             ->where('user_id', $user->id)
             ->get()
             ->pluck('name')
             ->filter()
             ->flatMap(function($name) {
-                // Extract technologies from JSON array structure
+                
                 if (is_string($name)) {
                     $decoded = json_decode($name, true);
                     return is_array($decoded) ? $decoded : [];
@@ -207,7 +207,7 @@ class ProjectController extends Controller
             ->get(['name', 'key']);
         $statuses = Status::where('is_active', true)->get(['name', 'key']);
         
-        // Get user technologies
+        
         $user = request()->attributes->get('user');
         $userTechnologies = [];
         
@@ -218,14 +218,14 @@ class ProjectController extends Controller
                 ->pluck('name')
                 ->filter()
                 ->flatMap(function($name) {
-                    // Extract technologies from JSON array structure
+                    
                     if (is_string($name)) {
                         $decoded = json_decode($name, true);
                         return is_array($decoded) ? $decoded : [];
                     }
                     return [];
                 })
-                ->unique() // Show unique technologies in dropdown
+                ->unique() 
                 ->values()
                 ->toArray();
         }
@@ -244,7 +244,7 @@ class ProjectController extends Controller
             return redirect()->route('admin.home');
         }
 
-        // Fetch categories and statuses for the form
+        
         $categories = Category::where('user_id', $user->id)
             ->orWhereNull('user_id')
             ->get(['id', 'name', 'key']);
@@ -252,7 +252,7 @@ class ProjectController extends Controller
         $linkTypes = LinkType::all(['id', 'name', 'key']);
         $assetTypes = AssetType::all(['id', 'name', 'key']);
 
-        // Fetch user's existing technologies for the dropdown
+        
         $userTechnologies = Tag::where('type', 'technology')
             ->where('user_id', $user->id)
             ->get()
@@ -269,10 +269,10 @@ class ProjectController extends Controller
             ->values()
             ->toArray();
 
-        // Load project with relationships
+        
         $project->load(['category', 'status', 'links.linkType', 'assets.assetType', 'settings', 'tags']);
 
-        // Prepare project data for the form
+        
         $projectData = [
             'id' => $project->id,
             'name' => $project->name,
@@ -295,9 +295,9 @@ class ProjectController extends Controller
                     'id' => $asset->id,
                     'name' => $asset->display_name,
                     'path' => $asset->filename,
-                    'url' => $asset->filename, // Use MinIO URL directly
-                    'filename' => $asset->filename, // MinIO URL
-                    'display_name' => $asset->display_name, // Original filename
+                    'url' => $asset->filename, 
+                    'filename' => $asset->filename, 
+                    'display_name' => $asset->display_name, 
                     'asset_type' => $asset->assetType ? [
                         'key' => $asset->assetType->key,
                         'name' => $asset->assetType->name
@@ -355,7 +355,7 @@ class ProjectController extends Controller
             'existingAssets.*.display_name' => 'nullable|string|max:255',
             'existingAssets.*.filename' => 'nullable|string|max:500',
             'assets' => 'nullable|array',
-            'assets.*' => 'file|max:102400', // 100MB max per file
+            'assets.*' => 'file|max:102400', 
             'preview_settings' => 'nullable|array',
             'preview_settings.showDescription' => 'nullable|boolean',
             'preview_settings.showCategory' => 'nullable|boolean',
@@ -374,12 +374,12 @@ class ProjectController extends Controller
         try {
             DB::beginTransaction();
 
-            // Get category and status IDs
+            
             $category = null;
             if ($request->category) {
                 $category = Category::where('key', $request->category)->first();
                 
-                // If category doesn't exist, create it for the user
+                
                 if (!$category) {
                     $category = Category::create([
                         'name' => $request->category,
@@ -398,7 +398,7 @@ class ProjectController extends Controller
                 }
             }
 
-            // Update project
+            
             $project->update([
                 'name' => $request->name,
                 'description' => $request->description,
@@ -409,7 +409,7 @@ class ProjectController extends Controller
                 'is_public' => $request->input('is_public', false),
             ]);
 
-            // Update project settings
+            
             $previewSettings = $request->input('preview_settings', []);
             if ($project->settings) {
                 $project->settings->update([
@@ -424,7 +424,7 @@ class ProjectController extends Controller
                 ]);
             }
 
-            // Handle links
+            
             $project->links()->delete();
             if ($request->has('links') && is_array($request->links)) {
                 foreach ($request->links as $linkData) {
@@ -444,7 +444,7 @@ class ProjectController extends Controller
                 }
             }
 
-            // Handle tags and technologies
+            
             if ($request->has('tags') && is_array($request->tags)) {
                 $project->syncProjectTagsWithUser($request->tags, $user->id);
             }
@@ -453,44 +453,44 @@ class ProjectController extends Controller
                 $project->syncProjectTechnologiesWithUser($request->technologies, $user->id);
             }
 
-            // Handle assets (update, add new, delete)
+            
             $minioService = new MinIOService();
             
-            // Get current assets
+            
             $currentAssets = $project->assets()->with('assetType')->get();
             $currentAssetIds = $currentAssets->pluck('id')->toArray();
             
-            // Get assets from request (existing + new)
+            
             $requestAssets = $request->input('existingAssets', []);
             $requestAssetIds = collect($requestAssets)->pluck('id')->filter()->toArray();
             
-            // Find assets to delete (in current but not in request)
+            
             $assetsToDelete = $currentAssets->whereNotIn('id', $requestAssetIds);
             
-            // Delete assets from MinIO and database
+            
             foreach ($assetsToDelete as $asset) {
                 
-                // Extract filename from MinIO URL for deletion
+                
                 if ($asset->filename && $asset->assetType) {
                     $urlParts = parse_url($asset->filename);
                     $pathParts = explode('/', trim($urlParts['path'], '/'));
                     
-                    // URL structure: /projectsdashboard/username/assettype/filename
+                    
                     if (count($pathParts) >= 4) {
                         $username = $pathParts[1];
                         $assetType = $pathParts[2];
                         $filename = $pathParts[3];
                         
-                        // Delete from MinIO
+                        
                         $minioService->deleteFile($username, $assetType, $filename);
                     }
                 }
                 
-                // Delete from database
+                
                 $asset->delete();
             }
             
-            // Handle new file uploads
+            
             if ($request->hasFile('assets')) {
                 foreach ($request->file('assets') as $file) {
                     if ($file->isValid()) {
@@ -500,13 +500,13 @@ class ProjectController extends Controller
                         if ($assetType) {
                             $filename = time() . '_' . $file->getClientOriginalName();
                             
-                            // Upload to MinIO
+                            
                             $uploadResult = $minioService->uploadFile($file, $user->username, $assetTypeKey, $filename);
                             
                             if ($uploadResult['success']) {
                                 Asset::create([
                                     'display_name' => $file->getClientOriginalName(),
-                                    'filename' => $uploadResult['url'], // Store MinIO URL instead of local path
+                                    'filename' => $uploadResult['url'], 
                                     'asset_type_id' => $assetType->id,
                                     'is_active' => true,
                                     'assetable_id' => $project->id,
@@ -567,7 +567,7 @@ class ProjectController extends Controller
             'links.*.title' => 'required|string|max:255',
             'links.*.url' => 'required|url|max:500',
             'assets' => 'nullable|array',
-            'assets.*' => 'file|max:102400', // 100MB max per file
+            'assets.*' => 'file|max:102400', 
             'preview_settings' => 'nullable|array',
             'preview_settings.showDescription' => 'nullable|boolean',
             'preview_settings.showCategory' => 'nullable|boolean',
@@ -591,12 +591,12 @@ class ProjectController extends Controller
         try {
             DB::beginTransaction();
 
-            // Get category and status IDs
+            
             $category = null;
             if ($request->category) {
                 $category = Category::where('key', $request->category)->first();
                 
-                // If category doesn't exist, create it for the user
+                
                 if (!$category) {
                     $category = Category::create([
                         'name' => $request->category,
@@ -615,10 +615,10 @@ class ProjectController extends Controller
                 }
             }
 
-            // Generate project key
+            
             $projectKey = strtolower(str_replace(' ', '-', $request->name)) . '-' . time();
 
-            // Create project
+            
             $project = Project::create([
                 'key' => $projectKey,
                 'name' => $request->name,
@@ -631,14 +631,14 @@ class ProjectController extends Controller
                 'is_public' => true,
             ]);
 
-            // Create project settings with preview settings from form - STORE METHOD
+            
             $previewSettings = $request->input('preview_settings', []);
             $this->createProjectSettings($project, $user, $previewSettings);
 
-            // Handle links
+            
             if ($request->has('links') && is_array($request->links)) {
                 foreach ($request->links as $linkData) {
-                    // Determine link type based on title
+                    
                     $linkTypeKey = $this->determineLinkType($linkData['title']);
                     $linkType = LinkType::where('key', $linkTypeKey)->first();
                     
@@ -655,36 +655,36 @@ class ProjectController extends Controller
                 }
             }
 
-            // Handle tags
+            
             if ($request->has('tags') && is_array($request->tags)) {
                 $project->syncProjectTagsWithUser($request->tags, $user->id);
             }
 
-            // Handle technologies
+            
             if ($request->has('technologies') && is_array($request->technologies)) {
                 $project->syncProjectTechnologiesWithUser($request->technologies, $user->id);
             }
 
-            // Handle assets
+            
             if ($request->hasFile('assets')) {
                 $minioService = new MinIOService();
                 
                 foreach ($request->file('assets') as $file) {
                     if ($file->isValid()) {
-                        // Determine asset type based on file extension
+                        
                         $assetTypeKey = $this->determineAssetType($file);
                         $assetType = AssetType::where('key', $assetTypeKey)->first();
                         
                         if ($assetType) {
                             $filename = time() . '_' . $file->getClientOriginalName();
                             
-                            // Upload to MinIO
+                            
                             $uploadResult = $minioService->uploadFile($file, $user->username, $assetTypeKey, $filename);
                             
                             if ($uploadResult['success']) {
                                 Asset::create([
                                     'display_name' => $file->getClientOriginalName(),
-                                    'filename' => $uploadResult['url'], // Store MinIO URL instead of local path
+                                    'filename' => $uploadResult['url'], 
                                     'asset_type_id' => $assetType->id,
                                     'is_active' => true,
                                     'assetable_id' => $project->id,
@@ -728,19 +728,19 @@ class ProjectController extends Controller
         $extension = strtolower($file->getClientOriginalExtension());
         $mimeType = strtolower($file->getMimeType());
         
-        // Image files
+        
         if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'tiff']) || 
             str_starts_with($mimeType, 'image/')) {
             return 'images';
         }
         
-        // Video files
+        
         if (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'm4v']) || 
             str_starts_with($mimeType, 'video/')) {
             return 'videos';
         }
         
-        // Document files (PDFs, Word docs, Excel, etc.)
+        
         if (in_array($extension, ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'md', 'rtf']) || 
             str_starts_with($mimeType, 'application/pdf') ||
             str_starts_with($mimeType, 'application/msword') ||
@@ -748,7 +748,7 @@ class ProjectController extends Controller
             return 'documents';
         }
         
-        // Default to others for everything else
+        
         return 'others';
     }
 
@@ -771,7 +771,7 @@ class ProjectController extends Controller
 
     public function saveProject(Request $request)
     {
-        // Validate the request
+        
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -787,7 +787,7 @@ class ProjectController extends Controller
             'links.*.title' => 'required|string|max:255',
             'links.*.url' => 'required|url|max:500',
             'assets' => 'nullable|array',
-            'assets.*' => 'file|max:102400', // 100MB max per file
+            'assets.*' => 'file|max:102400', 
             'user_id' => 'required|integer|exists:users,id',
             'preview_settings' => 'nullable|array',
             'preview_settings.showDescription' => 'nullable|boolean',
@@ -804,7 +804,7 @@ class ProjectController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        // Get the user from the request
+        
         $user = User::find($request->input('user_id'));
         if (!$user) {
             return back()->withErrors(['user' => 'User not found'])->withInput();
@@ -813,12 +813,12 @@ class ProjectController extends Controller
         try {
             DB::beginTransaction();
 
-            // Get category and status IDs
+            
             $category = null;
             if ($request->category) {
                 $category = Category::where('key', $request->category)->first();
                 
-                // If category doesn't exist, create it for the user
+                
                 if (!$category) {
                     $category = Category::create([
                         'name' => $request->category,
@@ -837,10 +837,10 @@ class ProjectController extends Controller
                 }
             }
 
-            // Generate project key
+            
             $projectKey = strtolower(str_replace(' ', '-', $request->name)) . '-' . time();
 
-            // Create project
+            
             $project = Project::create([
                 'key' => $projectKey,
                 'name' => $request->name,
@@ -853,14 +853,14 @@ class ProjectController extends Controller
                 'is_public' => false,
             ]);
 
-            // Create project settings with preview settings from form - SAVEPROJECT METHOD
+            
             $previewSettings = $request->input('preview_settings', []);
             $this->createProjectSettings($project, $user, $previewSettings);
 
-            // Handle links
+            
             if ($request->has('links') && is_array($request->links)) {
                 foreach ($request->links as $linkData) {
-                    // Determine link type based on title
+                    
                     $linkTypeKey = $this->determineLinkType($linkData['title']);
                     $linkType = LinkType::where('key', $linkTypeKey)->first();
                     
@@ -878,36 +878,36 @@ class ProjectController extends Controller
                 
             }
 
-            // Handle tags
+            
             if ($request->has('tags') && is_array($request->tags)) {
                 $project->syncProjectTagsWithUser($request->tags, $user->id);
             }
 
-            // Handle technologies
+            
             if ($request->has('technologies') && is_array($request->technologies)) {
                 $project->syncProjectTechnologiesWithUser($request->technologies, $user->id);
             }
 
-            // Handle assets
+            
             if ($request->hasFile('assets')) {
                 $minioService = new MinIOService();
                 
                 foreach ($request->file('assets') as $file) {
                     if ($file->isValid()) {
-                        // Determine asset type based on file extension
+                        
                         $assetTypeKey = $this->determineAssetType($file);
                         $assetType = AssetType::where('key', $assetTypeKey)->first();
                         
                         if ($assetType) {
                             $filename = time() . '_' . $file->getClientOriginalName();
                             
-                            // Upload to MinIO
+                            
                             $uploadResult = $minioService->uploadFile($file, $user->username, $assetTypeKey, $filename);
                             
                             if ($uploadResult['success']) {
                                 Asset::create([
                                     'display_name' => $file->getClientOriginalName(),
-                                    'filename' => $uploadResult['url'], // Store MinIO URL instead of local path
+                                    'filename' => $uploadResult['url'], 
                                     'asset_type_id' => $assetType->id,
                                     'is_active' => true,
                                     'assetable_id' => $project->id,
@@ -931,9 +931,6 @@ class ProjectController extends Controller
         }
     }
 
-    /**
-     * Get the current authenticated user for public projects
-     */
     public function getUserForPublicProjects()
     {
         $user = request()->attributes->get('user');
@@ -944,9 +941,6 @@ class ProjectController extends Controller
         return response()->json(['user_id' => $user->id]);
     }
 
-    /**
-     * Get public projects by user ID - reusable method
-     */
     public function getPublicProjectsByUserId($userId)
     {
         $user = User::find($userId);
@@ -954,7 +948,7 @@ class ProjectController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        // Get filter parameters
+        
         $request = request();
         $search = $request->get('search', '');
         $categories = $request->get('categories', []);
@@ -963,7 +957,7 @@ class ProjectController extends Controller
         $sortBy = $request->get('sort_by', 'created_at');
         $sortDirection = $request->get('sort_direction', 'desc');
 
-        // Build the query for public projects only
+        
         $query = Project::with([
             'category',
             'status', 
@@ -972,9 +966,9 @@ class ProjectController extends Controller
             'settings',
             'tags'
         ])->where('user_id', $user->id)
-          ->where('is_public', true); // Only fetch public projects
+          ->where('is_public', true); 
 
-        // Apply search filter
+        
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
@@ -983,21 +977,21 @@ class ProjectController extends Controller
             });
         }
 
-        // Apply category filter
+        
         if (!empty($categories) && is_array($categories)) {
             $query->whereHas('category', function($q) use ($categories) {
                 $q->whereIn('key', $categories);
             });
         }
 
-        // Apply status filter
+        
         if (!empty($statuses) && is_array($statuses)) {
             $query->whereHas('status', function($q) use ($statuses) {
                 $q->whereIn('key', $statuses);
             });
         }
 
-        // Apply technology filter
+        
         if (!empty($technologies) && is_array($technologies)) {
             $query->whereHas('tags', function($q) use ($technologies) {
                 $q->where('type', 'technology');
@@ -1007,21 +1001,21 @@ class ProjectController extends Controller
             });
         }
 
-        // Apply sorting
+        
         $validSortFields = ['created_at', 'updated_at', 'name'];
         $validSortDirections = ['asc', 'desc'];
         
         if (in_array($sortBy, $validSortFields) && in_array($sortDirection, $validSortDirections)) {
-            // For public projects, always order by sorting_order first, then by the selected field
+            
             $query->orderBy('sorting_order', 'asc');
             $query->orderBy($sortBy, $sortDirection);
         } else {
-            // Default sorting: sorting_order first, then created_at
+            
             $query->orderBy('sorting_order', 'asc');
             $query->orderBy('created_at', 'desc');
         }
 
-        // Execute query and transform data
+        
         $projects = $query->get()->map(function($project) {
             return [
                 'id' => $project->id,
@@ -1082,13 +1076,13 @@ class ProjectController extends Controller
             ];
         });
 
-        // Fetch categories and statuses for filtering
+        
         $allCategories = Category::where('user_id', $user->id)
-            ->orWhereNull('user_id') // Include global categories
+            ->orWhereNull('user_id') 
             ->get(['id', 'name', 'key']);
         $allStatuses = Status::where('is_active', true)->get(['id', 'name', 'key']);
 
-        // Get all available technologies for filter dropdown
+        
         $allTechnologies = Tag::where('type', 'technology')
             ->where('user_id', $user->id)
             ->get()
@@ -1105,12 +1099,12 @@ class ProjectController extends Controller
             ->values()
             ->toArray();
 
-        // Get user profile for website-like display with processed data
+        
         $userProfile = null;
         if ($user && $user->profile) {
             $profile = $user->profile;
             
-            // Get profile photo URL
+            
             $profilePhoto = $profile->assets()
                 ->where('display_name', 'Profile Photo')
                 ->whereHas('assetType', function($query) {
@@ -1118,7 +1112,7 @@ class ProjectController extends Controller
                 })
                 ->first();
 
-            // Get profile links
+            
             $links = $profile->links()->with('linkType')->get()->map(function ($link) {
                 return [
                     'title' => $link->name,
@@ -1127,7 +1121,7 @@ class ProjectController extends Controller
                 ];
             })->toArray();
 
-            // Get profile documents (excluding profile photo)
+            
             $documents = $profile->assets()
                 ->where('display_name', '!=', 'Profile Photo')
                 ->whereHas('assetType', function($query) {
@@ -1139,7 +1133,7 @@ class ProjectController extends Controller
                         'id' => $asset->id,
                         'name' => $asset->display_name,
                         'display_name' => $asset->display_name,
-                        'url' => $asset->filename, // MinIO URL
+                        'url' => $asset->filename, 
                         'filename' => $asset->filename,
                         'type' => $asset->assetType ? $asset->assetType->key : 'documents',
                     ];
@@ -1184,26 +1178,20 @@ class ProjectController extends Controller
             return redirect('/');
         }
 
-        // Use the reusable method to get data
+        
         $data = $this->getPublicProjectsByUserId($user->id);
 
         return Inertia::render('PublicProjects', $data);
     }
 
-    /**
-     * Display public projects for a specific user by user_id
-     */
     public function publicProjectsByUserId($userId)
     {
-        // Use the reusable method to get data
+        
         $data = $this->getPublicProjectsByUserId($userId);
 
         return Inertia::render('PublicProjects', $data);
     }
 
-    /**
-     * Update sorting orders for public projects
-     */
     public function updateSortingOrders(Request $request)
     {
         $user = request()->attributes->get('user');
@@ -1221,7 +1209,7 @@ class ProjectController extends Controller
         }
 
         try {
-            // Verify all projects belong to the user and are public
+            
             $userProjects = Project::where('user_id', $user->id)
                 ->where('is_public', true)
                 ->whereIn('id', $request->project_ids)
@@ -1232,7 +1220,7 @@ class ProjectController extends Controller
                 return response()->json(['error' => 'Some projects are not accessible'], 403);
             }
 
-            // Update sorting orders
+            
             Project::updateSortingOrders($user->id, $request->project_ids);
 
             return response()->json(['success' => true, 'message' => 'Project order updated successfully']);
@@ -1241,9 +1229,6 @@ class ProjectController extends Controller
         }
     }
 
-    /**
-     * Soft delete a project
-     */
     public function destroy(Project $project)
     {
         $user = request()->attributes->get('user');
@@ -1252,7 +1237,7 @@ class ProjectController extends Controller
         }
 
         try {
-            // Soft delete the project
+            
             $project->delete();
 
             return back()->with('success', 'Project deleted successfully');

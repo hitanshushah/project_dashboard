@@ -81,8 +81,8 @@ export interface ProjectAsset {
     size?: number;
     type?: string;
     url?: string;
-    filename?: string; // MinIO URL
-    display_name?: string; // Original filename
+    filename?: string; 
+    display_name?: string; 
     asset_type?: {
         key: string;
         name: string;

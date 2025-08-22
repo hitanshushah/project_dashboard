@@ -1,6 +1,6 @@
 <template>
   <div class="project-reorder">
-    <!-- Header -->
+    
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0 mb-6">
       <div class="flex items-center gap-3">
         <v-icon icon="mdi-drag" color="blue" size="large"></v-icon>
@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <!-- Instructions -->
+    
     <v-alert
       type="info"
       variant="tonal"
@@ -45,7 +45,7 @@
       </div>
     </v-alert>
 
-    <!-- Projects List -->
+    
     <div class="space-y-3">
       <draggable
         v-model="orderedProjects"
@@ -62,12 +62,12 @@
           <div class="project-item">
             <v-card class="cursor-move hover:shadow-lg transition-shadow duration-200">
               <div class="flex items-center gap-4 p-4">
-                <!-- Drag Handle -->
+                
                 <div class="drag-handle">
                   <v-icon icon="mdi-drag" :color="isDark ? 'gray-300' : 'gray-800'" size="small"></v-icon>
                 </div>
 
-                <!-- Project Info -->
+                
                 <div class="flex-1">
                   <div class="flex items-center gap-3 mb-2">
                     <h3 :class="isDark ? 'text-lg font-medium text-gray-300' : 'text-lg font-medium text-gray-900'">{{ project.name }}</h3>
@@ -93,7 +93,7 @@
                   </p>
                 </div>
 
-                <!-- Order Number -->
+                
                 <div class="order-number">
                   <v-chip
                     size="small"
@@ -110,14 +110,14 @@
       </draggable>
     </div>
 
-    <!-- Empty State -->
+    
     <div v-if="orderedProjects.length === 0" class="text-center py-12">
       <v-icon icon="mdi-folder-open" size="x-large" :color="isDark ? 'gray-300' : 'gray-800'" class="mb-4"></v-icon>
       <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-2' : 'text-lg font-medium text-gray-900 mb-2'">No Public Projects</h3>
       <p :class="isDark ? 'text-gray-500' : 'text-gray-800'">Make some projects public to reorder them here.</p>
     </div>
 
-    <!-- Snackbar for feedback -->
+    
     <v-snackbar
       v-model="showSnackbar"
       :color="snackbarColor"
@@ -155,14 +155,14 @@ const emit = defineEmits<{
   saved: [Project[]];
 }>();
 
-// State
+
 const dragging = ref(false);
 const saving = ref(false);
 const showSnackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('success');
 
-// Computed
+
 const orderedProjects = ref<Project[]>([...props.projects]);
 
 const hasChanges = computed(() => {
@@ -174,7 +174,7 @@ const hasChanges = computed(() => {
   });
 });
 
-// Methods
+
 const dragStart = () => {
   dragging.value = true;
 };
@@ -211,10 +211,10 @@ const saveOrder = async () => {
       showSnackbar.value = true;
       emit('saved', orderedProjects.value);
       
-      // Close the modal after successful save
+      
       setTimeout(() => {
         emit('close');
-      }, 500); // Wait 1.5 seconds to show the success message
+      }, 500); 
     } else {
       snackbarMessage.value = data.error || 'Failed to save project order. Please try again.';
       snackbarColor.value = 'error';
@@ -229,7 +229,7 @@ const saveOrder = async () => {
   }
 };
 
-// Watch for changes in props
+
 watch(() => props.projects, (newProjects) => {
   orderedProjects.value = [...newProjects];
 }, { deep: true });

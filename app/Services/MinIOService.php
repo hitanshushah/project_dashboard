@@ -45,9 +45,6 @@ class MinIOService
         }
     }
 
-    /**
-     * Check if the main projectsdashboard bucket exists
-     */
     public function checkMainBucketExists(): bool
     {
         try {
@@ -63,9 +60,6 @@ class MinIOService
         }
     }
 
-    /**
-     * Create the main projectsdashboard bucket
-     */
     public function createMainBucket(): bool
     {
         try {
@@ -95,7 +89,6 @@ class MinIOService
 
             return true;
         } catch (AwsException $e) {
-            // Check if the error is because the bucket already exists
             if ($e->getAwsErrorCode() === 'BucketAlreadyExists' || 
                 $e->getAwsErrorCode() === 'BucketAlreadyOwnedByYou' ||
                 str_contains($e->getMessage(), 'already exists')) {
@@ -107,9 +100,6 @@ class MinIOService
         }
     }
 
-    /**
-     * Check if user bucket exists
-     */
     public function checkUserBucketExists(string $username): bool
     {
         try {
@@ -126,9 +116,6 @@ class MinIOService
         }
     }
 
-    /**
-     * Create user bucket and asset type folders
-     */
     public function createUserBucket(string $username): bool
     {
         try {
@@ -159,9 +146,6 @@ class MinIOService
         }
     }
 
-    /**
-     * Upload file to MinIO
-     */
     public function uploadFile(UploadedFile $file, string $username, string $assetType, string $filename): array
     {
         try {
@@ -177,7 +161,7 @@ class MinIOService
                     throw new \Exception('Failed to create user bucket');
                 }
             }
-            // Upload file
+
             $key = $username . '/' . $assetType . '/' . $filename;
             
             $result = $this->s3Client->putObject([
@@ -188,7 +172,6 @@ class MinIOService
                 'ACL' => 'public-read',
             ]);
 
-            // Generate public URL
             $publicUrl = config('services.minio.public_url', $this->endpoint);
             $url = rtrim($publicUrl, '/') . '/' . $this->bucket . '/' . $key;
 
@@ -213,9 +196,6 @@ class MinIOService
         }
     }
 
-    /**
-     * Delete file from MinIO
-     */
     public function deleteFile(string $username, string $assetType, string $filename): bool
     {
         try {
@@ -235,9 +215,6 @@ class MinIOService
         }
     }
 
-    /**
-     * Get file URL
-     */
     public function getFileUrl(string $username, string $assetType, string $filename): string
     {
         $publicUrl = config('services.minio.public_url', $this->endpoint);
@@ -246,13 +223,9 @@ class MinIOService
         return rtrim($publicUrl, '/') . '/' . $this->bucket . '/' . $key;
     }
 
-    /**
-     * Test MinIO connection
-     */
     public function testConnection(): array
     {
         try {
-            // List buckets to test connection
             $result = $this->s3Client->listBuckets();
             
             return [

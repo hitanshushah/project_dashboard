@@ -10,10 +10,7 @@ export function usePublicProjects() {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  /**
-   * Get current user's ID
-   */
-  const getCurrentUserId = async (): Promise<number | null> => {
+    const getCurrentUserId = async (): Promise<number | null> => {
     loading.value = true;
     error.value = null;
     
@@ -29,10 +26,7 @@ export function usePublicProjects() {
     }
   };
 
-  /**
-   * Get public projects data for a specific user
-   */
-  const getProjectsData = async (userId: number, filters?: {
+    const getProjectsData = async (userId: number, filters?: {
     search?: string;
     categories?: string[];
     statuses?: string[];
@@ -55,17 +49,11 @@ export function usePublicProjects() {
     }
   };
 
-  /**
-   * Open public projects page for a specific user
-   */
-  const openProjectsPage = (userId: number) => {
+    const openProjectsPage = (userId: number) => {
     openPublicProjectsPage(userId);
   };
 
-  /**
-   * Get current user's public projects URL
-   */
-  const getCurrentUserUrl = async (): Promise<string | null> => {
+    const getCurrentUserUrl = async (): Promise<string | null> => {
     loading.value = true;
     error.value = null;
     
@@ -81,24 +69,21 @@ export function usePublicProjects() {
     }
   };
 
-  /**
-   * Complete flow: Get user ID, fetch data, and optionally open page
-   */
-  const getPublicProjectsFlow = async (openInNewTab = false) => {
+    const getPublicProjectsFlow = async (openInNewTab = false) => {
     loading.value = true;
     error.value = null;
     
     try {
-      // Step 1: Get user ID
+      
       const userId = await getUserForPublicProjects();
       if (!userId) {
         throw new Error('User not found');
       }
 
-      // Step 2: Get projects data
+      
       const data = await getPublicProjectsByUserId(userId);
       
-      // Step 3: Optionally open in new tab
+      
       if (openInNewTab) {
         openPublicProjectsPage(userId);
       }

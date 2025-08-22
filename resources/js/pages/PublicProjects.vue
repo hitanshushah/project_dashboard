@@ -19,16 +19,16 @@ const userProfile = computed(() => {
   return profile;
 });
 
-// Category filter state
+
 const selectedCategory = ref('all');
 
-// Get categories that have projects
+
 const availableCategories = computed(() => {
   const projectCategories = new Set(projects.value.map(project => project.category).filter(Boolean));
   return categories.value.filter(category => projectCategories.has(category.key));
 });
 
-// Filtered projects based on selected category
+
 const filteredProjects = computed(() => {
   if (selectedCategory.value === 'all') {
     return projects.value;
@@ -36,7 +36,7 @@ const filteredProjects = computed(() => {
   return projects.value.filter(project => project.category === selectedCategory.value);
 });
 
-// Get user initials
+
 const userInitials = computed(() => {
   if (!userProfile.value?.name) return 'U';
   return userProfile.value.name
@@ -47,15 +47,15 @@ const userInitials = computed(() => {
     .slice(0, 2);
 });
 
-// Get current year for footer
+
 const currentYear = new Date().getFullYear();
 
-// Handle image error
+
 const handleImageError = () => {
   
 };
 
-// Filter out duplicate documents based on display_name
+
 const uniqueDocuments = computed(() => {
   if (!userProfile.value?.documents) return [];
   
@@ -70,7 +70,7 @@ const uniqueDocuments = computed(() => {
   });
 });
 
-// Document helper functions
+
 const getDocumentIcon = (filename: string): string => {
   const lowerFilename = filename.toLowerCase();
   if (lowerFilename.includes('resume') || lowerFilename.includes('cv')) {
@@ -97,12 +97,12 @@ const getDocumentLabel = (filename: string): string => {
   } else if (lowerFilename.includes('portfolio')) {
     return 'Portfolio';
   } else {
-    // Return a cleaned version of the filename
+    
     return filename.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
   }
 };
 
-// Link icon helper function
+
 const getLinkIcon = (linkType: string): string => {
   const lowerType = linkType.toLowerCase();
   if (lowerType.includes('github')) {
@@ -126,9 +126,9 @@ const getLinkIcon = (linkType: string): string => {
 </script>
 
 <template>
-  <!-- Public Projects Portfolio Website -->
+  
   <div :class="isDark ? '!bg-gradient-to-br from-[#0c0c0c] to-[#1A1A1C]' : '!bg-gradient-to-br from-[#bfbfbf] to-[#F5F5F5]'">
-          <!-- Profile Header Section -->
+          
       <div class="px-8 pt-8 pb-4">
         <div class="flex flex-row justify-between">
         <div class="flex items-center gap-3 mb-4">
@@ -146,12 +146,12 @@ const getLinkIcon = (linkType: string): string => {
       </div>
       <section :class="isDark ? 'bg-black !mx-8 !my-8 rounded-xl' : '!bg-gray-100 !mx-8 !my-8 rounded-xl'">
       <div class="mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <!-- Theme Toggle Button -->
+        
 
         
-        <!-- Desktop Layout (unchanged) -->
+        
         <div class="hidden md:flex flex-row items-start space-x-8">
-          <!-- Profile Avatar -->
+          
           <div class="flex-shrink-0 mr-8 ml-8">
             <div v-if="userProfile?.profile_photo_url" class="w-24 h-24 rounded-full overflow-hidden">
               <v-img
@@ -166,7 +166,7 @@ const getLinkIcon = (linkType: string): string => {
             </div>
           </div>
           
-          <!-- Profile Info -->
+          
           <div class="flex-1">
             <div class="flex flex-row gap-8 justify-between">
             <div>
@@ -201,7 +201,7 @@ const getLinkIcon = (linkType: string): string => {
               {{ userProfile?.bio || 'Passionate developer with experience building modern web applications. I love creating beautiful, functional, and user-friendly solutions.' }}
             </p>
             
-            <!-- Contact Info -->
+            
             <div class="flex items-center space-x-6 mb-6 gap-8">
               <div v-if="userProfile?.city || userProfile?.country" :class="isDark ? 'flex items-center text-gray-400' : 'flex items-center text-gray-800'">
                 <v-icon icon="mdi-map-marker-outline" size="small" variant="outlined" :class="isDark ? 'mr-2 text-gray-400' : 'mr-2 text-gray-800'"></v-icon>
@@ -213,7 +213,7 @@ const getLinkIcon = (linkType: string): string => {
               </div>
             </div>
             
-            <!-- Social Links -->
+            
             <div class="flex flex-wrap gap-3">
               <v-btn
                 v-for="link in userProfile?.links || []"
@@ -231,9 +231,9 @@ const getLinkIcon = (linkType: string): string => {
           </div>
         </div>
 
-        <!-- Mobile Layout -->
+        
         <div class="md:hidden flex flex-col items-center">
-          <!-- Documents at top -->
+          
           <div v-if="uniqueDocuments.length > 0" class="flex flex-wrap gap-3 justify-center w-full">
             <v-btn
               v-for="document in uniqueDocuments"
@@ -254,7 +254,7 @@ const getLinkIcon = (linkType: string): string => {
             </v-btn>
           </div>
 
-          <!-- Profile Avatar in center -->
+          
           <div class="flex-shrink-0 mt-4 mb-4">
             <div v-if="userProfile?.profile_photo_url" class="w-32 h-32 rounded-full overflow-hidden">
               <v-img
@@ -269,7 +269,7 @@ const getLinkIcon = (linkType: string): string => {
             </div>
           </div>
           
-          <!-- Profile Info below image -->
+          
           <div class="flex-1 text-center">
             <h1 :class="isDark ? 'text-2xl font-bold text-gray-300 mb-2' : 'text-2xl font-bold text-gray-900 mb-2'">
               {{ userProfile?.name || 'Your Name' }}
@@ -281,7 +281,7 @@ const getLinkIcon = (linkType: string): string => {
               {{ userProfile?.bio || 'Passionate developer with experience building modern web applications. I love creating beautiful, functional, and user-friendly solutions.' }}
             </p>
             
-            <!-- Contact Info -->
+            
             <div class="flex flex-col items-center space-y-3 mb-6">
               <div v-if="userProfile?.city || userProfile?.country" :class="isDark ? 'flex items-center text-gray-400' : 'flex items-center text-gray-800'">
                 <v-icon icon="mdi-map-marker-outline" size="small" variant="outlined" :class="isDark ? 'mr-2 text-gray-400' : 'mr-2 text-gray-800'"></v-icon>
@@ -293,7 +293,7 @@ const getLinkIcon = (linkType: string): string => {
               </div>
             </div>
             
-            <!-- Social Links -->
+            
             <div class="flex flex-wrap gap-3 justify-center">
               <v-btn
                 v-for="link in userProfile?.links || []"
@@ -313,10 +313,10 @@ const getLinkIcon = (linkType: string): string => {
       </div>
     </section>
 
-    <!-- Main Content -->
+    
     <main class="md:!mx-8 !mx-0 !my-8">
       <div class="mx-auto px-6 md:py-12 py-2">
-        <!-- Category Filters -->
+        
         <div class="mb-8">
           <div class="flex flex-wrap gap-3">
             <v-btn
@@ -355,7 +355,7 @@ const getLinkIcon = (linkType: string): string => {
           </div>
         </div>
 
-        <!-- Technologies Section -->
+        
         <div v-if="technologies.length > 0" class="mb-12">
           <h2 :class="isDark ? 'text-2xl font-bold text-white mb-6' : 'text-2xl font-bold text-gray-900 mb-6'">Technologies Used:</h2>
           <div class="flex flex-wrap gap-3">
@@ -370,7 +370,7 @@ const getLinkIcon = (linkType: string): string => {
           </div>
         </div>
 
-        <!-- Projects Grid -->
+        
         <section v-if="filteredProjects.length > 0" class="projects-section">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div 
@@ -389,7 +389,7 @@ const getLinkIcon = (linkType: string): string => {
           </div>
         </section>
 
-        <!-- No Projects State -->
+        
         <section v-else class="no-projects-section text-center py-20">
           <div class="max-w-md mx-auto">
             <v-icon 
@@ -420,7 +420,7 @@ const getLinkIcon = (linkType: string): string => {
       </div>
     </main>
 
-    <!-- Footer -->
+    
     <footer :class="isDark ? 'bg-black border-t border-gray-800 py-8' : 'bg-gray-100 border-t border-gray-800 py-8'">
       <div class="container mx-auto px-6 text-center">
         <p :class="isDark ? 'text-gray-400' : 'text-gray-800'">

@@ -5,11 +5,11 @@
       isDarkMode ? 'bg-black' : '!bg-gray-300',
     ]"
   >
-    <!-- Content Wrapper (flex-grow) -->
+    
     <div class="flex-1 flex flex-col">
-      <!-- Header Section -->
+      
       <div class="p-6 pb-4">
-        <!-- Title -->
+        
         <h3 :class="[
           'text-xl md:text-2xl font-bold mb-2',
           isDarkMode ? 'text-white' : 'text-gray-900'
@@ -17,7 +17,7 @@
           {{ project.name }}
         </h3>
         
-        <!-- Status Tags -->
+        
         <div class="flex items-center gap-2 mb-3">
           <v-chip
             size="small"
@@ -38,7 +38,7 @@
           </v-chip>
         </div>
         
-        <!-- Description -->
+        
         <p v-if="project.description"
         :class="[
           'text-sm',
@@ -48,7 +48,7 @@
         </p>
       </div>
 
-        <!-- Category Tags -->
+        
         <div v-if="project.tags" class="md:px-6 px-0 md:pb-4 pb-2">
       <div class="flex flex-wrap gap-2">
         <v-chip
@@ -65,7 +65,7 @@
       </div>
     </div>
 
-    <!-- Image/Preview Section -->
+    
     <div class="md:px-6 px-0 md:pb-4 pb-2">
       <v-sheet class="overflow-hidden rounded-lg" max-width="700">
         <v-carousel
@@ -98,7 +98,7 @@
       </v-sheet>
     </div>
 
-    <!-- Technologies Section -->
+    
     <div v-if="project.technologies" class="md:px-6 px-0 md:pb-4 pb-2">
       <h4 v-if="project.technologies.length > 0" :class="[
         'font-bold md:mb-3 mb-1',
@@ -121,7 +121,7 @@
       </div>
     </div>
 
-    <!-- Date Range -->
+    
     <div v-if="project.start_date || project.end_date" class="md:px-6 px-0 md:pb-6 pb-2">
       <div class="flex items-center gap-2 text-sm">
         <v-icon 
@@ -140,7 +140,7 @@
       </div>
     </div>
 
-    <!-- Documents Section -->
+    
     <div v-if="documentAssets.length > 0 && effectivePreviewSettings.showAssets" class="md:px-6 px-0 md:pb-6 pb-2">
       <div class="flex items-center gap-2 mb-3">
         <v-icon 
@@ -185,11 +185,11 @@
     </div>
     </div>
 
-    <!-- Action Buttons -->
+    
     <div  v-if="githubLink || demoLink || additionalLinks.length" class="md:px-6 px-0 md:py-6 py-2 md:pb-0 pb-2 border-t border-gray-400">
       <div class="flex flex-col gap-2 md:gap-3">
         <div class="flex flex-col md:flex-row gap-2 md:gap-3">
-          <!-- Code Button -->
+          
           <v-btn
             v-if="githubLink"
             variant="elevated"
@@ -207,7 +207,7 @@
             {{ githubLink.title }}
           </v-btn>
           
-          <!-- Demo Button -->
+          
           <v-btn
             v-if="demoLink"
             variant="elevated"
@@ -226,7 +226,7 @@
           </v-btn>
         </div>
 
-        <!-- Second row: Additional Links (full width) -->
+        
         <div v-if="additionalLinks.length" class="flex flex-col gap-2">
           <v-btn
             v-for="link in additionalLinks"
@@ -303,7 +303,7 @@ const { isDark } = useAppearance();
 const isDarkMode = computed(() => isDark.value);
 const currentIndex = ref(0);
 
-// Computed property to handle null preview settings
+
 const effectivePreviewSettings = computed(() => {
   return props.previewSettings || {
     showDescription: true,
@@ -317,7 +317,7 @@ const effectivePreviewSettings = computed(() => {
   };
 });
 
-// Helper function to extract filename from URL
+
 const getFileNameFromUrl = (url: string): string => {
   if (!url) return '';
   try {
@@ -330,21 +330,21 @@ const getFileNameFromUrl = (url: string): string => {
   }
 };
 
-// Helper function to get file URL for preview (handles both existing and new files)
+
 const getFileUrlForPreview = (file: any): string => {
-  // If it's a new file (has file property), create object URL
+  
   if (file.file && file.file instanceof File) {
     return URL.createObjectURL(file.file);
   }
-  // Otherwise use the existing getFileUrl function
+  
   return getFileUrl(file);
 };
 
-// Computed properties for assets
+
 const mediaAssets = computed(() => {
   if (!props.project.assets) return [];
   return props.project.assets.filter(file => {
-    // Check if it's an image or video based on asset type or filename
+    
     const assetType = file.asset_type?.key || '';
     const filename = file.filename || file.display_name || file.name || file.path || file.url || '';
     const isImage = assetType === 'images' || filename.match(/\.(jpg|jpeg|png|gif|svg|webp|bmp|tiff)$/i);
@@ -353,20 +353,20 @@ const mediaAssets = computed(() => {
   });
 });
 
-// Computed properties for documents (non-media files)
+
 const documentAssets = computed(() => {
   if (!props.project.assets) return [];
   return props.project.assets.filter(file => {
-    // Check if it's a document based on asset type or filename
+    
     const assetType = file.asset_type?.key || '';
     const filename = file.filename || file.display_name || file.name || file.path || file.url || '';
     const isImage = assetType === 'images' || filename.match(/\.(jpg|jpeg|png|gif|svg|webp|bmp|tiff)$/i);
     const isVideo = assetType === 'videos' || filename.match(/\.(mp4|avi|mov|wmv|flv|webm|mkv|m4v)$/i);
-    return !isImage && !isVideo; // Return non-media files as documents
+    return !isImage && !isVideo; 
   });
 });
 
-// Helper functions for links
+
 const githubLink = computed(() => {
   if (!props.project.links) return null;
   return props.project.links.find(link => link.type === 'github');
@@ -384,7 +384,7 @@ const additionalLinks = computed(() => {
   );
 });
 
-// Helper functions - using imported utilities
+
 const getStatusNameLocal = (statusKey: string) => {
   return getStatusName(statusKey, props.statuses);
 };

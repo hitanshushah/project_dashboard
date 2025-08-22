@@ -56,9 +56,6 @@ class HandleInertiaRequests extends Middleware
         ];
     }
 
-    /**
-     * Get profile data including profile photo, links, and documents
-     */
     private function getProfileData($user)
     {
         if (!$user || !$user->profile) {
@@ -67,7 +64,6 @@ class HandleInertiaRequests extends Middleware
 
         $profile = $user->profile;
         
-        // Get profile photo URL
         $profilePhoto = $profile->assets()
             ->where('display_name', 'Profile Photo')
             ->whereHas('assetType', function($query) {
@@ -75,7 +71,6 @@ class HandleInertiaRequests extends Middleware
             })
             ->first();
 
-        // Get profile links
         $links = $profile->links()->with('linkType')->get()->map(function ($link) {
             return [
                 'title' => $link->name,
@@ -84,7 +79,6 @@ class HandleInertiaRequests extends Middleware
             ];
         })->toArray();
 
-        // Get profile documents (excluding profile photo)
         $documents = $profile->assets()
             ->where('display_name', '!=', 'Profile Photo')
             ->whereHas('assetType', function($query) {
@@ -95,7 +89,7 @@ class HandleInertiaRequests extends Middleware
                 return [
                     'id' => $asset->id,
                     'name' => $asset->display_name,
-                    'url' => $asset->filename, // MinIO URL
+                    'url' => $asset->filename,
                     'type' => $asset->assetType ? $asset->assetType->key : 'documents',
                 ];
             })

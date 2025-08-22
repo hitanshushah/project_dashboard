@@ -19,7 +19,7 @@ const page = usePage();
 
 const currentUser = computed(() => page.props.auth?.user);
 
-// Get data from backend
+
 const categories = computed(() => page.props.categories || []);
 const statuses = computed(() => page.props.statuses || []);
 const userTechnologies = computed(() => (page.props.userTechnologies as string[]) || []);
@@ -28,7 +28,7 @@ const snackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('success')
 
-// Form data
+
 const form = useForm({
   name: '',
   description: '',
@@ -53,15 +53,15 @@ const form = useForm({
   },
 });
 
-// Update user_id when currentUser changes
+
 const updateUserId = () => {
   form.user_id = currentUser.value?.id || null;
 };
 
-// Watch for changes in currentUser
+
 watch(currentUser, updateUserId, { immediate: true });
 
-// Available options
+
 const statusOptions = computed(() => 
   statuses.value?.map((status: any) => ({
     value: status.key,
@@ -71,18 +71,18 @@ const statusOptions = computed(() =>
 
 
 
-// Normalize technology name for comparison (lowercase and remove spaces)
+
 const normalizeTechnologyName = (name: string): string => {
   return name.toLowerCase().replace(/\s+/g, '');
 };
 
-// Check if technology already exists (case-insensitive and space-insensitive)
+
 const isTechnologyDuplicate = (newTech: string, existingTechs: string[]): boolean => {
   const normalizedNewTech = normalizeTechnologyName(newTech);
   return existingTechs.some(tech => normalizeTechnologyName(tech) === normalizedNewTech);
 };
 
-// Local state
+
 const newTag = ref('');
 const newLinkTitle = ref('');
 const newLinkUrl = ref('');
@@ -93,14 +93,14 @@ const fileInputRef = ref<HTMLInputElement>();
 const githubUrl = ref('');
 const projectDemo = ref('');
 
-// Preview settings
+
 const showPreviewSettings = ref(false);
 const previewSettings = computed(() => form.preview_settings);
 
-// Theme management
+
 const { isDark } = useAppearance();
 
-// Methods
+
 const handleCategoryChange = (value: any) => {
   if (typeof value === 'string') {
     form.category = value;
@@ -126,7 +126,7 @@ const addLink = () => {
     return;
   }
   
-  // Basic URL validation
+  
   let validUrl = url;
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     validUrl = 'https://' + url;
@@ -137,7 +137,7 @@ const addLink = () => {
     url: validUrl
   });
   
-  // Clear the input fields
+  
   newLinkTitle.value = '';
   newLinkUrl.value = '';
 };
@@ -151,7 +151,7 @@ const addGithubLink = () => {
     return;
   }
   
-  // Basic URL validation
+  
   let validUrl = githubUrl.value.trim();
   if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
     validUrl = 'https://' + validUrl;
@@ -162,7 +162,7 @@ const addGithubLink = () => {
     url: validUrl
   });
   
-  // Clear the input field
+  
   githubUrl.value = '';
 };
 
@@ -171,7 +171,7 @@ const addProjectDemoLink = () => {
     return;
   }
   
-  // Basic URL validation
+  
   let validUrl = projectDemo.value.trim();
   if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
     validUrl = 'https://' + validUrl;
@@ -182,7 +182,7 @@ const addProjectDemoLink = () => {
     url: validUrl
   });
   
-  // Clear the input field
+  
   projectDemo.value = '';
 };
 
@@ -196,9 +196,9 @@ const addTechnology = () => {
   const techName = newTechnology.value.trim();
   if (!techName) return;
   
-  // Check for duplicates in current form technologies only
+  
   if (isTechnologyDuplicate(techName, form.technologies)) {
-    return; // Already exists in current form
+    return; 
   }
   
   form.technologies.push(techName);
@@ -227,10 +227,10 @@ const openFileDialog = () => {
 };
 
 const saveProject = async () => {
-  // Clear previous errors
+  
   form.clearErrors();
   
-  // Validate required fields
+  
   if (!form.name.trim()) {
     form.setError('name', 'Project name is required');
     return false;
@@ -241,7 +241,7 @@ const saveProject = async () => {
     return false;
   }
   
-  // Validate dates
+  
   if (form.start_date && form.end_date) {
     const startDate = new Date(form.start_date);
     const endDate = new Date(form.end_date);
@@ -252,7 +252,7 @@ const saveProject = async () => {
     }
   }
   
-  // Validate links
+  
   for (let i = 0; i < form.links.length; i++) {
     const link = form.links[i];
     if (!link.title.trim()) {
@@ -265,7 +265,7 @@ const saveProject = async () => {
     }
   }
   
-  // Validate file sizes (100MB limit)
+  
   for (let i = 0; i < form.assets.length; i++) {
     const file = form.assets[i];
     if (!validateFileSize(file)) {
@@ -308,7 +308,7 @@ const cancel = () => {
   router.visit('/');
 };
 
-// Formatted date display
+
 const formattedStartDate = computed(() => {
   if (!form.start_date) return '';
   return formatDateForDisplay(form.start_date);
@@ -319,7 +319,7 @@ const formattedEndDate = computed(() => {
   return formatDateForDisplay(form.end_date);
 });
 
-// Date formatting function
+
 const formatDateForDisplay = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -330,7 +330,7 @@ const formatDateForDisplay = (dateString: string) => {
   });
 };
 
-// Update handlers
+
 const updateStartDate = (value: string) => {
   form.start_date = value;
 };
@@ -339,9 +339,9 @@ const updateEndDate = (value: string) => {
   form.end_date = value;
 };
 
-// Helper function to validate file size
+
 const validateFileSize = (file: File): boolean => {
-  const maxFileSize = 100 * 1024 * 1024; // 100MB in bytes
+  const maxFileSize = 100 * 1024 * 1024; 
   if (file.size > maxFileSize) {
     snackbarMessage.value = `File "${file.name}" is too large. Maximum size is 100MB.`;
     snackbarColor.value = 'error';
@@ -351,15 +351,15 @@ const validateFileSize = (file: File): boolean => {
   return true;
 };
 
-// Asset management functions
+
 const addAssets = (files: File | File[]) => {
   const fileArray = Array.isArray(files) ? files : [files];
   
   if (fileArray && fileArray.length > 0) {
-    // Check file sizes before adding
+    
     for (const file of fileArray) {
       if (!validateFileSize(file)) {
-        return; // Don't add any files if one is too large
+        return; 
       }
     }
     
@@ -377,7 +377,7 @@ const previewFile = (file: File) => {
     const url = getFileUrl(file);
     window.open(url, '_blank');
   } else {
-    // For text files, could implement a text preview modal
+    
     
   }
 };
@@ -448,11 +448,11 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
         </div>
 
         <v-row>
-          <!-- Left Section - Form -->
+          
           <v-col cols="12" lg="7">
             <v-form @submit.prevent="submit">
               <v-card :class="[isDark ? 'bg-[#212121]' : '!bg-[#DBDBDB]', 'pa-6']">
-            <!-- Basic Information -->
+            
                   <div class="mb-2">
                     <div class="flex items-center mb-8">
                       <div class="w-1 h-8 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full mr-4"></div>
@@ -528,7 +528,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     </v-textarea>
                   </div>
 
-                  <!-- Project Timeline Section -->
+                  
                   <div class="mb-2">
                     <div class="flex items-center mb-8">
                       <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
@@ -617,7 +617,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     </v-row>
                   </div>
 
-            <!-- Tags and Technologies -->
+            
             <div class="mb-2">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full mr-4"></div>
@@ -625,7 +625,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               </div>
               
               <v-row>
-                <!-- Tags -->
+                
                 <v-col cols="12" md="6">
                   <v-combobox
                     v-model="form.tags"
@@ -661,7 +661,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </v-col>
 
 
-                <!-- Technologies -->
+                
                 <v-col cols="12" md="6">
                   <v-combobox
                     v-model="form.technologies"
@@ -699,7 +699,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               </v-row>
             </div>
 
-            <!-- Links -->
+            
             <div class="mb-8">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full mr-4"></div>
@@ -707,7 +707,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
               </div>
               
               <div>
-                <!-- Github Link -->
+                
                 <div v-if="!hasLinkWithTitle('Github')">
                   <v-row>
                     <v-col cols="12" md="10">
@@ -742,7 +742,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                   </v-row>
                 </div>
 
-                <!-- Project Demo Link -->
+                
                 <div v-if="!hasLinkWithTitle('Project Demo')">
                   <v-row>
                     <v-col cols="12" md="10">
@@ -836,7 +836,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                     class="max-w-full text-sm !py-3 !px-4"
                   >
                     <div class="flex grow items-center gap-2 w-full">
-                      <!-- Left: icon, title and URL -->
+                      
                       <div class="flex items-center flex-1 min-w-0 gap-2">
                         <v-icon 
                           :icon="getLinkIcon(link.title)" 
@@ -856,7 +856,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                         </div>
                       </div>
 
-                      <!-- Right: buttons -->
+                      
                       <div class="flex-none items-center shrink-0">
                         <v-btn
                           icon="mdi-open-in-new"
@@ -882,7 +882,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
 
             </div>
 
-            <!-- File Upload -->
+            
             <div class="mb-8">
               <div class="flex items-center mb-8">
                 <div class="w-1 h-8 bg-gradient-to-b from-gray-500 to-orange-500 rounded-full mr-4"></div>
@@ -939,7 +939,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                   class="max-w-full !p-6"
                 >
                   <div class="flex items-center gap-3 w-full">
-                    <!-- Left: icon and file info -->
+                    
                     <div class="flex items-center flex-1 min-w-0">
                       <v-icon
                         :icon="getFileIcon(file.type || file.name)"
@@ -957,7 +957,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                       </div>
                     </div>
 
-                    <!-- Right: buttons -->
+                    
                     <div class="flex items-center gap-2">
                       <v-btn
                         icon="mdi-eye"
@@ -981,7 +981,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
 
             </div>
 
-            <!-- Form Actions -->
+            
             <div class="flex gap-4 justify-end">
               <v-btn
                 variant="outlined"
@@ -1005,7 +1005,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
         </v-form>
           </v-col>
 
-          <!-- Right Section - Live Preview -->
+          
           <v-col cols="12" lg="5" class="!mt-[-15px]">
             <v-card :class="[isDark ? 'bg-[#212121]' : '!bg-[#DBDBDB]', 'pa-6 h-fit sticky top-4']">
               <div class="mb-6">
@@ -1022,7 +1022,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 <div class="text-sm text-gray-500 mb-4">Click the settings icon to personalize your preview. Hidden fields stay saved and help in sorting and managing your projects.</div>
               </div>
 
-              <!-- Project Preview Card -->
+              
               <ProjectCard 
                 :project="form"
                 :categories="categories"
@@ -1047,7 +1047,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
     </v-main>
   </AppLayout>
 
-  <!-- Preview Settings Modal -->
+  
     <PreviewSettings
     v-model="showPreviewSettings"
     :settings="form.preview_settings"

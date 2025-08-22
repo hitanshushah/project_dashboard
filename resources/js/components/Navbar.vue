@@ -7,7 +7,6 @@
     class="px-4 transition-colors duration-300"
     elevation="1"
   >
-    <!-- Logo on left -->
     <v-app-bar-title :class="[
       'font-bold text-xl transition-colors duration-300 cursor-pointer',
       isDark ? 'text-white' : 'text-gray-900'
@@ -19,9 +18,7 @@
           class="w-24 h-12 rounded mr-2 object-cover"
         >
         
-        <!-- Social Media Links - Hidden on mobile -->
         <div class="hidden md:flex items-center gap-4 ml-8">
-          <!-- LinkedIn -->
           <v-btn
             v-if="linkedinLink"
             :href="linkedinLink.url"
@@ -34,7 +31,6 @@
             <v-icon :class="[isDark ? 'text-gray-300' : 'text-blue-800']" size="small">mdi-linkedin</v-icon>
           </v-btn>
 
-          <!-- GitHub -->
           <v-btn
             v-if="githubLink"
             :href="githubLink.url"
@@ -47,7 +43,7 @@
             <v-icon :class="[ isDark ? 'text-gray-300' : 'text-gray-950']" size="small">mdi-github</v-icon>
           </v-btn>
 
-          <!-- Personal Website -->
+          
           <v-btn
             v-if="portfolioLink"
             :href="portfolioLink.url"
@@ -61,7 +57,7 @@
           </v-btn>
         </div>
         
-        <!-- Documents Menu - Hidden on mobile -->
+        
         <div v-if="documents.length > 0" class="hidden md:block">
           <v-menu offset-y>
             <template v-slot:activator="{ props }">
@@ -108,7 +104,7 @@
          </v-menu>
         </div>
 
-        <!-- Share Status Indicator -->
+        
           <div class="flex items-center ml-2 hidden md:flex">
             <v-tooltip
               :text="currentProfile?.share_profile ? 'Projects URL is public' : 'Projects URL is private'"
@@ -140,11 +136,11 @@
             </v-tooltip>
           </div>
          
-                  <!-- Public URL Controls - Hidden on mobile -->
+                  
         <div v-if="currentProfile?.public_url" class="ml-4 hidden md:block">
           <div class="flex items-center gap-2">
             <v-btn-group>
-              <!-- Visit Live URL -->
+              
               <v-btn
                 :href="`https://${currentProfile.public_url}.${domainUrl}`"
                 target="_blank"
@@ -156,7 +152,7 @@
                 <span class="mr-2">Public URL</span>
               </v-btn>
 
-            <!-- Edit Public URL -->
+            
             <v-menu v-model="editMenuOpen" offset-y @update:model-value="setupEditPublicUrl">
               <template v-slot:activator="{ props }">
                 <v-btn
@@ -170,7 +166,7 @@
                   <v-icon icon="mdi-pencil" size="small"></v-icon>
                 </v-btn>
               </template>
-              <!-- Edit Menu Content -->
+              
               <v-card min-width="400" class="pa-4" @click.stop>
                 <v-card-title class="text-lg font-semibold pb-2">Edit Public URL</v-card-title>
                 <v-card-text class="pa-0 pb-4">
@@ -206,7 +202,7 @@
               </v-card>
             </v-menu>
 
-            <!-- Copy Public URL -->
+            
             <v-btn
               @click="copyPublicUrl"
               icon
@@ -218,7 +214,7 @@
               <v-icon icon="mdi-content-copy" size="small"></v-icon>
             </v-btn>
 
-            <!-- Share Public URL -->
+            
             <v-btn
               @click="sharePublicUrl"
               icon
@@ -230,7 +226,7 @@
               <v-icon icon="mdi-share-variant" size="small"></v-icon>
             </v-btn>
 
-            <!-- Delete Public URL -->
+            
             <v-menu v-model="deleteMenuOpen" offset-y>
               <template v-slot:activator="{ props }">
                 <v-btn
@@ -244,7 +240,7 @@
                   <v-icon icon="mdi-delete" size="small"></v-icon>
                 </v-btn>
               </template>
-              <!-- Delete Menu Content -->
+              
               <v-card min-width="300" class="pa-4" @click.stop>
                 <v-card-title class="text-lg font-semibold pb-2">Delete Public URL</v-card-title>
                 <v-card-text class="pa-0 pb-4">
@@ -265,7 +261,7 @@
 
         </div>
 
-        <!-- Create Public URL Button if none exists - Hidden on mobile -->
+        
         <v-menu v-model="createMenuOpen" offset-y v-else class="hidden md:block">
           <template v-slot:activator="{ props }">
             <v-btn
@@ -278,7 +274,7 @@
               <span class="mr-2">Set Public URL</span>
             </v-btn>
           </template>
-          <!-- Create Menu Content -->
+          
           <v-card min-width="400" class="pa-4" @click.stop>
             <v-card-title class="text-lg font-semibold pb-2">Create Public URL</v-card-title>
             <v-card-text class="pa-0 pb-4">
@@ -315,12 +311,12 @@
       </div>
     </v-app-bar-title>
 
-    <!-- Right side controls -->
+    
     <div class="flex items-center">
-      <!-- Theme Toggle -->
+      
       <ThemeToggle class="mr-4" />
 
-      <!-- Mobile Menu Button -->
+      
        <div class="md:hidden">
       <v-btn
         icon
@@ -332,7 +328,7 @@
       </v-btn>
       </div>
 
-      <!-- Avatar dropdown on right -->
+      
       <v-menu offset-y>
         <template v-slot:activator="{ props }">
           <v-btn
@@ -353,7 +349,7 @@
         </template>
 
         <v-card class="mx-auto" min-width="280" max-width="320">
-          <!-- User info header -->
+          
           <v-card-text class="pb-2">
             <div class="flex items-center space-x-3">
               <v-avatar size="48" class="bg-gradient-to-br from-purple-400 to-blue-500">
@@ -389,7 +385,7 @@
             </v-list-item>
             </div>
 
-          <!-- Menu items -->
+          
           <v-list density="compact" class="py-1">
             <v-list-item
               prepend-icon="mdi-account-edit"
@@ -419,7 +415,7 @@
     </div>
   </v-app-bar>
 
-  <!-- Mobile Navigation Drawer -->
+  
   <v-navigation-drawer
     v-model="mobileMenuOpen"
     temporary
@@ -431,7 +427,7 @@
     <v-list>
 
 
-             <!-- Social Media Links -->
+             
        <v-list-subheader :class="isDark ? 'text-gray-300' : 'text-gray-700'">Social Links</v-list-subheader>
        
        <v-list-item
@@ -464,7 +460,7 @@
          <v-list-item-title>{{ portfolioLink.title }}</v-list-item-title>
        </v-list-item>
 
-       <!-- Documents Section -->
+       
        <template v-if="documents.length > 0">
          <v-divider></v-divider>
          <v-list-subheader :class="isDark ? 'text-gray-300' : 'text-gray-700'">
@@ -486,7 +482,7 @@
          </v-list-item>
        </template>
 
-       <!-- Public URL Section -->
+       
       <v-divider></v-divider>
       <v-list-subheader :class="isDark ? 'text-gray-300' : 'text-gray-700'">Public URL</v-list-subheader>
       
@@ -548,14 +544,14 @@
         <v-list-item-title>Create Public URL</v-list-item-title>
       </v-list-item>
 
-      <!-- Profile Actions -->
+      
 
     </v-list>
   </v-navigation-drawer>
 
-  <!-- Public URL Setup Modal -->
   
-  <!-- Toast Notification -->
+  
+  
   <v-snackbar
     v-model="snackbar"
     :timeout="3000"
@@ -578,7 +574,7 @@ const { isDark } = useAppearance();
 
 const publicUrl = import.meta.env.VITE_PUBLIC_URL;
 const domainUrl = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
-// Public URL dropdown state
+
 const publicUrlInput = ref('');
 const urlError = ref('');
 const isLoading = ref(false);
@@ -587,10 +583,10 @@ const editMenuOpen = ref(false);
 const deleteMenuOpen = ref(false);
 const createMenuOpen = ref(false);
 
-// Mobile menu state
+
 const mobileMenuOpen = ref(false);
 
-// Toast notification state
+
 const snackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('success');
@@ -604,7 +600,7 @@ const profilePhotoUrl = computed(() => {
   return url;
 });
 
-// Social media links
+
 const linkedinLink = computed(() => {
   return currentProfile.value?.links?.find(link => 
     link.type === 'linkedin' || link.title.toLowerCase().includes('linkedin')
@@ -623,12 +619,12 @@ const portfolioLink = computed(() => {
   );
 });
 
-// Documents
+
 const documents = computed(() => {
   return currentProfile.value?.documents || [];
 });
 
-// Check if user has any social links
+
 const hasSocialLinks = computed(() => {
   return !!(linkedinLink.value || githubLink.value || portfolioLink.value);
 });
@@ -650,7 +646,7 @@ const goHome = () => {
 
 const handleImageError = (error: any) => {
   
-  // The fallback to initials will happen automatically due to v-else
+  
 };
 
 const getDocumentIcon = (documentName: string): string => {
@@ -672,7 +668,7 @@ const editProfile = () => {
   router.visit('/profile/edit');
 };
 
-// Computed property for full public URL
+
 const fullPublicUrl = computed(() => {
   if (!publicUrlInput.value.trim()) return '';
   return `${publicUrlInput.value.trim()}.${domainUrl}`;
@@ -694,13 +690,13 @@ const savePublicUrl = async () => {
     return;
   }
 
-  // Validate that the URL doesn't contain dots
+  
   if (publicUrlInput.value.includes('.')) {
     urlError.value = 'Public URL cannot contain dots (.). Use only letters, numbers, hyphens, and underscores.';
     return;
   }
 
-  // Validate URL format
+  
   if (!/^[a-zA-Z0-9_-]+$/.test(publicUrlInput.value.trim())) {
     urlError.value = 'Public URL can only contain letters, numbers, hyphens, and underscores.';
     return;
@@ -724,7 +720,7 @@ const savePublicUrl = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      // Refresh the page to get updated profile data
+      
       window.location.reload();
     } else {
       urlError.value = data.message || 'Failed to save public URL';
@@ -742,19 +738,19 @@ const updatePublicUrl = async () => {
     return;
   }
 
-  // Validate that the URL doesn't contain dots
+  
   if (publicUrlInput.value.includes('.')) {
     urlError.value = 'Public URL cannot contain dots (.). Use only letters, numbers, hyphens, and underscores.';
     return;
   }
 
-  // Validate URL format
+  
   if (!/^[a-zA-Z0-9_-]+$/.test(publicUrlInput.value.trim())) {
     urlError.value = 'Public URL can only contain letters, numbers, hyphens, and underscores.';
     return;
   }
 
-  // Check if the URL is the same as current
+  
   if (publicUrlInput.value.trim() === currentProfile.value?.public_url) {
     urlError.value = 'This is already your current URL';
     return;
@@ -778,7 +774,7 @@ const updatePublicUrl = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      // Refresh the page to get updated profile data
+      
       window.location.reload();
     } else {
       urlError.value = data.message || 'Failed to update public URL';
@@ -836,7 +832,7 @@ const deletePublicUrl = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      // Refresh the page to get updated profile data
+      
       window.location.reload();
     } else {
       
@@ -858,7 +854,7 @@ const copyPublicUrl = async () => {
     snackbar.value = true;
   } catch (error) {
     console.error('Failed to copy URL to clipboard:', error);
-    // Fallback for older browsers
+    
     const textArea = document.createElement('textarea');
     textArea.value = fullUrl;
     document.body.appendChild(textArea);
@@ -875,7 +871,7 @@ const copyPublicUrl = async () => {
 const sharePublicUrl = async () => {
   const fullUrl = `https://${currentProfile.value?.public_url}.${domainUrl}`;
   
-  // Check if Web Share API is available (mobile devices)
+  
   if (navigator.share) {
     try {
       await navigator.share({
@@ -884,11 +880,11 @@ const sharePublicUrl = async () => {
         url: fullUrl
       });
     } catch (error) {
-      // User cancelled or share failed, fallback to copy
+      
       copyPublicUrl();
     }
   } else {
-    // Fallback to copy for desktop browsers
+    
     copyPublicUrl();
   }
 };

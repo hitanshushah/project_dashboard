@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 
-// Props
+
 interface Props {
   categories: Array<{ name: string; key: string }>;
   statuses: Array<{ name: string; key: string }>;
@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
   resultsCount: 0
 });
 
-// Emits
+
 const emit = defineEmits<{
   filtersChanged: [filters: {
     search: string;
@@ -34,7 +34,7 @@ const emit = defineEmits<{
   }];
 }>();
 
-// Local state
+
 const searchQuery = ref(props.currentFilters.search || '');
 const selectedCategories = ref([...props.currentFilters.categories]);
 const selectedStatuses = ref([...props.currentFilters.statuses]);
@@ -42,10 +42,10 @@ const selectedTechnologies = ref([...props.currentFilters.technologies]);
 const sortBy = ref(props.currentFilters.sort_by || 'created_at');
 const sortDirection = ref(props.currentFilters.sort_direction || 'desc');
 
-// UI state
+
 const showFilters = ref(false);
 
-// Sort options for dropdown
+
 const sortOptions = [
   { text: 'Newest First', value: 'created_at', direction: 'desc' },
   { text: 'Oldest First', value: 'created_at', direction: 'asc' },
@@ -80,7 +80,7 @@ const hasActiveFilters = computed(() => {
          sortDirection.value !== 'desc';
 });
 
-// Filter functionality
+
 const applyFilters = () => {
   const params = new URLSearchParams();
   
@@ -130,9 +130,9 @@ const clearFilters = () => {
   });
 };
 
-// Watch for changes and apply filters
+
 watch([searchQuery], () => {
-  // Debounced search
+  
   if (searchQuery.value !== props.currentFilters.search) {
     setTimeout(() => {
       if (searchQuery.value !== props.currentFilters.search) {
@@ -146,7 +146,7 @@ watch([selectedCategories, selectedStatuses, selectedTechnologies], () => {
   applyFilters();
 }, { deep: true });
 
-// Expose methods and computed properties for parent component
+
 defineExpose({
   clearFilters,
   hasActiveFilters: computed(() => hasActiveFilters.value)
@@ -157,7 +157,7 @@ defineExpose({
 <template>
   <div class="search-filters">
 
-    <!-- Search Bar -->
+    
     <v-text-field
       v-model="searchQuery"
       prepend-inner-icon="mdi-magnify"
@@ -168,7 +168,7 @@ defineExpose({
       class="mb-2 w-96"
     />
 
-    <!-- Filters + Sort Row -->
+    
     <div class="d-flex align-center gap-3 mb-2">
       <v-btn
         color="blue"
@@ -199,7 +199,7 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Compact Filters Panel -->
+    
     <v-expand-transition>
       <v-row
         v-if="showFilters"

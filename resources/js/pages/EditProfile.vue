@@ -16,12 +16,12 @@ interface Props {
 const props = defineProps<Props>();
 const page = usePage();
 
-// Toast state
+
 const showToast = ref(false);
 const toastMessage = ref('');
 const toastType = ref<'success' | 'error'>('success');
 
-// Local state for links
+
 const newLinkTitle = ref('');
 const newLinkUrl = ref('');
 const linkedinUrl = ref('');
@@ -30,10 +30,10 @@ const portfolioUrl = ref('');
 const existingLinks = ref<ProjectLink[]>(props.profile.links || []);
 const newLinks = ref<ProjectLink[]>([]);
 
-// Computed property to combine existing and new links
+
 const links = computed(() => [...existingLinks.value, ...newLinks.value]);
 
-// Local state for assets
+
 interface AssetWithMeta {
   file: File;
   displayName: string;
@@ -44,19 +44,19 @@ const newAssets = ref<AssetWithMeta[]>([]);
 const existingAssets = ref<ProjectAsset[]>(props.profile.assets || []);
 const fileInputRef = ref<HTMLInputElement>();
 
-// Profile photo state
+
 const profilePhoto = ref<File | null>(null);
 const profilePhotoPreview = ref<string | null>(null);
 const profilePhotoInputRef = ref<HTMLInputElement>();
 
-// Predefined document types
+
 const predefinedDocs = [
   { key: 'resume', label: 'Resume/CV', icon: 'mdi-file-document', description: 'Upload your resume or CV' },
   { key: 'cover-letter', label: 'Cover Letter', icon: 'mdi-file-document-outline', description: 'Upload your cover letter' },
   { key: 'other', label: 'Other Documents', icon: 'mdi-folder-multiple', description: 'Upload certificates, portfolios, etc.' }
 ];
 
-// Form data with prefilled values
+
 const form = useForm({
   name: props.profile.name || '',
   designation: props.profile.designation || '',
@@ -67,17 +67,17 @@ const form = useForm({
   country: props.profile.country || '',
 });
 
-// Share profile state
+
 const shareProfile = ref(props.profile.share_profile || false);
 const isTogglingShare = ref(false);
 
-// Domain URL for display
+
 const domainUrl = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
 
-// Theme management
+
 const { isDark } = useAppearance();
 
-// Methods for managing links
+
 const addLink = () => {
   const title = newLinkTitle.value.trim();
   const url = newLinkUrl.value.trim();
@@ -86,7 +86,7 @@ const addLink = () => {
     return;
   }
   
-  // Basic URL validation
+  
   let validUrl = url;
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     validUrl = 'https://' + url;
@@ -97,17 +97,17 @@ const addLink = () => {
     url: validUrl
   });
   
-  // Clear the input fields
+  
   newLinkTitle.value = '';
   newLinkUrl.value = '';
 };
 
 const removeLink = async (index: number) => {
-  // Check if this is an existing link (has an id) or a new link
+  
   const link = links.value[index];
   
   if (link.id) {
-    // This is an existing link, delete it from the server
+    
     try {
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
       
@@ -122,7 +122,7 @@ const removeLink = async (index: number) => {
       const result = await response.json();
       
       if (result.success) {
-        // Remove from existing links
+        
         const existingIndex = existingLinks.value.findIndex(l => l.id === link.id);
         if (existingIndex !== -1) {
           existingLinks.value.splice(existingIndex, 1);
@@ -135,7 +135,7 @@ const removeLink = async (index: number) => {
       showToastNotification('Failed to remove link', 'error');
     }
   } else {
-    // This is a new link, just remove from the new links array
+    
     const newIndex = newLinks.value.findIndex(l => l.title === link.title && l.url === link.url);
     if (newIndex !== -1) {
       newLinks.value.splice(newIndex, 1);
@@ -148,7 +148,7 @@ const addLinkedinLink = () => {
     return;
   }
   
-  // Basic URL validation
+  
   let validUrl = linkedinUrl.value.trim();
   if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
     validUrl = 'https://' + validUrl;
@@ -159,7 +159,7 @@ const addLinkedinLink = () => {
     url: validUrl
   });
   
-  // Clear the input field
+  
   linkedinUrl.value = '';
 };
 
@@ -168,7 +168,7 @@ const addGithubLink = () => {
     return;
   }
   
-  // Basic URL validation
+  
   let validUrl = githubUrl.value.trim();
   if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
     validUrl = 'https://' + validUrl;
@@ -179,7 +179,7 @@ const addGithubLink = () => {
     url: validUrl
   });
   
-  // Clear the input field
+  
   githubUrl.value = '';
 };
 
@@ -188,7 +188,7 @@ const addPortfolioLink = () => {
     return;
   }
   
-  // Basic URL validation
+  
   let validUrl = portfolioUrl.value.trim();
   if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
     validUrl = 'https://' + validUrl;
@@ -199,7 +199,7 @@ const addPortfolioLink = () => {
     url: validUrl
   });
   
-  // Clear the input field
+  
   portfolioUrl.value = '';
 };
 
@@ -239,19 +239,19 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
   }
 };
 
-// Profile photo handling methods
+
 const handleProfilePhotoSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files.length > 0) {
     const file = target.files[0];
     
-    // Validate file type
+    
     if (!file.type.startsWith('image/')) {
       showToastNotification('Please select an image file', 'error');
       return;
     }
     
-    // Validate file size (max 5MB)
+    
     if (file.size > 5 * 1024 * 1024) {
       showToastNotification('Image size should be less than 5MB', 'error');
       return;
@@ -259,28 +259,28 @@ const handleProfilePhotoSelect = (event: Event) => {
     
     profilePhoto.value = file;
     
-    // Create preview
+    
     const reader = new FileReader();
     reader.onload = (e) => {
       profilePhotoPreview.value = e.target?.result as string;
     };
     reader.readAsDataURL(file);
   }
-  // Reset the input
+  
   if (target) {
     target.value = '';
   }
 };
 
 const removeProfilePhoto = async () => {
-  // If there's a new photo selected, just clear the local state
+  
   if (profilePhoto.value) {
     profilePhoto.value = null;
     profilePhotoPreview.value = null;
     return;
   }
   
-  // If there's an existing profile photo, remove it from server
+  
   const existingProfilePhoto = existingAssets.value.find(asset => 
     asset.asset_type?.key === 'images' && asset.display_name === 'Profile Photo'
   );
@@ -302,7 +302,7 @@ const removeProfilePhoto = async () => {
       const result = await response.json();
       
       if (result.success) {
-        // Remove the profile photo from the existing assets list
+        
         const photoIndex = existingAssets.value.findIndex(asset => 
           asset.asset_type?.key === 'images' && asset.display_name === 'Profile Photo'
         );
@@ -323,13 +323,13 @@ const triggerProfilePhotoInput = () => {
   profilePhotoInputRef.value?.click();
 };
 
-// Asset handling methods
+
 const handleFileSelect = (event: Event, docType: string = 'other') => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
     const files = Array.from(target.files);
     
-    // Check file sizes before adding (max 10MB per file)
+    
     for (const file of files) {
       if (file.size > 10 * 1024 * 1024) {
         showToastNotification('File size must be less than 10MB', 'error');
@@ -337,7 +337,7 @@ const handleFileSelect = (event: Event, docType: string = 'other') => {
       }
     }
     
-    // Add files with metadata
+    
     files.forEach(file => {
       const fileWithMeta = {
         file: file,
@@ -377,7 +377,7 @@ const removeExistingAsset = async (index: number) => {
     const result = await response.json();
     
     if (result.success) {
-      // Remove the asset from the existing assets list
+      
       existingAssets.value.splice(index, 1);
       showToastNotification('Document removed successfully', 'success');
     } else {
@@ -389,7 +389,7 @@ const removeExistingAsset = async (index: number) => {
 };
 
 const triggerFileInput = (docType: string = 'other') => {
-  // Create a new file input for the specific document type
+  
   const input = document.createElement('input');
   input.type = 'file';
   input.multiple = docType === 'other';
@@ -431,23 +431,23 @@ const toggleShareProfile = async () => {
   }
 };
 
-// Show toast notification
+
 const showToastNotification = (message: string, type: 'success' | 'error' = 'success') => {
   toastMessage.value = message;
   toastType.value = type;
   showToast.value = true;
   
-  // Auto-hide after 5 seconds
+  
   setTimeout(() => {
     showToast.value = false;
   }, 5000);
 };
 
-// Handle form submission with toast feedback
+
 const submit = () => {
   const formData = new FormData();
   
-  // Add form data
+  
   formData.append('name', form.name);
   formData.append('designation', form.designation);
   formData.append('bio', form.bio);
@@ -456,18 +456,18 @@ const submit = () => {
   formData.append('province', form.province);
   formData.append('country', form.country);
   
-  // Add only new links (existing links are handled separately)
+  
   newLinks.value.forEach((link, index) => {
     formData.append(`links[${index}][title]`, link.title);
     formData.append(`links[${index}][url]`, link.url);
   });
   
-  // Add profile photo
+  
   if (profilePhoto.value) {
     formData.append('profile_photo', profilePhoto.value);
   }
   
-  // Add assets
+  
   newAssets.value.forEach((asset, index) => {
     formData.append(`assets[${index}]`, asset.file);
     formData.append(`asset_display_names[${index}]`, asset.displayName);
@@ -484,7 +484,7 @@ const submit = () => {
   });
 };
 
-// Check for flash messages on mount
+
 onMounted(() => {
   const flash = page.props.flash as any;
   if (flash?.success) {
@@ -498,7 +498,7 @@ onMounted(() => {
 
 <template>
   <AppLayout>
-    <!-- Toast Notification -->
+    
     <v-snackbar
       v-model="showToast"
       :color="toastType === 'success' ? 'success' : 'error'"
@@ -564,7 +564,7 @@ onMounted(() => {
           <v-col cols="12">
             <v-form @submit.prevent="submit">
               <v-card class="pa-6">
-                <!-- Account Information (Read-only) -->
+                
                 <div class="mb-0">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full mr-4"></div>
@@ -597,7 +597,7 @@ onMounted(() => {
                   </v-row>
                 </div>
 
-                <!-- Personal Information -->
+                
                 <div class="mb-0">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-green-500 to-teal-500 rounded-full mr-4"></div>
@@ -606,7 +606,7 @@ onMounted(() => {
                   <v-row>
                     <v-col cols="12" md="6">
                       <div class="d-flex align-center gap-4">
-                        <!-- Profile Photo Preview -->
+                        
                         <div class="relative">
                           <v-avatar
                             size="120"
@@ -630,7 +630,7 @@ onMounted(() => {
                             />
                           </v-avatar>
                           
-                          <!-- Remove button for new photo -->
+                          
                           <v-btn
                             v-if="profilePhotoPreview"
                             icon="mdi-close"
@@ -642,7 +642,7 @@ onMounted(() => {
                           />
                         </div>
                         
-                        <!-- Upload Controls -->
+                        
                         <div class="flex flex-col gap-2">
                           <v-btn
                             color="gray-300"
@@ -666,7 +666,7 @@ onMounted(() => {
                         </div>
                       </div>
                       
-                      <!-- Hidden file input -->
+                      
                       <input
                         ref="profilePhotoInputRef"
                         type="file"
@@ -715,9 +715,9 @@ onMounted(() => {
                   </v-row>
                 </div>
 
-                <!-- Public Profile Settings -->
+                
 <div class="mb-6">
-  <!-- Section Heading -->
+  
   <div class="flex items-center mb-6">
     <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full mr-4"></div>
     <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">
@@ -729,7 +729,7 @@ onMounted(() => {
     <v-col cols="12">
       <v-card variant="outlined" class="pa-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <!-- Left Side -->
+          
           <div class="flex-1">
             <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-2' : 'text-lg font-medium text-gray-900 mb-2'">
               Share Profile Publicly
@@ -741,7 +741,7 @@ onMounted(() => {
               }}
             </p>
 
-            <!-- Public URL -->
+            
             <div v-if="props.profile.public_url" class="mt-2">
               <p :class="isDark ? 'text-sm text-blue-400' : 'text-sm text-blue-600'">
                 <v-icon icon="mdi-link" size="small" class="mr-1"></v-icon>
@@ -749,7 +749,7 @@ onMounted(() => {
               </p>
             </div>
 
-            <!-- Warning if no public URL -->
+            
             <div v-else class="mt-2">
               <p :class="isDark ? 'text-sm text-orange-400' : 'text-sm text-orange-600'">
                 <v-icon icon="mdi-alert" size="small" class="mr-1"></v-icon>
@@ -758,7 +758,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Right Side (Switch) -->
+          
           <div class="sm:ml-4">
             <v-switch
               v-model="shareProfile"
@@ -776,7 +776,7 @@ onMounted(() => {
 </div>
 
 
-                <!-- Address Information -->
+                
                 <div class="mb-0">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-orange-500 to-red-500 rounded-full mr-4"></div>
@@ -830,7 +830,7 @@ onMounted(() => {
                   </v-row>
                 </div>
 
-                <!-- Links Section -->
+                
                 <div class="mt-4">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full mr-4"></div>
@@ -838,7 +838,7 @@ onMounted(() => {
                   </div>
                   
                   <div>
-                    <!-- LinkedIn Link -->
+                    
                     <div v-if="!hasLinkWithTitle('LinkedIn')">
                       <v-row>
                         <v-col cols="12" md="10">
@@ -868,7 +868,7 @@ onMounted(() => {
                       </v-row>
                     </div>
 
-                    <!-- Github Link -->
+                    
                     <div v-if="!hasLinkWithTitle('Github')">
                       <v-row>
                         <v-col cols="12" md="10">
@@ -899,7 +899,7 @@ onMounted(() => {
                       </v-row>
                     </div>
 
-                    <!-- Portfolio Link -->
+                    
                     <div v-if="!hasLinkWithTitle('Portfolio')">
                       <v-row>
                         <v-col cols="12" md="10">
@@ -930,7 +930,7 @@ onMounted(() => {
                       </v-row>
                     </div>
 
-                    <!-- Custom Links -->
+                    
                     <div class="mb-4">
                       <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-3' : 'text-lg font-medium text-gray-900 mb-3'">Add Custom Link</h3>
                       <v-row>
@@ -971,7 +971,7 @@ onMounted(() => {
                     </div>
                   </div>
                   
-                  <!-- Display Added Links -->
+                  
                   <div v-if="links.length > 0" class="mb-4 mt-4">
                     <div class="flex flex-wrap gap-2">
                       <v-chip
@@ -982,7 +982,7 @@ onMounted(() => {
                         class="max-w-full text-sm !py-3 !px-4"
                       >
                         <div class="flex grow items-center gap-2 w-full">
-                          <!-- Left: icon, title and URL -->
+                          
                           <div class="flex items-center flex-1 min-w-0 gap-2">
                             <v-icon 
                               :icon="getLinkIcon(link.title)" 
@@ -1002,7 +1002,7 @@ onMounted(() => {
                             </div>
                           </div>
 
-                          <!-- Right: remove button -->
+                          
                           <div class="flex-none items-center shrink-0">
                             <v-btn
                               icon="mdi-delete"
@@ -1019,14 +1019,14 @@ onMounted(() => {
                   </div>
                 </div>
 
-                <!-- Assets Section -->
+                
                 <div class="mt-4">
                   <div class="flex items-center mb-6">
                     <div class="w-1 h-8 bg-gradient-to-b from-yellow-500 to-orange-500 rounded-full mr-4"></div>
                     <h2 :class="isDark ? 'text-2xl font-bold text-gray-300' : 'text-2xl font-bold text-gray-900'">Documents & Files</h2>
                   </div>
                   
-                  <!-- Predefined Document Upload -->
+                  
                   <div class="mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div
@@ -1046,7 +1046,7 @@ onMounted(() => {
                     </div>
                   </div>
 
-                  <!-- New Assets -->
+                  
                   <div v-if="newAssets.length > 0" class="mb-4">
                     <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-3' : 'text-lg font-medium text-gray-900 mb-3'">New Files to Upload</h3>
                     <div class="flex flex-wrap gap-2">
@@ -1080,7 +1080,7 @@ onMounted(() => {
                     </div>
                   </div>
 
-                  <!-- Existing Assets -->
+                  
                   <div v-if="existingAssets.length > 0" class="mb-4">
                     <h3 :class="isDark ? 'text-lg font-medium text-gray-300 mb-3' : 'text-lg font-medium text-gray-900 mb-3'">Uploaded Files</h3>
                     <div class="flex flex-wrap gap-2">
