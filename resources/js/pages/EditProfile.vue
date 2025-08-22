@@ -72,7 +72,7 @@ const shareProfile = ref(props.profile.share_profile || false);
 const isTogglingShare = ref(false);
 
 // Domain URL for display
-const domainUrl = 'projectsboard.live';
+const domainUrl = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
 
 // Theme management
 const { isDark } = useAppearance();

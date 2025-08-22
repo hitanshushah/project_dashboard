@@ -577,7 +577,7 @@ const page = usePage();
 const { isDark } = useAppearance();
 
 const publicUrl = import.meta.env.VITE_PUBLIC_URL;
-const domainUrl = 'projectsboard.live';
+const domainUrl = import.meta.env.VITE_DOMAIN_URL || 'local.hitanshushah.com';
 // Public URL dropdown state
 const publicUrlInput = ref('');
 const urlError = ref('');
