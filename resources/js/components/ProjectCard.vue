@@ -88,13 +88,13 @@
           />
         </v-carousel>
 
-        <div v-else :class="isDarkMode ? 'h-80 rounded-lg overflow-hidden bg-gradient-to-r from-blue-800 to-blue-950 flex items-center justify-center' : 
+        <!-- <div v-else :class="isDarkMode ? 'h-80 rounded-lg overflow-hidden bg-gradient-to-r from-blue-800 to-blue-950 flex items-center justify-center' : 
         'h-80 rounded-lg overflow-hidden bg-gradient-to-r from-[#f5f5f5] to-[#bfbfbf] flex items-center justify-center'">
           <div :class="isDarkMode ? 'text-center text-white' : 'text-center text-black'">
             <v-icon size="64" :color="isDarkMode ? 'white' : 'black'" class="mb-4">mdi-cellphone</v-icon>
             <p :class="isDarkMode ? 'text-lg font-medium text-white' : 'text-lg font-medium text-black'">Project Preview</p>
           </div>
-        </div>
+        </div> -->
       </v-sheet>
     </div>
 
