@@ -15,6 +15,8 @@ services:
       - laravel-public-assets:/var/www/public/build:ro
     networks:
       - laravel-production
+    env_file:
+     - .env
     ports:
       # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine.
       # -----------------------------------------------------------
