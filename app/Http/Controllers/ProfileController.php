@@ -451,7 +451,7 @@ class ProfileController extends Controller
             'public_url.regex' => 'Public URL can only contain letters, numbers, hyphens, and underscores'
         ]);
 
-        $publicUrl = $request->input('public_url');
+        $publicUrl = strtolower($request->input('public_url'));
         
         // Check if this public URL already exists
         $existingProfile = Profile::where('public_url', $publicUrl)
@@ -503,7 +503,7 @@ class ProfileController extends Controller
             'public_url.regex' => 'Public URL can only contain letters, numbers, hyphens, and underscores'
         ]);
 
-        $publicUrl = $request->input('public_url');
+        $publicUrl = strtolower($request->input('public_url'));
         
         // Get the user's profile
         $profile = $user->profile;
