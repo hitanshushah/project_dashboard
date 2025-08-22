@@ -65,7 +65,7 @@ return [
     |
     */
     
-    'domain_url' => env('DOMAIN_URL', 'local.hitanshushah.com'),
+    'domain_url' => env('DOMAIN_URL', 'projectsboard.live'),
 
     /*
     |--------------------------------------------------------------------------
