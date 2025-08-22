@@ -573,9 +573,6 @@ const clearFilters = () => {
                 Are you sure you want to delete the project 
                 <strong>"{{ projectToDelete?.name }}"</strong>?
               </p>
-              <p :class="isDark ? 'text-sm text-gray-400' : 'text-sm text-gray-700'">
-                This action will soft delete the project. It will be hidden from your dashboard but can be restored if needed.
-              </p>
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
