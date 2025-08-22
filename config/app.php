@@ -65,7 +65,7 @@ return [
     |
     */
     
-    'domain_url' => env('DOMAIN_URL', 'projectsboard.live'),
+    'domain_url' => 'projectsboard.live',
 
     /*
     |--------------------------------------------------------------------------
