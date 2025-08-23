@@ -1,9 +1,12 @@
 <template>
   <v-card 
     :class="[
-      'rounded-xl !p-6 h-full flex flex-col',
-      isDarkMode ? 'bg-black' : '!bg-gray-300',
+      'rounded-xl !p-6 h-full flex flex-col backdrop-blur-sm transition-all duration-300 animate-fade-in group project-card',
+      isDarkMode 
+        ? '!bg-black'
+        : '!bg-gray-300',
     ]"
+    :data-dark="isDarkMode"
   >
     
     <div class="flex-1 flex flex-col">
@@ -11,17 +14,18 @@
       <div class="p-6 pb-4">
         
         <h3 :class="[
-          'text-xl md:text-2xl font-bold mb-2',
-          isDarkMode ? 'text-white' : 'text-gray-900'
+          'text-xl md:text-2xl font-bold mb-2 transition-colors duration-300 project-title',
+          isDarkMode 
+            ? 'text-white' 
+            : 'text-gray-900'
         ]">
           {{ project.name }}
         </h3>
         
-        
-        <div class="flex items-center gap-2 mb-3">
+        <div v-if="effectivePreviewSettings.showCategory || effectivePreviewSettings.showStatus" class="flex items-center gap-2 mb-3">
           <v-chip
             size="small"
-            v-if="project.category"
+            v-if="project.category && effectivePreviewSettings.showCategory"
             :class="[
               'text-xs !font-bold',
               isDarkMode ? '!border-1 !border-orange-400 !bg-[#3A2315] !text-orange-400' : 'bg-gray-100 text-gray-700'
@@ -31,25 +35,23 @@
           </v-chip>
           <v-chip
             size="small"
-            v-if="project.status"
+            v-if="project.status && effectivePreviewSettings.showStatus"
             class="!border-2 !border-green-900 !bg-[#183421] !text-green-500 text-xs"
           >
             {{ getStatusNameLocal(project.status)}}
           </v-chip>
         </div>
         
-        
-        <p v-if="project.description"
+        <p v-if="project.description && effectivePreviewSettings.showDescription"
         :class="[
-          'text-sm',
+          'text-sm whitespace-pre-wrap',
           isDarkMode ? 'text-gray-300' : 'text-gray-600'
         ]">
           {{ project.description}}
         </p>
       </div>
 
-        
-        <div v-if="project.tags" class="md:px-6 px-0 md:pb-4 pb-2">
+        <div v-if="project.tags && effectivePreviewSettings.showTags" class="md:px-6 px-0 md:pb-4 pb-2">
       <div class="flex flex-wrap gap-2">
         <v-chip
           v-for="tag in (project.tags)"
@@ -65,8 +67,7 @@
       </div>
     </div>
 
-    
-    <div class="md:px-6 px-0 md:pb-4 pb-2">
+    <div v-if="effectivePreviewSettings.showAssets" class="md:px-6 px-0 md:pb-4 pb-2">
       <v-sheet class="overflow-hidden rounded-lg" max-width="700">
         <v-carousel
           v-if="mediaAssets.length > 0"
@@ -85,6 +86,8 @@
             :key="index"
             :src="getFileUrlForPreview(file)"
             contain
+            class="cursor-pointer"
+            @click="openImageModal(file, index)"
           />
         </v-carousel>
 
@@ -98,8 +101,7 @@
       </v-sheet>
     </div>
 
-    
-    <div v-if="project.technologies" class="md:px-6 px-0 md:pb-4 pb-2">
+    <div v-if="project.technologies && effectivePreviewSettings.showTechnologies" class="md:px-6 px-0 md:pb-4 pb-2">
       <h4 v-if="project.technologies.length > 0" :class="[
         'font-bold md:mb-3 mb-1',
         isDarkMode ? 'text-white' : 'text-gray-900'
@@ -121,8 +123,7 @@
       </div>
     </div>
 
-    
-    <div v-if="project.start_date || project.end_date" class="md:px-6 px-0 md:pb-6 pb-2">
+    <div v-if="(project.start_date || project.end_date) && effectivePreviewSettings.showDates" class="md:px-6 px-0 md:pb-6 pb-2">
       <div class="flex items-center gap-2 text-sm">
         <v-icon 
           size="16" 
@@ -185,8 +186,7 @@
     </div>
     </div>
 
-    
-    <div  v-if="githubLink || demoLink || additionalLinks.length" class="md:px-6 px-0 md:py-6 py-2 md:pb-0 pb-2 border-t border-gray-400">
+    <div  v-if="(githubLink || demoLink || additionalLinks.length) && effectivePreviewSettings.showLinks" class="md:px-6 px-0 md:py-6 py-2 md:pb-0 pb-2 border-t border-gray-400">
       <div class="flex flex-col gap-2 md:gap-3">
         <div class="flex flex-col md:flex-row gap-2 md:gap-3">
           
@@ -249,6 +249,42 @@
       </div>
     </div>
   </v-card>
+
+  <v-dialog v-model="showImageModal" max-width="90vw" max-height="90vh">
+    <v-card :class="[isDarkMode ? 'bg-black' : 'bg-white']">
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span>{{ currentImage?.display_name || currentImage?.name || 'Image' }}</span>
+        <v-btn icon="mdi-close" variant="text" @click="showImageModal = false"></v-btn>
+      </v-card-title>
+      <v-card-text class="pa-0">
+        <div class="d-flex justify-center align-center" style="min-height: 60vh;">
+          <img 
+            :src="currentImageUrl" 
+            :alt="currentImage?.display_name || currentImage?.name || 'Image'"
+            class="max-w-full max-h-full object-contain"
+            style="max-height: 70vh;"
+          />
+        </div>
+      </v-card-text>
+      <v-card-actions class="pa-4">
+        <v-spacer></v-spacer>
+        <v-btn 
+          variant="outlined" 
+          prepend-icon="mdi-download"
+          @click="downloadImage"
+        >
+          Download
+        </v-btn>
+        <v-btn 
+          variant="outlined" 
+          prepend-icon="mdi-open-in-new"
+          @click="openImageInNewTab"
+        >
+          Open in New Tab
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -303,7 +339,36 @@ const { isDark } = useAppearance();
 const isDarkMode = computed(() => isDark.value);
 const currentIndex = ref(0);
 
+// Image modal state
+const showImageModal = ref(false);
+const currentImage = ref<any>(null);
+const currentImageUrl = ref('');
 
+// Image modal methods
+const openImageModal = (file: any, index: number) => {
+  currentImage.value = file;
+  currentImageUrl.value = getFileUrlForPreview(file);
+  showImageModal.value = true;
+};
+
+const downloadImage = () => {
+  if (currentImage.value) {
+    const link = document.createElement('a');
+    link.href = currentImageUrl.value;
+    link.download = currentImage.value.display_name || currentImage.value.name || 'image';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+const openImageInNewTab = () => {
+  if (currentImageUrl.value) {
+    window.open(currentImageUrl.value, '_blank');
+  }
+};
+
+// Computed property to handle null preview settings
 const effectivePreviewSettings = computed(() => {
   return props.previewSettings || {
     showDescription: true,
@@ -398,3 +463,26 @@ const openDocument = (document: any) => {
   window.open(url, '_blank');
 };
 </script>
+
+<style scoped>
+.project-card {
+  box-shadow: none !important;
+  transition: all 0.3s ease;
+}
+
+.project-card[data-dark="true"]:hover {
+  box-shadow: 0 0 40px rgba(25, 33, 152, 0.6) !important;
+}
+
+.project-card[data-dark="false"]:hover {
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+.project-card[data-dark="true"]:hover .project-title {
+  color: #193598 !important;
+}
+
+.project-card[data-dark="false"]:hover .project-title {
+  color: black !important;
+}
+</style>

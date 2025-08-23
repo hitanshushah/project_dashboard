@@ -352,7 +352,7 @@
           
           <v-card-text class="pb-2">
             <div class="flex items-center space-x-3">
-              <v-avatar size="48" class="bg-gradient-to-br from-purple-400 to-blue-500">
+              <v-avatar size="48" class="bg-gradient-to-br from-purple-400 to-blue-500 mr-3">
                 <v-img
                   v-if="profilePhotoUrl"
                   :src="profilePhotoUrl"

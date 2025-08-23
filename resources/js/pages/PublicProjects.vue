@@ -157,7 +157,7 @@ const getLinkIcon = (linkType: string): string => {
               <v-img
                 :src="userProfile.profile_photo_url"
                 :alt="userProfile?.name || 'Profile Photo'"
-                :class="isDark ? 'w-full h-full object-cover bg-gradient-to-br from-blue-800 to-blue-950' : 'w-full h-full object-cover bg-gradient-to-br from-[#f5f5f5] to-[#bfbfbf]'"
+                :class="isDark ? 'w-full h-full !object-cover bg-gradient-to-br from-black-800 to-black-950' : 'w-full h-full !object-cover bg-gradient-to-br from-white to-white'"
                 @error="handleImageError"
               />
             </div>
@@ -171,7 +171,7 @@ const getLinkIcon = (linkType: string): string => {
             <div class="flex flex-row gap-8 justify-between">
             <div>
             <h1 :class="isDark ? 'text-3xl font-bold text-gray-300 mb-2' : 'text-3xl font-bold text-gray-900 mb-2'">
-              {{ userProfile?.name || 'Your Name' }}
+              {{ userProfile?.name}}
             </h1>
             </div>
             <div v-if="uniqueDocuments.length > 0" class="flex flex-wrap gap-3 items-center">
@@ -195,10 +195,10 @@ const getLinkIcon = (linkType: string): string => {
             </div>
             </div>
             <p :class="isDark ? 'text-xl text-blue-400 mb-4' : 'text-xl text-blue-950 mb-4'">
-              {{ userProfile?.designation || 'Full Stack Developer' }}
+              {{ userProfile?.designation }}
             </p>
             <p :class="isDark ? 'text-gray-400 text-lg mb-6 max-w-3xl' : 'text-gray-800 text-lg mb-6 max-w-3xl'">
-              {{ userProfile?.bio || 'Passionate developer with experience building modern web applications. I love creating beautiful, functional, and user-friendly solutions.' }}
+              {{ userProfile?.bio }}
             </p>
             
             
@@ -272,13 +272,13 @@ const getLinkIcon = (linkType: string): string => {
           
           <div class="flex-1 text-center">
             <h1 :class="isDark ? 'text-2xl font-bold text-gray-300 mb-2' : 'text-2xl font-bold text-gray-900 mb-2'">
-              {{ userProfile?.name || 'Your Name' }}
+              {{ userProfile?.name }}
             </h1>
             <p :class="isDark ? 'text-lg text-blue-400 mb-4' : 'text-lg text-blue-950 mb-4'">
-              {{ userProfile?.designation || 'Full Stack Developer' }}
+              {{ userProfile?.designation }}
             </p>
             <p :class="isDark ? 'text-gray-400 text-base mb-6' : 'text-gray-800 text-base mb-6'">
-              {{ userProfile?.bio || 'Passionate developer with experience building modern web applications. I love creating beautiful, functional, and user-friendly solutions.' }}
+              {{ userProfile?.bio }}
             </p>
             
             
