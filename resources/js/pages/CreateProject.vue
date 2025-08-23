@@ -560,7 +560,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             v-model="form.start_date"
                             @update:model-value="updateStartDate"
                             show-adjacent-months
-                            :color="isDark ? 'gray-300' : 'gray-600'"
+                            :color="isDark ? 'gray-950' : 'gray-100'"
                             @click:date="() => {}"
                           ></v-date-picker>
                         </v-menu>
@@ -590,7 +590,7 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                             v-model="form.end_date"
                             @update:model-value="updateEndDate"
                             show-adjacent-months
-                            :color="isDark ? 'gray-300' : 'gray-600'"
+                            :color="isDark ? 'gray-950' : 'gray-100'"
                             @click:date="() => {}"
                           ></v-date-picker>
                         </v-menu>
