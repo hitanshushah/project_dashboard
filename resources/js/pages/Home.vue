@@ -199,35 +199,35 @@ const clearFilters = () => {
         </v-alert>
 
         
-        <v-alert
-          v-if="isProfileIncomplete && showIncompleteProfileBanner"
-          type="warning"
-          variant="tonal"
-          class="mb-6"
-          closable
-          @click:close="showIncompleteProfileBanner = false"
-        >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <div>
-                <div class="font-semibold text-base">Profile is not complete</div>
-                <div class="text-sm opacity-90">
-                  Add your resume, LinkedIn, and other links from the edit profile page to complete your profile.
-                </div>
-              </div>
-            </div>
-            <v-btn
-              :color="isDark ? 'default' : 'default'"
-              variant="outlined"
-              size="small"
-              prepend-icon="mdi-pencil"
-              @click="router.visit('/profile/edit')"
-              class="ml-4"
-            >
-              Edit Profile
-            </v-btn>
+    <v-alert
+      v-if="isProfileIncomplete && showIncompleteProfileBanner"
+      type="warning"
+      variant="tonal"
+      class="mb-6"
+      closable
+      @click:close="showIncompleteProfileBanner = false"
+    >
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div class="font-semibold text-base">Profile is not complete</div>
+          <div class="text-sm opacity-90">
+            Add your resume, LinkedIn, and other links from the edit profile page to complete your profile.
           </div>
-        </v-alert>
+        </div>
+
+        <v-btn
+          :color="isDark ? 'default' : 'default'"
+          variant="outlined"
+          size="small"
+          prepend-icon="mdi-pencil"
+          @click="router.visit('/profile/edit')"
+          class="self-start md:self-auto"
+        >
+          Edit Profile
+        </v-btn>
+      </div>
+    </v-alert>
+
 
         
         <div class="mb-6">

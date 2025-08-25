@@ -29,6 +29,11 @@ const snackbar = ref(false)
 const snackbarMessage = ref('')
 const snackbarColor = ref('success')
 
+// Tooltip visibility states
+const categoryTooltip = ref(false)
+const tagsTooltip = ref(false)
+const technologiesTooltip = ref(false)
+
 
 const form = useForm({
   name: project.value.name || '',
@@ -43,6 +48,7 @@ const form = useForm({
   status: project.value.status || '',
   technologies: project.value.technologies || [] as string[],
   user_id: currentUser.value?.id || null,
+  is_public: project.value.is_public || false,
   preview_settings: project.value.preview_settings || {
     showDescription: true,
     showCategory: true,
@@ -495,35 +501,57 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 </v-col>
                       
                 <v-col cols="12" md="4">
-                  <v-combobox
-                    v-model="form.category"
-                    :items="categories"
-                    item-title="name"
-                    item-value="key"
-                    label="Category *"
-                    placeholder="Select or create a category"
-                    variant="outlined"
-                    :error-messages="form.errors.category"
-                    :color="isDark ? 'gray-300' : 'gray-600'"
-                    density="compact"
-                    class="select-modern"
-                    :hide-no-data="false"
-                    clearable
-                    required
-                    @update:model-value="handleCategoryChange"
-                  >
-                    <template v-slot:prepend-inner>
-                      <v-icon>mdi-folder-star</v-icon>
-                    </template>
-                    <template v-slot:no-data>
-                      <v-list-item>
-                        <v-list-item-title>
-                          No results matching
-                          <strong>"{{ form.category || 'your input' }}"</strong>. Press <kbd>enter</kbd> to create a new category.
-                        </v-list-item-title>
-                      </v-list-item>
-                    </template>
-                  </v-combobox>
+                  <div class="d-flex align-end gap-2">
+                    <v-tooltip
+                      v-model="categoryTooltip"
+                      location="top"
+                      :text="'Your categories will appear in this dropdown once created'"
+                      :open-delay="0"
+                      :close-delay="0"
+                    >
+                      <template v-slot:activator="{ props }">
+                        <v-icon
+                          v-bind="props"
+                          size="small"
+                          :color="isDark ? '#bcbcbc' : '#696969'"
+                          class="cursor-pointer"
+                          style="margin-bottom: 30px;"
+                          @click="categoryTooltip = !categoryTooltip"
+                        >
+                          mdi-information
+                        </v-icon>
+                      </template>
+                    </v-tooltip>
+                    <v-combobox
+                      v-model="form.category"
+                      :items="categories"
+                      item-title="name"
+                      item-value="key"
+                      label="Category *"
+                      placeholder="Select or create a category"
+                      variant="outlined"
+                      :error-messages="form.errors.category"
+                      :color="isDark ? 'gray-300' : 'gray-600'"
+                      density="compact"
+                      class="select-modern"
+                      :hide-no-data="false"
+                      clearable
+                      required
+                      @update:model-value="handleCategoryChange"
+                    >
+                      <template v-slot:prepend-inner>
+                        <v-icon>mdi-folder-star</v-icon>
+                      </template>
+                      <template v-slot:no-data>
+                        <v-list-item>
+                          <v-list-item-title>
+                            No results matching
+                            <strong>"{{ form.category || 'your input' }}"</strong>. Press <kbd>enter</kbd> to create a new category.
+                          </v-list-item-title>
+                        </v-list-item>
+                      </template>
+                    </v-combobox>
+                  </div>
                 </v-col>
                 </v-row>
 
@@ -642,75 +670,119 @@ const handleLinkKeydown = (event: KeyboardEvent) => {
                 
                 <v-row>
                   
-                  <v-col cols="12" md="6">
-                    <v-combobox
-                      v-model="form.tags"
-                      v-model:search="newTag"
-                      :items="[]"
-                      label="Add Tag"
-                      placeholder="Enter or select a tag"
-                      variant="outlined"
-                      @click:append-inner="addTag"
-                      :hide-no-data="false"
-                      multiple
-                      chips
-                      closable-chips
-                      hide-selected
-                      clearable
-                      density="compact"
-                      :color="isDark ? 'gray-300' : 'gray-600'"
-                      class="text-field-modern"
-                    >
-                      <template v-slot:prepend-inner>
-                        <v-icon>mdi-tag</v-icon>
-                      </template>
+                    <v-col cols="12" md="6">
+                       <div class="d-flex align-end gap-2">
+                         <v-tooltip
+                           v-model="tagsTooltip"
+                           location="top"
+                           :text="'This dropdown only lists tags for this project. Add new ones to see them.'"
+                           :open-delay="0"
+                           :close-delay="0"
+                         >
+                           <template v-slot:activator="{ props }">
+                             <v-icon
+                               v-bind="props"
+                               size="small"
+                               :color="isDark ? '#bcbcbc' : '#696969'"
+                               class="cursor-pointer"
+                               style="margin-bottom: 30px;"
+                               @click="tagsTooltip = !tagsTooltip"
+                             >
+                               mdi-information
+                             </v-icon>
+                           </template>
+                         </v-tooltip>
+                        <v-combobox
+                          v-model="form.tags"
+                          v-model:search="newTag"
+                          :items="[]"
+                          label="Add Tag"
+                          placeholder="Enter or select a tag"
+                          variant="outlined"
+                          @click:append-inner="addTag"
+                          :hide-no-data="false"
+                          multiple
+                          chips
+                          closable-chips
+                          hide-selected
+                          clearable
+                          density="compact"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
+                          class="text-field-modern"
+                        >
+                          <template v-slot:prepend-inner>
+                            <v-icon>mdi-tag</v-icon>
+                          </template>
 
-                      <template v-slot:no-data>
-                        <v-list-item>
-                          <v-list-item-title>
-                            No results matching
-                            <strong>"{{ newTag || 'your input' }}"</strong>. Press <kbd>enter</kbd> to create a new one.
-                          </v-list-item-title>
-                        </v-list-item>
-                      </template>
-                    </v-combobox>
-                  </v-col>
+                          <template v-slot:no-data>
+                            <v-list-item>
+                              <v-list-item-title>
+                                No results matching
+                                <strong>"{{ newTag || 'your input' }}"</strong>. Press <kbd>enter</kbd> to create a new one.
+                              </v-list-item-title>
+                            </v-list-item>
+                          </template>
+                        </v-combobox>
+                      </div>
+                    </v-col>
 
                   
-                  <v-col cols="12" md="6">
-                    <v-combobox
-                      v-model="form.technologies"
-                      v-model:search="newTechnology"
-                      :items="userTechnologies"
-                      label="Add Technology"
-                      placeholder="Select or type a technology"
-                      variant="outlined"
-                      @click:append-inner="addTechnology"
-                      :hide-no-data="false"
-                      multiple
-                      chips
-                      closable-chips
-                      hide-selected
-                      clearable
-                      density="compact"
-                      :color="isDark ? 'gray-300' : 'gray-600'"
-                      class="select-modern"
-                    >
-                      <template v-slot:prepend-inner>
-                        <v-icon>mdi-cog</v-icon>
-                      </template>
+                                                                             <v-col cols="12" md="6">
+                       <div class="d-flex align-end gap-2">
+                         <v-tooltip
+                           v-model="technologiesTooltip"
+                           location="top"
+                           :text="'Your technologies will appear in this dropdown once created'"
+                           :open-delay="0"
+                           :close-delay="0"
+                         >
+                           <template v-slot:activator="{ props }">
+                             <v-icon
+                               v-bind="props"
+                               size="small"
+                               :color="isDark ? '#bcbcbc' : '#696969'"
+                               class="cursor-pointer"
+                               style="margin-bottom: 30px;"
+                               @click="technologiesTooltip = !technologiesTooltip"
+                             >
+                               mdi-information
+                             </v-icon>
+                           </template>
+                         </v-tooltip>
+                        <v-combobox
+                          v-model="form.technologies"
+                          v-model:search="newTechnology"
+                          :items="userTechnologies"
+                          label="Add Technology"
+                          placeholder="Select or type a technology"
+                          variant="outlined"
+                          @click:append-inner="addTechnology"
+                          :hide-no-data="false"
+                          multiple
+                          chips
+                          closable-chips
+                          hide-selected
+                          clearable
+                          density="compact"
+                          :color="isDark ? 'gray-300' : 'gray-600'"
+                          class="select-modern"
+                        >
+                          <template v-slot:prepend-inner>
+                            <v-icon>mdi-cog</v-icon>
+                          </template>
 
-                      <template v-slot:no-data>
-                        <v-list-item>
-                          <v-list-item-title>
-                            No results matching
-                            <strong>"{{ newTechnology || 'your input' }}"</strong>.
-                            Press <kbd>enter</kbd> to create a new one.
-                          </v-list-item-title>
-                        </v-list-item>
-                      </template>
-                    </v-combobox>
-                  </v-col>
+                          <template v-slot:no-data>
+                            <v-list-item>
+                              <v-list-item-title>
+                                No results matching
+                                <strong>"{{ newTechnology || 'your input' }}"</strong>.
+                                Press <kbd>enter</kbd> to create a new one.
+                              </v-list-item-title>
+                            </v-list-item>
+                          </template>
+                        </v-combobox>
+                      </div>
+                    </v-col>
                 </v-row>
               </div>
 

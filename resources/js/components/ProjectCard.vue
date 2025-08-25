@@ -3,8 +3,8 @@
     :class="[
       'rounded-xl !p-6 h-full flex flex-col backdrop-blur-sm transition-all duration-300 animate-fade-in group project-card',
       isDarkMode 
-        ? '!bg-black'
-        : '!bg-gray-300',
+        ? '!bg-black border border-gray-300'
+        : '!bg-gray-300 border !border-black',
     ]"
     :data-dark="isDarkMode"
   >
@@ -71,33 +71,31 @@
       <v-sheet class="overflow-hidden rounded-lg" max-width="700">
         <v-carousel
           v-if="mediaAssets.length > 0"
-          v-model="currentIndex"
-          direction="vertical"
-          height="300"
-          show-arrows
-          :progress="isDarkMode ? 'blue' : 'black'"
-          vertical-arrows="left"
-          vertical-delimiters="right"
-          hide-delimiter-background
+          height="400"
+          :progress="isDarkMode ? 'primary' : 'black'"
+          hide-delimiters
           :class="isDarkMode ? 'bg-gradient-to-r from-blue-800 to-blue-950 rounded-lg' : 'bg-gradient-to-r from-[#f5f5f5] to-[#bfbfbf] rounded-lg'"
         >
           <v-carousel-item
             v-for="(file, index) in mediaAssets"
             :key="index"
-            :src="getFileUrlForPreview(file)"
-            contain
-            class="cursor-pointer"
-            @click="openImageModal(file, index)"
-          />
+          >
+            <v-sheet
+              height="100%"
+              class="cursor-pointer"
+              @click="openImageModal(file, index)"
+            >
+              <div class="d-flex fill-height justify-center align-center">
+                <img 
+                  :src="getFileUrlForPreview(file)"
+                  :alt="file.display_name || file.name || 'Image'"
+                  class="max-w-full max-h-full object-contain"
+                  style="max-height: 100%;"
+                />
+              </div>
+            </v-sheet>
+          </v-carousel-item>
         </v-carousel>
-
-        <!-- <div v-else :class="isDarkMode ? 'h-80 rounded-lg overflow-hidden bg-gradient-to-r from-blue-800 to-blue-950 flex items-center justify-center' : 
-        'h-80 rounded-lg overflow-hidden bg-gradient-to-r from-[#f5f5f5] to-[#bfbfbf] flex items-center justify-center'">
-          <div :class="isDarkMode ? 'text-center text-white' : 'text-center text-black'">
-            <v-icon size="64" :color="isDarkMode ? 'white' : 'black'" class="mb-4">mdi-cellphone</v-icon>
-            <p :class="isDarkMode ? 'text-lg font-medium text-white' : 'text-lg font-medium text-black'">Project Preview</p>
-          </div>
-        </div> -->
       </v-sheet>
     </div>
 
@@ -195,9 +193,9 @@
             variant="elevated"
             size="small"
             :class="[
-              'w-full md:flex-1 border rounded-lg !text-sm py-2 md:py-0 content-center',
+              'w-full md:flex-1 border rounded-lg !text-sm !py-5 content-center',
               isDarkMode 
-                ? '!bg-blue-950 text-white' 
+                ? '!bg-black !border-gray-500 text-white' 
                 : 'text-gray-900 !bg-gray-100 !border-gray-600'
             ]"
             :href="githubLink.url"
@@ -213,7 +211,7 @@
             variant="elevated"
             size="small"
             :class="[
-              'w-full md:flex-1 rounded-lg !text-sm py-2 md:py-0 content-center',
+              'w-full md:flex-1 rounded-lg !text-sm !py-5 content-center',
               isDarkMode 
                 ? '!bg-blue-950 text-white' 
                 : 'text-gray-900 !bg-gray-100 !border-gray-600'
@@ -234,9 +232,9 @@
             variant="elevated"
             size="small"
             :class="[
-              'w-full rounded-lg py-2 md:py-0 content-center',
+              'w-full rounded-lg border !py-5 content-center',
               isDarkMode 
-                ? '!bg-blue-950 text-white' 
+                ? '!bg-black !border-gray-500 text-white' 
                 : 'text-gray-900 !bg-gray-100 !border-gray-600'
             ]"
             :href="link.url"
@@ -268,13 +266,13 @@
       </v-card-text>
       <v-card-actions class="pa-4">
         <v-spacer></v-spacer>
-        <v-btn 
+        <!-- <v-btn 
           variant="outlined" 
           prepend-icon="mdi-download"
           @click="downloadImage"
         >
           Download
-        </v-btn>
+        </v-btn> -->
         <v-btn 
           variant="outlined" 
           prepend-icon="mdi-open-in-new"

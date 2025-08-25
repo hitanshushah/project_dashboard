@@ -288,6 +288,7 @@ class ProjectController extends Controller
                 return [
                     'title' => $link->name,
                     'url' => $link->url,
+                    'type' => $link->linkType ? $link->linkType->key : null,
                 ];
             }),
             'assets' => $project->assets->map(function($asset) {
@@ -406,7 +407,7 @@ class ProjectController extends Controller
                 'end_date' => $request->end_date,
                 'status_id' => $status ? $status->id : null,
                 'category_id' => $category ? $category->id : null,
-                'is_public' => $request->input('is_public', false),
+                'is_public' => $request->has('is_public') ? $request->input('is_public') : $project->is_public,
             ]);
 
             

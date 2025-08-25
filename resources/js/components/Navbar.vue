@@ -261,8 +261,8 @@
 
         </div>
 
-        
-        <v-menu v-model="createMenuOpen" offset-y v-else class="hidden md:block">
+        <div v-else  class="hidden md:block">
+        <v-menu v-model="createMenuOpen" offset-y>
           <template v-slot:activator="{ props }">
             <v-btn
               v-bind="props"
@@ -271,12 +271,12 @@
               append-icon="mdi-chevron-down"
               :class="[isDark ? '!bg-black text-white !border-gray-600 border rounded-lg !text-sm py-2 px-2 ml-4' : '!bg-white text-gray-700 !border-gray-300 border rounded-lg !text-sm py-2 px-2 ml-4']"
             >
-              <span class="mr-2">Set Public URL</span>
+              <span class="mr-2">Create your Domain</span>
             </v-btn>
           </template>
           
           <v-card min-width="400" class="pa-4" @click.stop>
-            <v-card-title class="text-lg font-semibold pb-2">Create Public URL</v-card-title>
+            <v-card-title class="text-lg font-semibold pb-2">Create your Domain</v-card-title>
             <v-card-text class="pa-0 pb-4">
               <p :class="[isDark ? 'text-sm text-gray-400 mb-4' : 'text-sm text-gray-700 mb-4']">
                 Create a custom public URL for your portfolio. This will be your unique profile link.
@@ -308,6 +308,7 @@
             </v-card-actions>
           </v-card>
         </v-menu>
+        </div>
       </div>
     </v-app-bar-title>
 
@@ -541,7 +542,7 @@
         prepend-icon="mdi-plus"
         :class="[isDark ? 'text-green-400' : 'text-green-600']"
       >
-        <v-list-item-title>Create Public URL</v-list-item-title>
+        <v-list-item-title>Create your Domain</v-list-item-title>
       </v-list-item>
 
       
