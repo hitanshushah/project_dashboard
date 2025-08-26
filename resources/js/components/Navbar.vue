@@ -691,7 +691,11 @@ const savePublicUrl = async () => {
     return;
   }
 
-  
+  if(publicUrlInput.value.trim() === 'admin' || publicUrlInput.value.trim() === 'demo') {
+    urlError.value = 'This URL is not allowed';
+    return;
+  }
+
   if (publicUrlInput.value.includes('.')) {
     urlError.value = 'Public URL cannot contain dots (.). Use only letters, numbers, hyphens, and underscores.';
     return;
