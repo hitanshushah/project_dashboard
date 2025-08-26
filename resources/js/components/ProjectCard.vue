@@ -74,7 +74,7 @@
           height="400"
           :progress="isDarkMode ? 'primary' : 'black'"
           hide-delimiters
-          :class="isDarkMode ? 'bg-gradient-to-r from-blue-800 to-blue-950 rounded-lg' : 'bg-gradient-to-r from-[#f5f5f5] to-[#bfbfbf] rounded-lg'"
+          :class="isDarkMode ? '!bg-[#212121] rounded-lg' : '!bg-[#f5f5f5] rounded-lg'"
         >
           <v-carousel-item
             v-for="(file, index) in mediaAssets"

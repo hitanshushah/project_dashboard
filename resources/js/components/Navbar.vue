@@ -882,11 +882,15 @@ const sharePublicUrl = async () => {
       });
     } catch (error) {
       
-      copyPublicUrl();
+    snackbarMessage.value = 'Share functionality is not supported in this browser. Please copy the URL manually.';
+    snackbarColor.value = 'warning';
+    snackbar.value = true;
     }
   } else {
     
-    copyPublicUrl();
+    snackbarMessage.value = 'Share functionality is not supported in this browser. Please copy the URL manually.';
+    snackbarColor.value = 'warning';
+    snackbar.value = true;
   }
 };
 

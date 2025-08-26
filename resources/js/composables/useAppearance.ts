@@ -82,6 +82,10 @@ export function useAppearance() {
 
         
         updateIsDark();
+        
+        if (window.__VUETIFY__) {
+            window.__VUETIFY__.theme.global.name.value = isDark.value ? 'dark' : 'light';
+        }
     });
 
     function updateIsDark() {
@@ -109,6 +113,12 @@ export function useAppearance() {
     
     watch(appearance, () => {
         updateIsDark();
+    });
+    
+    watch(isDark, (newValue) => {
+        if (window.__VUETIFY__) {
+            window.__VUETIFY__.theme.global.name.value = newValue ? 'dark' : 'light';
+        }
     });
 
     return {

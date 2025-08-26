@@ -21,15 +21,28 @@ declare global {
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+initializeTheme();
+
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
+        const getCurrentTheme = () => {
+            if (typeof window === 'undefined') return 'light';
+            
+            const savedAppearance = localStorage.getItem('appearance');
+            if (savedAppearance === 'dark') return 'dark';
+            if (savedAppearance === 'light') return 'light';
+            
+            const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+            return mediaQueryList.matches ? 'dark' : 'light';
+        };
+
         const vuetify = createVuetify({
             components,
             directives,
             theme: {
-                defaultTheme: 'light',
+                defaultTheme: getCurrentTheme(),
                 themes: {
                     light: {
                         colors: {
@@ -72,6 +85,3 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
-
-// This will set light / dark mode on page load...
-initializeTheme();
