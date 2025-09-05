@@ -1086,6 +1086,14 @@ class ProjectController extends Controller
         
         $allTechnologies = Tag::where('type', 'technology')
             ->where('user_id', $user->id)
+            ->whereIn('id', function($query) use ($user) {
+                $query->selectRaw('MAX(id)')
+                    ->from('tags')
+                    ->where('type', 'technology')
+                    ->where('user_id', $user->id)
+                    ->whereNotNull('project_id')
+                    ->groupBy('project_id');
+            })
             ->get()
             ->pluck('name')
             ->filter()
