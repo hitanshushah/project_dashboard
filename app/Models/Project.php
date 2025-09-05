@@ -147,6 +147,14 @@ class Project extends Model
         
         if (!empty($existingTagIds)) {
             $this->tags()->detach($existingTagIds);
+            
+            
+            foreach ($existingTagIds as $tagId) {
+                $tag = Tag::find($tagId);
+                if ($tag && $tag->type === 'tag') {
+                    $tag->delete();
+                }
+            }
         }
         
         if (!empty($tags)) {
@@ -172,6 +180,14 @@ class Project extends Model
         
         if (!empty($existingTagIds)) {
             $this->tags()->detach($existingTagIds);
+            
+            
+            foreach ($existingTagIds as $tagId) {
+                $tag = Tag::find($tagId);
+                if ($tag && $tag->type === 'technology') {
+                    $tag->delete();
+                }
+            }
         }
         
         if (!empty($technologies)) {
