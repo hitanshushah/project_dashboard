@@ -7,16 +7,74 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import { createVuetify } from 'vuetify';
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 
+// Extend Window interface for Vuetify instance
+declare global {
+    interface Window {
+        __VUETIFY__: any;
+    }
+}
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+initializeTheme();
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
-        const vuetify = createVuetify();
+        const getCurrentTheme = () => {
+            if (typeof window === 'undefined') return 'light';
+            
+            const savedAppearance = localStorage.getItem('appearance');
+            if (savedAppearance === 'dark') return 'dark';
+            if (savedAppearance === 'light') return 'light';
+            
+            const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+            return mediaQueryList.matches ? 'dark' : 'light';
+        };
+
+        const vuetify = createVuetify({
+            components,
+            directives,
+            theme: {
+                defaultTheme: getCurrentTheme(),
+                themes: {
+                    light: {
+                        colors: {
+                            primary: '#3B82F6',
+                            secondary: '#8B5CF6',
+                            accent: '#06B6D4',
+                            error: '#EF4444',
+                            warning: '#F59E0B',
+                            info: '#3B82F6',
+                            success: '#10B981',
+                        },
+                    },
+                    dark: {
+                        colors: {
+                            primary: '#17265C',
+                            secondary: '#193BB5',
+                            accent: '#06B6D4',
+                            error: '#EF4444',
+                            warning: '#F59E0B',
+                            info: '#3B82F6',
+                            success: '#10B981',
+                        },
+                    },
+                },
+            },
+        })
+        
+        // Make Vuetify instance available globally for theme switching
+        if (typeof window !== 'undefined') {
+            window.__VUETIFY__ = vuetify;
+        }
+        
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
@@ -27,6 +85,3 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
-
-// This will set light / dark mode on page load...
-initializeTheme();

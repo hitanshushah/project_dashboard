@@ -53,6 +53,19 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Domain URL for Subdomain Routing
+    |--------------------------------------------------------------------------
+    |
+    | This URL is used for subdomain routing to determine the base domain
+    | for public profile subdomains. This should be set to the main domain
+    | without any subdomain prefix.
+    |
+    */
+    
+    'domain_url' => 'projectsboard.live',
 
     /*
     |--------------------------------------------------------------------------

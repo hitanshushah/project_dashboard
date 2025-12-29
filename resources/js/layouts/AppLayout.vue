@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
+
 import type { BreadcrumbItemType } from '@/types';
+import Navbar from '@/components/Navbar.vue';
+import { useAppearance } from '@/composables/useAppearance';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
@@ -9,10 +11,13 @@ interface Props {
 withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
+
+const { isDark } = useAppearance();
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <v-app :theme="isDark ? 'dark' : 'light'">
+        <Navbar />
         <slot />
-    </AppLayout>
+    </v-app>
 </template>

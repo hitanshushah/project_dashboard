@@ -44,13 +44,70 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->attributes->get('user')?->only(['id', 'username', 'email']),
+                'profile' => $this->getProfileData($request->attributes->get('user')),
             ],
+            'logoutUrl' => env('APP_URL') . '/' . env('AUTHENTIK_LOGOUT_URL', 'outpost.goauthentik.io/sign_out'),
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    private function getProfileData($user)
+    {
+        if (!$user || !$user->profile) {
+            return null;
+        }
+
+        $profile = $user->profile;
+        
+        $profilePhoto = $profile->assets()
+            ->where('display_name', 'Profile Photo')
+            ->whereHas('assetType', function($query) {
+                $query->where('key', 'images');
+            })
+            ->first();
+
+        $links = $profile->links()->with('linkType')->get()->map(function ($link) {
+            return [
+                'title' => $link->name,
+                'url' => $link->url,
+                'type' => $link->linkType->key ?? 'portfolio',
+            ];
+        })->toArray();
+
+        $documents = $profile->assets()
+            ->where('display_name', '!=', 'Profile Photo')
+            ->whereHas('assetType', function($query) {
+                $query->where('key', 'documents');
+            })
+            ->get()
+            ->map(function ($asset) {
+                return [
+                    'id' => $asset->id,
+                    'name' => $asset->display_name,
+                    'url' => $asset->filename,
+                    'type' => $asset->assetType ? $asset->assetType->key : 'documents',
+                ];
+            })
+            ->toArray();
+
+        $profileData = [
+            'id' => $profile->id,
+            'name' => $profile->name,
+            'bio' => $profile->bio,
+            'public_url' => $profile->public_url,
+            'share_profile' => $profile->share_profile,
+            'profile_photo_url' => $profilePhoto ? $profilePhoto->filename : null,
+            'links' => $links,
+            'documents' => $documents,
+        ];
+
+
+
+        return $profileData;
     }
 }

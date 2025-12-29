@@ -41,9 +41,9 @@ services:
       - ./:/var/www
     networks:
       - laravel-development
-    depends_on:
-      postgres:
-        condition: service_started  # Wait for postgres to start
+    # depends_on:
+    #   postgres:
+    #     condition: service_started  # Wait for postgres to start
     command: >
       sh -c "php artisan config:clear && php artisan migrate --force && php-fpm"
 
@@ -60,18 +60,18 @@ services:
     command: >
       ' cd /var/www && npm i
       && npm run dev'
-  postgres:
-    image: postgres:16
-    ports:
-      - "${POSTGRES_PORT:-4833}:5432"
-    environment:
-      - POSTGRES_DB=projectsdashboard
-      - POSTGRES_USER=projectsdashboard
-      - POSTGRES_PASSWORD=projectsdashboard
-    volumes:
-      - postgres-data-development:/var/lib/postgresql/data
-    networks:
-      - laravel-development
+  # postgres:
+  #   image: postgres:16
+  #   ports:
+  #     - "${POSTGRES_PORT:-4833}:5432"
+  #   environment:
+  #     - POSTGRES_DB=projectsdashboard
+  #     - POSTGRES_USER=projectsdashboard
+  #     - POSTGRES_PASSWORD=projectsdashboard
+  #   volumes:
+  #     - postgres-data-development:/var/lib/postgresql/data
+  #   networks:
+  #     - laravel-development
 
   redis:
     image: redis:alpine
@@ -81,5 +81,5 @@ services:
 networks:
   laravel-development:
 
-volumes:
-  postgres-data-development:
+# volumes:
+#   postgres-data-development:
